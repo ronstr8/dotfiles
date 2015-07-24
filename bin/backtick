@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+{
+    TICK_SLEEP_SECONDS=60 ;
+    TICK_SLASH_REPL='⁄' ; # "⁄" digraph "/f" - 2044 - 8260 - FRACTION SLASH
+    TICK_SKVA='→ «' ;
+    TICK_SKVZ="» ←" ;
+    
+    function __scrubScreenToken() { echo "$1" | tr '/' "${TICK_SLASH_REPL}" ; } ;
+
+    # @xxx This clobbers any existing screen logging.
+    function __appendScreenWinInfo() {
+        declare sLogFileName="/tmp/screenWinInfo-$( __scrubScreenToken "${STY:?STY not set}" )" ;
+        
+        screen -X eval 'log off' ;
+
+        screen -X eval "logfile '$sLogFileName'" 'logfile flush 1' ;
+        screen -X eval 'logtstamp on' 'logtstamp after 1' ;
+        screen -X eval "logtstamp string '\n${TICK_SKVA}%n=%t${TICK_SKVZ}\n'" ;
+
+        screen -X eval 'log on' ; echo  ; sleep 1 ; screen -X eval 'log off' ;
+        
+        # grep "${TICK_SKVA}.*${TICK_SKVZ}" /tmp/${sLogBaseName}* ;
+    }
+
+    while true ; do __appendScreenWinInfo ; sleep 60 ; done ;
+} &
+
+# screen -X eval "logtstamp string '\n${TICK_SKVA}%n=%t [@ %M/%d/%y %c:%s]${TICK_SKVZ}\n'" ;
+# → «0:bash-slash-foo [@ Jun/23/15 12:07:09]» ←
+
+# vim: set filetype=sh:

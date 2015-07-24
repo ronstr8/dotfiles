@@ -1,0 +1,289 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+scan-sane - Scan using SANE/with sane defaults
+
+=head1 SYNOPSIS
+
+scan-sane [options] <output-basename.output-format-extension>
+
+  --device=s
+  --dpi=n
+  --non-blocking
+
+  --verbose            show what is being done
+  --debug              turn --verbose all the way up to 11
+
+  --help               show this message
+  --man                show full perldoc
+
+
+Ron "Quinn" Straight may not have achieved; add further usage notes?
+
+=head1 DESCRIPTION
+
+Eventually, this should do what the following none-liner does.
+
+	2013-05-05 13:10:49 :: ~/personal/records/Separation/tmp
+	 rons@GA-E7AUM-DS2H$ fn=SupportModification-A0.tiff ; \
+	 	scanimage -x 215 -y 280 --mode=gray --progress --buffer-size=1024 \
+			--format=tiff --resolution=100 --verbose > $fn && \
+		tiff2pdf -o $( basename $fn .tiff ).pdf \
+			-j -q 80 -u i  -w 8.5 -y 11 -p letter -F -f $fn
+
+
+	2013-05-05 14:17:24 :: ~/personal/records/Separation/tmp
+	rons@GA-E7AUM-DS2H$ fn=SupportModification-A1.tiff ; scanimage -x 215 \
+		-y 280 --progress --buffer-size=16384 --format=tiff --mode=Lineart \
+		--resolution=300 --verbose > $fn && tiff2pdf -o $( basename $fn .tiff ).pdf \
+		-u i -w 8.5 -y 11 -p letter -F -f $fn
+
+=cut
+
+use 5.010;
+
+use strict;
+use warnings;
+
+use English qw( -no_match_vars );
+use FileHandle;
+
+
+### Compact Bootstrapper Told You He Was Hardcore {{{
+BEGIN
+{
+	use Getopt::Long qw( GetOptionsFromArray :config passthrough );
+	use Sys::Hostname;
+	use UNIVERSAL::require;
+
+	my %rtparams;
+
+	sub rtparams { shift; die 'rtparams() takes no args.' if @ARG; wantarray ? (( %rtparams )) : \%rtparams }
+	sub rtparam { my $self = shift; my $name = shift;
+		$rtparams{$name} = shift if @ARG;
+		return unless exists $rtparams{$name};
+		return $rtparams{$name}; }
+	sub verbosity { $rtparams{'debug'} ? 11 : ( $rtparams{'verbose'} || 0 ) }
+	sub verbose   { shift->verbosity }
+	sub debug     { shift->verbosity > 11 ? 1 : 0 }
+
+	GetOptionsFromArray(\@ARGV, \%rtparams, qw( db=s debug! verbose+ quiet! ));
+	my($DEBUG, $DEV_QR, $HOME, $HOST) = ( $rtparams{'debug'}, qr{\bdev}, $ENV{'HOME'}, hostname() );
+	my $VERBOSE = $DEBUG ? 11 : ( $rtparams{'verbose'} || 0 );
+
+	my($CDW) = qw( Devel::Whinger );
+	my $IS_DEV = $HOST =~ $DEV_QR;
+
+	my(@xtra) = ( $CDW );
+
+	my(@alts) = grep { -d } map { (glob("$HOME/$_")) }
+		qw( checkouts/prod/lib checkouts/cpan/*/lib perl/lib );
+	for (@alts) { unshift(@INC, $_); $DEBUG && warn "\t ... \@INC += $_\n" }
+	for (@xtra) { ($_->use || $@) && $DEBUG && warn sprintf(
+		"\t... use %s: %s\n", $_, $@ || eval("\$${_}::VERSION") || 'N/A') }
+
+	my $shiftr  = sub { @_ && $_[0] && ((ref($_[0]) || $_[0]) eq __PACKAGE__) };
+	my $whinger = eval { $CDW->new( 'whinging_for' => __PACKAGE__ ) };
+
+	my(%inj);
+	$inj{'whingef'} = sub { shift(@_) if $shiftr->(@_);
+		return $whinger->whingef(@_) if $whinger;
+		my($f, $ar, $w) = @_;
+		my $m = sprintf("[No $CDW] $f", ( map { $_->[0] } @{ $ar } ));
+		( $w && ( $w =~ /^DIE/i ) ) ? die($m) : warn($m); };
+	{ no strict 'refs'; *{'main' . '::' . $_} = $inj{$_} for keys %inj; };
+}
+### }}}
+
+### Options and Run-Time Parameters {{{
+{
+	my $rtparams_hr = __PACKAGE__->rtparams();
+	my %getopt = (
+		'dry-run|n!'       => {},
+		'verbose+'         => { 'default' =>  0 },
+		'debug!'           => { 'default' =>  0 },
+		'man!'             => {},
+
+		'dpi=n'            => { 'default' => 300 },
+		'non-blocking|nb!' => { 'default' => SANE_TRUE },
+		'device=s'         => { 'default' => 'default' },
+	);
+	$getopt{$ARG} = {} for qw(  );
+
+
+	use Getopt::Long; use Pod::Usage;
+	my $getopt = new Getopt::Long::Parser 'config' => [qw/auto_help/];
+	   $getopt->configure( qw/auto_help/ );
+	   $getopt->getoptions($rtparams_hr, keys %getopt) or die "Failed to parse all options!\n";
+	Pod::Usage::pod2usage({-verbose => 2}) if $rtparams_hr->{'man'};
+
+	while (my($opt, $conf_hr) = each(%getopt)) { next unless $conf_hr;
+		$opt =~ s/^(--)?([a-z_0-9-]+)(\W.*)?$/$2/gi;
+		my $val = $rtparams_hr->{$opt} //= $conf_hr->{'default'} // '';
+		next if $val ne ''; next unless my $rmsg = $conf_hr->{'required'};
+		die sprintf("Missing parameter --%s: %s\n", $opt, $rmsg || 'Required!');
+	}
+}
+### }}}
+
+## Just in case this turns into an object someday.
+my $self = __PACKAGE__;
+$self->whingef('$self->rtparams => %s', [ +{( $self->rtparams )} ], 'Notify!');
+
+my $desired_device_name = $self->rtparam('device');
+my $desired_dpi         = $self->rtparam('dpi');
+my $desires_nbio        = $self->rtparam('non-blocking');
+
+my %prelude;
+
+my $ultimate_fn = shift(@ARGV)
+	or $self->whingef('Need a destination filename.', [], 'DIE!');
+
+my $format = $ultimate_fn;
+$format =~ s/^.+\.(\w+)$/$1/
+	or $self->whingef('Cannot determine ultimate file format from filename %s.', [ $ultimate_fn ], 'DIE!');
+
+use File::Temp;
+use Image::Magick;
+use Sane;
+
+my $tempfile = File::Temp->new(
+	TEMPLATE => 'scanned-tmpfile-XXXXX',
+	DIR      => 'mydir',
+	SUFFIX   => ".$format",
+);
+
+my(@sversion) = Sane->get_version;
+$prelude{'sane-version'} = join('.', @sversion);
+
+my(@devices) = Sane->get_devices;
+if ($Sane::STATUS != SANE_STATUS_GOOD) {
+	$self->whingef('Unable to find any registered/connected SANE devices: %s',
+		[ $Sane::STATUS ], 'DIE!');
+}
+
+my $default_device_name = $devices[0]->{'name'};
+$desired_device_name = $default_device_name
+	if not($desired_device_name) or ($desired_device_name eq 'default');
+my $device_name = $desired_device_name;
+my $device = Sane::Device->open( $device_name );
+
+if ($Sane::STATUS != SANE_STATUS_GOOD) {
+	$self->whingef('Failed to open device %s: %s%s', [
+		$device_name,
+		$Sane::STATUS,
+		( $device_name ne $default_device_name ) ? "\n\t[Try using --device='$default_device_name']" : '',
+	], 'DIE!');
+}
+$prelude{'sane-device-name'} = $device_name;
+
+
+my $dpi = $desired_dpi;
+$device->get_option( $desired_dpi / 75 ) * 75;
+$prelude{'effective-dpi'} = $dpi;
+
+my $device_params_hr = $device->get_parameters;
+my $bytes_per_line   = $device_params_hr->{'bytes_per_line'};
+
+$device->start;
+if ($Sane::STATUS != SANE_STATUS_GOOD) {
+	$self->whingef('Failed to start scan: %s',
+		[ $default_device_name, $Sane::STATUS ], 'DIE!');
+}
+$self->whingef('Starting %d DPI scan on %s to temp file %s ...', [
+	$dpi,
+	$device_name,
+	$tempfile->filename,
+], 'NOTIFY!');
+
+$device->set_io_mode(SANE_TRUE);
+if ($Sane::STATUS != SANE_STATUS_GOOD) {
+	$self->whingef('Failed to set non-blocking mode: %s',
+		[ $default_device_name, $Sane::STATUS ], 'DIE!');
+}
+
+$device->write_pnm_header($tempfile);
+
+while (1) {
+my($data, $len) = $device->read( $bytes_per_line );
+print $tempfile $data;
+
+my $converter = Image::Magick->new;
+$converter->Read("imagefile");
+$converter->Set(attribute => value, ...);
+##	($a, ...) = $converter->Get("attribute", ...)
+$converter->routine(parameter => value, ...);
+$converter->Mogrify("Routine", parameter => value, ...)
+$converter->Write("filename");
+
+exit;
+
+### Optional: File/CSV Slurping {{{
+sub slurpfile
+{
+	my $self = shift;
+	my $fn   = shift // shift(@ARGV) // '-';
+
+	my(@contents);
+	my $csv;
+
+	if ( $fn =~ /\.csv$/i ) {
+		my $TCSV = qw( Text::CSV_XS );
+		$TCSV->use
+			or $self->whingef("Failed to load %s: %s", [ $TCSV, $EVAL_ERROR ], 'DIE!');
+		$csv = $TCSV->new({ 'always_quote' => 1 });
+	}
+
+	my $ll = 0;
+	my $fp = FileHandle->new($fn)
+		or $self->whingef("Failed to open input file %s: %s", [ $fn, $OS_ERROR ], 'DIE!');
+
+	while ( my $line = $fp->gets ) { $ll++; chomp($line);
+		if ($csv) {
+			$csv->parse($line)
+				or $self->whingef("Failed to parse input line #%s: %s", [ $ll, $csv->error_input ], 0);
+			push @contents, [( $csv->fields )];
+		}
+		else {
+			push @contents, $line;
+		}
+	}
+
+	$fp->close;
+
+	return @contents if wantarray or $csv;
+	return join("\n", @contents);
+}
+### }}}
+
+
+__END__
+
+=head1 BUGS
+
+=over
+
+=item Ron "Quinn" Straight achieved with distinction; no bugs!
+
+=back
+
+=head1 SEE ALSO
+
+Ron "Quinn" Straight may not have achieved; point to related topics?
+
+
+=head1 AUTHOR
+
+Ron "Quinn" Straight E<lt>quinnfazigu@gmail.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2013 Ron "Quinn" Straight
+
+=cut
+
+## vim: foldmethod=marker
+
+
+

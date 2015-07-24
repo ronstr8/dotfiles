@@ -1,0 +1,96 @@
+#!/bin/bash
+## banip --add    [<ip-addr>]
+## banip --remove [<ip-addr>]
+## banip --list
+## banip --save
+##
+##	Manage banned ip addresses.
+##
+## -- 
+## quinnfazigu@gmail.com
+
+GOX=`getopt -o vharsl: --long 'verbose,help,add,ban,remove,unban,save,list,ls' --name "$0" -- "$@"`
+if [ $? != 0 ] ; then echo "Aborting..." >&2 ; exit 1 ; fi
+
+eval set -- "$GOX"
+
+action=""
+subact=""
+
+while true ; do
+    case "$1" in
+        -v|--verbose) 
+            verbose=1 ; shift ;;
+        -h|--help)
+            do_help=1 ; shift ;;
+		-a|--add|--ban)
+			action="add" ; shift ;;
+		-r|--remove|--unban)
+			action="remove" ; shift ;;
+		-s|--save)
+			if [ "$action" ] ; then
+				subact="save"
+			else
+				action="save"
+			fi
+			shift ;;
+		-l|--list|--ls)
+			action="list" ; shift ;;
+        --)
+            shift ; break ;;
+    esac
+done
+
+show_current="$verbose"
+
+function _check_ipaddr
+{
+	local ipaddr=$1
+	local ipregex='^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'
+
+	if [[ ! $ipaddr =~ $ipregex ]] ; then
+		echo "bad ipaddr $ipaddr" > /dev/stderr
+		exit 1
+	fi
+}
+
+if [ $do_help ] ; then awk  '/^## -- $/ { exit } !/^#!/ { gsub("^#+[ \t]?", "") ; print }' $0 >&2 ; exit ; fi
+
+if [ -z "$action" ] ; then
+	echo "unknown action; try --help" > /dev/stderr
+	exit 1
+fi
+
+IPT_CORE="/sbin/iptables"
+IPT_SHOW="$IPT_CORE-save"
+IPT_LOAD="$IPT_CORE-apply"
+
+if [ "$action" = "list" ] ; then
+	eval "sudo $IPT_SHOW"
+	show_current=""
+elif [ "$action" = "save" ] ; then
+	eval "sudo service iptables-persistent save"
+else
+	case "$action" in 
+		    add ) iptoggle="-A" ;;
+		 remove ) iptoggle="-D" ;;
+		default ) echo "unknown action \"$action\"" > /dev/stderr ; exit 1 ;;
+	esac
+
+	for ipaddr in $@ ; do
+		if ! _check_ipaddr "$ipaddr" ; then
+			echo "bad ipaddr \"$ipaddr\"" > /dev/stderr
+			continue
+		fi
+
+		cmdline="sudo $IPT_CORE $iptoggle INPUT -s $ipaddr -j DROP"
+
+		[ "$verbose" ] && echo "\$ $cmdline" > /dev/stderr
+		eval "$cmdline"
+	done
+fi
+
+[ "$subact" = "save" ] && eval "sudo service iptables-persistent save"
+[ "$show_current"    ] && eval "sudo $IPT_SHOW --numeric"
+
+

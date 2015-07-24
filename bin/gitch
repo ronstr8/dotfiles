@@ -1,0 +1,706 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+gitch - Scratch some of those phantom itches from missing git features.
+
+=head1 SYNOPSIS
+
+gitch <command> [options]
+
+Common Options:
+
+  --dry-run            show what would've been done [implies --verbose]
+
+  --verbose            show what is being done
+  --debug              turn --verbose all the way up to 11
+
+  --help               show this message
+  --man                show full perldoc
+
+Available subcommands:
+
+=over
+
+=item * L<pwb|gitch print-working-branch> - Display the name of the current working branch.
+
+=item * L<fork|gitch fork> - Create a new branch.
+
+=item * L<share|gitch share> - Push current branch to remote, set/update remote as upstream.
+
+=item * L<changed|gitch changed> - Show what YOU have changed since forking.
+
+=item * L<checkpoint|gitch checkpoint> - Make an annotated tag marking your progress.
+
+=back
+
+=head1 DESCRIPTION
+
+Create branches in what the author considers a best practice style, and
+subsequently manage those branches.
+
+=head1 COMMANDS
+
+=cut
+
+use 5.010;
+
+use strict;
+use warnings;
+
+use English qw( -no_match_vars );
+
+### Compact Bootstrapper Told You He Was Hardcore {{{
+BEGIN
+{
+	use Getopt::Long qw( GetOptionsFromArray :config passthrough );
+	use Sys::Hostname;
+	use UNIVERSAL::require;
+
+	my %rtparams;
+
+	sub rtparams { shift; die 'rtparams() takes no args.' if @ARG; wantarray ? (( %rtparams )) : \%rtparams }
+	sub rtparam { my($self, $name, @args) = @ARG;
+		$rtparams{$name} = shift if @args;
+		return unless exists $rtparams{$name};
+		return $rtparams{$name}; }
+	sub verbosity { my $self = shift;
+		my $v = $rtparams{'debug'} ? 11 : ( $rtparams{'verbose'} || 0 );
+		$v++ if $self->rtparam('dry-run');
+		return $v;
+	}
+	sub verbose   { shift->verbosity }
+	sub debug     { shift->verbosity > 11 ? 1 : 0 }
+
+	GetOptionsFromArray(\@ARGV, \%rtparams, qw( db=s debug! verbose+ quiet! ));
+	my($DEBUG, $DEV_QR, $HOME, $HOST) = ( $rtparams{'debug'}, qr{\bdev}, $ENV{'HOME'}, hostname() );
+	my $VERBOSE = $DEBUG ? 11 : ( $rtparams{'verbose'} || 0 );
+
+	my($KCD, $CDW) = qw( Kanoodle::Configs::Development Devel::Whinger );
+	my $IS_DEV = eval "use $KCD; \$$KCD->PRODUCTION;" || $HOST =~ $DEV_QR;
+
+	my(@xtra) = ( $CDW );
+
+	my(@alts) = grep { -d } map { (glob("$HOME/$_")) }
+		qw( checkouts/prod/lib checkouts/cpan/*/lib perl/lib );
+	for (@alts) { unshift(@INC, $_); $DEBUG && 0 && warn "\t ... \@INC += $_\n" }
+	for (@xtra) { ($_->use || $@) && $DEBUG && warn sprintf(
+		"\t... use %s: %s\n", $_, $@ || eval("\$${_}::VERSION") || 'N/A') }
+}
+### }}}
+
+use File::Temp;
+use POSIX qw( strftime );
+use Text::Wrap;
+
+### Options and Run-Time Parameters {{{
+{
+	my $rtparams = __PACKAGE__->rtparams();
+	my %getopt = (
+		'dry-run|n!'      => { 'default' =>  0 },
+		'verbose+'        => { 'default' =>  0 },
+		'debug!'          => { 'default' =>  0 },
+		'man!'            => {},
+	);
+	$getopt{$ARG} = {} for qw( from=s case=s label=s track! with-remote! );
+	$getopt{$ARG} = {} for qw( collapse-cpan! ignore-deletes! );
+	$getopt{$ARG} = {} for qw( full-diff! );
+
+
+	use Getopt::Long; use Pod::Usage;
+	my $getopt = new Getopt::Long::Parser 'config' => [qw/auto_help/];
+	   $getopt->configure( qw/auto_help/ );
+	   $getopt->getoptions($rtparams, keys %getopt) or die "Failed to parse all options!\n";
+	Pod::Usage::pod2usage({-verbose => 2}) if $rtparams->{'man'};
+
+	while (my($opt, $conf_hr) = each(%getopt)) { next unless $conf_hr;
+		$opt =~ s/^(--)?([a-z_0-9-]+)(\W.*)?$/$2/gi;
+		my $val = $rtparams->{$opt} //= $conf_hr->{'default'} // '';
+		next if $val ne ''; next unless my $rmsg = $conf_hr->{'required'};
+		die sprintf("Missing parameter --%s: %s\n", $opt, $rmsg || 'Required!');
+	}
+
+
+	## Have to inject at least the whinger AFTER we have ->verbosity.
+	my($CDW, %inj) = 'Devel::Whinger';
+	my $shiftr  = sub { @_ && $_[0] && ((ref($_[0]) || $_[0]) eq __PACKAGE__) };
+	my $whinger = eval { $CDW->new( 'whinging_for' => __PACKAGE__ ) };
+
+	$inj{'whingef'} = sub { shift(@_) if $shiftr->(@_);
+		return $whinger->whingef(@_) if $whinger;
+		my($f, $ar, $w) = @_;
+		my $m = sprintf("[No $CDW] $f", ( map { $_->[0] } @{ $ar } ));
+		( $w && ( $w =~ /^DIE/i ) ) ? die($m) : warn($m); };
+	{ no strict 'refs'; *{'main' . '::' . $_} = $inj{$_} for keys %inj; };
+}
+### }}}
+
+## Just in case this turns into an object someday.
+my $self = __PACKAGE__;
+
+my $subcmd = shift @ARGV
+	or die "Missing required argument of the [sub-]command to perform.\n";
+
+if    ( $subcmd =~ /^fork$/ ) {
+	$self->do_cmd_fork();
+}
+elsif ( $subcmd =~ /^(pwb|gcb|print-working-branch)$/ ) {
+	$self->do_cmd_print_working_branch();
+}
+elsif ( $subcmd =~ /^share$/ ) {
+	$self->do_cmd_share();
+}
+elsif ( $subcmd =~ /^changed$/ ) {
+	$self->do_cmd_changed();
+}
+elsif ( $subcmd =~ /^checkpoint$/ ) {
+	$self->do_cmd_checkpoint();
+}
+else {
+	$self->whingef('Unknown command "%s"; try --help.', [ $subcmd ], 'Die!');
+}
+
+exit;
+
+### Support Routines {{{
+
+sub current_branch_name
+{
+	my $gcb = qx" git branch --no-color 2> /dev/null | awk '/^\*/ { print \$2 }' ";
+	chomp($gcb);
+
+	return $gcb;
+}
+
+sub find_existing_branch_sha
+{
+	my($self, $branch_substr) = @ARG;
+
+	my $git_branch_list_cmdline = 'git branch -av';
+
+	my $branch_re = quotemeta($branch_substr);
+	my $branch_qr = qr{$branch_re};
+	my $exact_branch_qr = qr{^(remotes/)?$branch_qr$};
+
+	my(@matching_branches);
+
+	open( my $ph, "$git_branch_list_cmdline |" )
+		or $self->whingef('Failed to run «%s» => %s', [ $git_branch_list_cmdline, $OS_ERROR ], 'Die!');
+
+	while (<$ph>) {
+		s/^\W+//; my $line = $ARG;
+
+		my($branch_fqn, $branch_sha, $branch_commit_msg) = split(/\s+/, $line, 3);
+		my(%brecord) = ( 'sha' => $branch_sha, 'fqn' => $branch_fqn, 'mrcmsg' => $branch_commit_msg, 'raw' => $line );
+
+		if ( $branch_fqn =~ $exact_branch_qr ) {
+			@matching_branches = ( \%brecord );
+			last;
+		}
+		elsif ( $branch_fqn =~ $branch_qr ) {
+			push @matching_branches, \%brecord;
+		}
+	}
+
+	close($ph);
+
+	return @matching_branches;
+}
+
+sub initialize_branch_details
+{
+	my($self, $branch_hr) = @ARG;
+
+	my $IRRELEVANT_CASE_ID = 'x';
+	my $VALID_CASE_RE = sprintf('^(%s|\d+)$', $IRRELEVANT_CASE_ID);
+	my $VALID_CASE_QR = qr{$VALID_CASE_RE};
+
+	my $FOGBUGZ_CASE_URL_FMT = 'https://pulse360.fogbugz.com/default.asp?%d';
+
+	my $INVALID_CASE_QR = qr{^$|[^A-Za-z0-9_-]};
+	my $INVALID_CASE_CONSISTENCY_CLAUSE = 'consist of alphanumeric characters, underbars, and hyphens';
+
+	my $LABEL_BITS_TO_REPLACE_WITH_UNDERSCORE_QR = qr{\s};
+	my $LABEL_BITS_TO_REPLACE_WITH_MYSTERION_QR  = qr{[^0-9A-Za-z_[]:-]};
+	my $LABEL_BITS_THAT_ARE_TOTALLY_UNACCEPTABLE = qr{[/{}&]};
+
+	my $passed_case_id = $self->rtparam('case') || '';
+
+	my($force_use_of_passed_case_id, $is_the_irrelevant_case_id,
+		$seems_to_be_a_valid_case_id, $try_finding_passed_case_id);
+
+	if ( my($forced_or_maybe) = ( $passed_case_id =~ s/(?!|!?|‽)$// ) ) {
+		if ( $forced_or_maybe eq '‽' ) {
+			$force_use_of_passed_case_id =
+			$try_finding_passed_case_id = 1;
+		}
+		else {
+			$force_use_of_passed_case_id = 1 if $forced_or_maybe =~ /!/;
+			$try_finding_passed_case_id  = 1 if $forced_or_maybe =~ /\?/;
+		}
+	}
+
+	if ( not($passed_case_id) or ( $passed_case_id eq $IRRELEVANT_CASE_ID ) ) {
+		$passed_case_id = $IRRELEVANT_CASE_ID;
+		$force_use_of_passed_case_id = $is_the_irrelevant_case_id  = 1;
+		$seems_to_be_a_valid_case_id = $try_finding_passed_case_id = 0;
+	}
+	elsif ( $passed_case_id =~ $VALID_CASE_QR ) {
+		$seems_to_be_a_valid_case_id = $try_finding_passed_case_id = 1;
+	}
+	elsif ( $passed_case_id =~ $INVALID_CASE_QR ) {
+		my $forced_jab_clause  = 'but';
+		   $forced_jab_clause .= 'but (even though you tried to force us to use) '
+				if $force_use_of_passed_case_id;
+
+		$self->whingef('Sorry, %s your --case "%s" is unacceptably invalid;
+			it must %s.  Try again.',
+				[ $forced_jab_clause, $passed_case_id, $INVALID_CASE_CONSISTENCY_CLAUSE ], 'Die');
+	}
+	elsif ( $force_use_of_passed_case_id ) {
+		$self->whingef('Using --case "%s" because you forced us to.  It really is not proper, though.',
+				[ $passed_case_id ] , 'Notify');
+	}
+
+	my $case_id    = $passed_case_id;
+	my $case_title = '';
+
+	my $label = $self->rtparam('label');
+	my $url   = '';
+
+	if ( $try_finding_passed_case_id ) {
+		$self->whingef('Support for looking up cases is not yet re-implemented.');
+
+## 		my $fb = Comm::FogBugz::API->new;
+## 
+## 		my %cases = $fb->cases('ids' => [ $case_id ]);
+## 		if ( my $case_hr = ( %cases && $cases{$case_id} ) ) {
+## 			$case_title = $case_hr->{'sTitle'};
+## 
+## 			$label ||= $case_title
+## 				or $self->whingef('FogBugz case "%d" was found, but we could not fetch its title.
+## 					Please specify an explicit --label for your branch.', [ $case_id ], 'Die');
+## 
+## 			$url ||= sprintf($FOGBUGZ_CASE_URL_FMT, $case_id);
+## 		}
+## 		elsif ( $force_use_of_passed_case_id ) {
+## 			$self->whingef('FogBugz case "%d" not found, but you forced us to use it.',
+## 				[ $passed_case_id ], 'Notify');
+## 		}
+## 		else {
+## 			$self->whingef('FogBugz case "%d" not found; append a ! to force its use.',
+## 				[ $passed_case_id ], 'Die');
+## 		}
+	}
+
+	$label =~ s/^\s+//;
+	$label =~ s/\s+$//;
+
+	my $uncontroversial_label = $label;
+
+	if ( not $label ) {
+		$self->whingef('Need a short --label describing the new branch.', [], 'Die');
+	}
+	elsif ( $label !~ $LABEL_BITS_THAT_ARE_TOTALLY_UNACCEPTABLE ) {
+		$label =~ s{$LABEL_BITS_TO_REPLACE_WITH_UNDERSCORE_QR}{_}g;
+		$uncontroversial_label = $label;
+
+		$label =~ s{$LABEL_BITS_TO_REPLACE_WITH_MYSTERION_QR}{?}g;
+	}
+	elsif ( $label eq $case_title ) {
+		$self->whingef('The label "%s" contains some invalid characters.', [], 'Die');
+	}
+
+	if ( $label ne $uncontroversial_label ) {
+		$self->whingef('Type YES to use modified label "%s".', [ $label ], 'Notify');
+		my $response = <STDIN>;
+		die "Aborting on user rejection of derived label.\n" unless $response =~ /YES/i;
+	}
+	$branch_hr->{'label'} = $label;
+
+	my $fork_date = strftime('%Y%m%d', localtime);
+
+	my $username = qx{ git config --get user.email } || ( getpwuid($EFFECTIVE_USER_ID) )[0] || $ENV{'USER'}
+		|| qx{ whoami } || qx{ id -un } or $self->whingef('Failed to find your user name.  Set $USER.', [], 'Die!');
+	chomp($username);
+	$username =~ s/(\+\w+)?\@.+$//; ## Cheap-ass quick-n-dirty email address extraction.
+	$branch_hr->{'username'} = $username;
+
+	my $start_sha = $branch_hr->{'start_sha'};
+	my $new_branch_name = "${username}/${fork_date}/${start_sha}/${case_id}/${label}";
+	$branch_hr->{'new_branch_name'} = $new_branch_name;
+
+	my $commit_subject = "SPANK ${new_branch_name}";
+	if (length($commit_subject) > 70) {
+	   $commit_subject = substr($commit_subject, 0, 65) . '[...]';
+	}
+
+	my $commit_body = "\nInitial commit to christen new branch:\n\n";
+	$commit_body .= sprintf('Branch: %s', $new_branch_name) . "\n";
+	$commit_body .= sprintf('Forked: %s [%s]', 
+		$branch_hr->{'start_ish'}, $branch_hr->{'start_sha'}) . "\n";
+
+	if ($case_title) {
+		$commit_body .= "\nFogBugz Details:\n";
+		$commit_body .= "----------------  \n";
+		$commit_body .= sprintf(" Case:  %s\n", $case_id);
+		$commit_body .= sprintf(" Title: %s\n", $case_title);
+		$commit_body .= sprintf(" URL:   %s\n", $url);
+	}
+
+	{
+		local $Text::Wrap::columns = 72;
+		$commit_body = wrap('    ', '', $commit_body);
+	};
+
+	my $commit_msg = "${commit_subject}\n\n${commit_body}\n";
+
+	my $tmp = File::Temp->new
+		or $self->whingef('Failed to create temp file for initial commit: %s', [ $EVAL_ERROR || $OS_ERROR ], 'DIE');
+	print $tmp $commit_msg;
+
+	my $commit_msg_fn = $tmp->filename;
+
+	$branch_hr->{'case_id'}       = $case_id;
+	$branch_hr->{'commit_msg_fh'} = $tmp;
+	$branch_hr->{'commit_msg_fn'} = $commit_msg_fn;
+	$branch_hr->{'commit_msg'}    = $commit_msg;
+
+	$branch_hr;
+}
+
+sub process_git_command_templates
+{
+	my($self, $cmdline_tmpl_ar, $interpol_hr) = @ARG;
+
+	my(%interpol)  = %{ $interpol_hr };
+	my $is_dry_run = $self->rtparam('dry-run');
+
+	foreach my $cmdline_ar (( @{ $cmdline_tmpl_ar } )) {
+		my($fmt, $key_ar) = @{ $cmdline_ar };
+		my $cmdline = sprintf($fmt, @interpol{( @{ $key_ar } )});
+
+		$self->whingef('$ %s', [ $cmdline ]);
+		next if $is_dry_run;
+
+		system($cmdline) == 0
+			or $self->whingef('Command «%s» failed!', [ $cmdline ], 'Die!');
+	}
+}
+### }}}
+
+### Command Drivers {{{
+
+=head2 gitch print-working-branch
+
+Simply output the name of the current working branch.  Aliased to C<pwb> and C<gcb>.
+
+=cut
+
+sub do_cmd_print_working_branch
+{
+	my($self) = @ARG;
+
+	print $self->current_branch_name, "\n";
+}
+
+
+=head2 gitch fork --label=s [options]
+
+Create a new branch with a standardized name embedded with metadata
+regarding its origin:
+
+	$USER/%Y%m%d/<short-origin-commit-hash>/<fogbugz-case-id>/<label>
+
+  --case=s             Optional FogBugz case-number; defaults to 'x', meaning none relevant
+  --label=s            Moniker for the branch; tr/\s/ /, default to title of FogBugz --case
+
+  --from=s             A commit-ish from which to base the branch; default to current branch
+
+  --track              Track the branch from which we forked
+  --with-remote        Push a remote version of our newly created branch and track that
+
+=cut
+
+sub do_cmd_fork
+{
+	my($self) = @ARG;
+
+	my $start_ish = $self->rtparam('from')  ## e.g. truecpm-txsys-loader
+		|| $self->current_branch_name;
+
+	my $start_sha;
+	my(@sha_matches) = $self->find_existing_branch_sha($start_ish);
+
+	if ( not @sha_matches ) {
+		$self->whingef('Failed to find a SHA for commit-ish «%s».', [ $start_ish ], 'Die!');
+	}
+	elsif ( @sha_matches > 1 ) {
+		$self->whingef('Found more than one match for commit-ish «%s»: %s', [ $start_ish,
+			"\n\t" . join("\n\t", map { $ARG->[0] . "\t" . $ARG->[1] } @sha_matches) ], 'Die!');
+	}
+	else {
+		$start_sha = $sha_matches[0]->{'sha'};
+	}
+
+	my $with_remote  = $self->rtparam('with-remote');
+	my $track        = $self->rtparam('track');
+
+	my(%branch) = (
+		'start_ish'       => $start_ish,
+		'start_sha'       => $start_sha,
+		'track_option'    => $track ? ' --track ' : '',
+	);
+	$self->initialize_branch_details(\%branch);
+
+	my $case_id   = $branch{'case_id'};
+	my $label     = $branch{'label'};
+
+	if ($track and $with_remote) {
+		$self->whingef('The --track and --with-remote parameters conflict.  If you create a remote,
+			it will automatically be set as the upstream branch, and thus tracked.', [], 'Die!');
+	}
+
+	my(@command_templates) = (
+		[ q{git fetch} => [] ],
+		[ q{git checkout %s -l -b '%s' '%s'} => [qw( track_option new_branch_name start_ish )] ],
+		[ q{git commit --allow-empty --file='%s'} => [qw( commit_msg_fn )] ],
+	);
+
+	push(@command_templates,
+		[ q{git push --set-upstream origin '%s'} => [qw( new_branch_name )] ]) if $with_remote;
+
+	$self->process_git_command_templates(\@command_templates, \%branch);
+}
+
+=head2 gitch share
+
+Push your current branch to its origin as a remote branch.  Rough equivalent:
+
+	git push --set-upstream origin $( gitch pwb )
+
+=cut
+
+sub do_cmd_share
+{
+	my($self) = @ARG;
+
+	my(%interpol) = (
+		'gcb' => $self->current_branch_name,
+	);
+
+	my(@command_templates) = (
+		[ q{git push --set-upstream origin '%s'} => [qw( gcb )] ],
+	);
+
+	$self->process_git_command_templates(\@command_templates, \%interpol);
+}
+
+
+=head2 gitch checkpoint
+
+Push your current branch to its origin as a remote branch.  Rough equivalent:
+
+	git tag -a -m "Checkpoint as of $( date +%Y-%m-%dT%H:%M:%S )." "$( gcb )/$( date +%Y-%m-%dT%H%M%S )"
+
+=cut
+
+sub do_cmd_checkpoint
+{
+	my($self) = @ARG;
+
+	my $dt_iso8601 = strftime('%Y-%m-%dT%H:%M:%S', localtime);
+	my $dt_for_tag = strftime('%Y%m%d-at-%H%M%S',  localtime);
+
+	my $gcb = $self->current_branch_name;
+	my $tag = "${gcb}/${dt_for_tag}";
+
+	my(%interpol) = (
+		'dt_iso8601'  => $dt_iso8601,
+		'dt_for_tag'  => $dt_for_tag,
+		'gcb' => $gcb,
+		'tag' => $tag,
+	);
+
+	my(@command_templates) = (
+		[ q{git tag --annotate --message='Checkpoint of branch %s as of %s.' '%s'} => [qw( gcb dt_iso8601 tag )] ],
+##		[ q{git push --tags} => [qw()] ],
+	);
+
+	$self->process_git_command_templates(\@command_templates, \%interpol);
+}
+
+=head2 gitch changed
+
+Show what objects YOU have changed since forking your current branch.
+
+  --full-diff          full diff between fork-point; precludes options below
+
+  --collapse-cpan      hide changes to individual files within a CPAN distro
+  --ignore-deletes     hide entries for entities with no change but deletion
+
+=cut
+
+sub do_cmd_changed
+{
+	my($self) = @ARG;
+
+	my $WANT_FULL_DIFF  = $self->rtparam('full-diff');
+	my $ONLY_RAW_OUTPUT = $WANT_FULL_DIFF;
+
+	my $COLLAPSE_CPAN  = $self->rtparam('collapse-cpan');
+	my $IGNORE_DELETES = $self->rtparam('ignore-deletes');
+
+	my $ALL_GIT_CHANGE_LETTERS = 'ACDMRUTXB';
+	my @ALL_GIT_CHANGE_LETTERS = split(//, $ALL_GIT_CHANGE_LETTERS);
+
+	my $BRANCH_META_QR = qr{
+		(?<author>[a-z]+)
+		/
+		(?<cdate_year>\d{4})-?
+		(?<cdate_month>\d{2})-?
+		(?<cdate_day>\d{2})
+		/
+		(?<commit>[a-f0-9]+)
+		/
+		(?<bugno>\w+)
+		/
+		(?<label>\S+$)
+	}x;
+	my $LOG_LINE_NAME_STATUS_QR = qr{^(?<change_type>[$ALL_GIT_CHANGE_LETTERS])\s+(?<changed_file>.+)$};
+
+	## gcb=$( git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/' )
+	## rons/20130227/b6fcfcf/1500/truecpm-txsys-loader
+	## qx" git branch --no-color 2> /dev/null | awk '/^\*/ { print \$2 }' "; ## | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/' };
+	my $in_branch = $self->current_branch_name;
+	## export AUTHOR CDATE COMMISH BUGNO BLABEL
+	## echo $inbranch | read -d/ AUTHOR CDATE COMMISH BUGNO BLABEL
+
+	my($author, $cdate_year, $cdate_month, $cdate_day, $commit, $bugno, $label)
+		= ( $in_branch =~ $BRANCH_META_QR );
+	die "Failed to parse branch «$in_branch».  Abort.\n" unless $author;
+
+	## XXX :: Overriding this.  Dammit.
+##	$commit = 'origin/master';
+
+	my $output_style = $WANT_FULL_DIFF ? '--unified' : '--name-status';
+	my $since_date   = join('-', $cdate_year, $cdate_month, $cdate_day);
+##	my $log_cmdline  = "git log --author='$author' $output_style $commit\@{$since_date}.. --branches='$in_branch'";
+	my $log_cmdline  = "git log --author='$author' $output_style ${commit}.. --branches='$in_branch'";
+
+	$self->whingef('$ %s', [ $log_cmdline ], 'Notify!');
+
+	## my $log_pipe = IO::Pipe->new;
+	## $log_pipe->reader(split(/\s+/, $log_cmdline));
+
+	open(my $log_pipe, "$log_cmdline |")
+		or die "Failed to open pipe of «$log_cmdline»: $OS_ERROR";
+
+	my(%files);
+
+	while( defined( my $line = <$log_pipe> ) ) {
+		if ($ONLY_RAW_OUTPUT) {
+			print $line;
+			next;
+		}
+
+		my($change_type, $changed_file) = ( $line =~ $LOG_LINE_NAME_STATUS_QR );
+		next unless $change_type;
+
+		my($rd_subrepo, $rd_subdir, @rd_whatever) = split('/', $changed_file);
+
+		$files{$changed_file}{'change_type'}{$change_type} = $change_type;
+		$files{$changed_file}{'subrepo'} ||= $rd_subrepo;
+		$files{$changed_file}{'subdir'}  ||= $rd_subdir;
+	}
+
+	close($log_pipe);
+
+	return if $ONLY_RAW_OUTPUT;
+
+	my(@changed_files) = sort keys(%files);
+	my(%reduced);
+	my $recno = 1;
+
+	foreach my $changed_file (@changed_files) {
+		my $chinfo_hr       = $files{$changed_file};
+		my $change_types_hr = $chinfo_hr->{'change_type'};
+		my $change_types    = join('', map { $change_types_hr->{$ARG} || ' ' } @ALL_GIT_CHANGE_LETTERS);
+
+		my $subrepo = $chinfo_hr->{'subrepo'};
+		my $subdir  = $chinfo_hr->{'subdir'};
+
+		my $changed_thing_name = $changed_file;
+
+		if ( $subrepo eq 'cpan' ) {
+			$reduced{$subdir}{'name'}     ||= $subdir;
+			$reduced{$subdir}{'changes'}  ||= $change_types;
+			$reduced{$subdir}{'recno'}    ||= $recno++;
+			push @{ $reduced{$subdir}{'files'} ||= [] }, [ $change_types, $changed_file ];
+		}
+		else {
+			$reduced{$changed_file}{'name'}    ||= $changed_file;
+			$reduced{$changed_file}{'changes'} ||= $change_types;
+			$reduced{$changed_file}{'recno'}   ||= $recno++;
+		}
+
+	##	print "-- $change_types \t $changed_thing_name\n";
+	}
+
+	my(@reduced_records) =
+		map  { $ARG->[0] }
+		sort { $a->[1] cmp $b->[1] }
+		map  { [ $ARG, $ARG->{'recno'} ] }
+	(( values %reduced ));
+
+	foreach my $reduced_record_hr (@reduced_records) {
+		my($name, $changes, $files_ar) = map {
+			$reduced_record_hr->{$ARG}
+		} qw( name changes files );
+
+		my $any_non_delete_changes = $changes;
+		$any_non_delete_changes =~ s/[[:space:]D]//g;
+		next if $IGNORE_DELETES and not $any_non_delete_changes;
+
+		print "$changes \t $name\n";
+		next if $COLLAPSE_CPAN or not($files_ar);
+
+		foreach my $chnm_ar (@{ $files_ar }) {
+			my($changes, $name) = @{ $chnm_ar };
+			print "$changes \t \t $name\n";
+		}
+	}
+}
+
+### }}}
+
+__END__
+
+=head1 BUGS
+
+=over
+
+=item * L<gitch changed> should optionally show diffs/output patchsets.
+
+=item * This should most definitely I<not> be the huge-ass single file it is.
+
+=back
+
+=head1 SEE ALSO
+
+Ron "Quinn" Straight may not have achieved; point to related topics?
+
+=head1 AUTHOR
+
+Ron "Quinn" Straight E<lt>rons@seevast.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2013 Seevast, Inc.
+
+=cut
+
+## vim: foldmethod=marker
+
+
+

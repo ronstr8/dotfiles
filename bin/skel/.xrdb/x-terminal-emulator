@@ -1,0 +1,139 @@
+
+!#include "/etc/X11/app-defaults/XTerm-color"
+
+!! NOTES
+!! man xterm says to use XTerm.* and XTerm.vt100.*.  The latter does not seem to
+!! work for me on Cygwin, so I have used *.vt100.
+
+! Goal: Make VIM and others interpret BS as erase and DEL as delete-forward-char.
+! Seems to work on Cygwin with default settings, without these tweaks.
+!XTerm.backarrowKeyIsErase: true
+!XTerm.keyboardType:        tcap
+!XTerm.ptyInitialErase:     true
+! ttyModes overrides ptyInitialErase
+!XTerm.ttyModes:            erase 
+! allowTcapOps Apparently VIM uses this, so maybe it would help there.
+!*.vt100.allowTcapOps:  true
+! backarrowKey true sends backspace(8), false sends delete(127); default is true/backspace
+! Pressing control toggles it?
+!XTerm.backarrowKey:        true
+! deleteIsDel true sends delete(127), false sends some vt220 esc seq; default is false/vt220
+!XTerm.vt100.deleteIsDel:   true
+
+! Goal: Keep the xterm open in case there is stuff of import in scrollback.  Annoying while testing.
+! AKA: Close on Disconnect
+XTerm.hold:                false
+
+! Goal: Regardless of vt100 font, make the menus use the standard C locale.
+! This is probably just a failsafe in case one specifies overly-broad resources for their font.
+!XTerm.menuLocale:          C
+
+! Goal: Color!
+! XTerm.termName: xterm-256color
+
+! Goal: We need no stinking toolbar.
+XTerm.toolBar: false
+
+! Goal: Would this fix instances where the mouse is not getting through to a curses app?
+!*.vt100.allowSendEvents: true
+
+! boldColors maps 0-7 to 8-15, generally brighter.  Default true, false will use overstrike?
+! Oh, and false makes it just not work right, at least with green on kandev.
+!*.vt100.boldColors:      false
+!*.vt100.boldMode:        true
+
+*.vt100.cursorColor:     red
+*.vt100.pointerColor:     red
+
+! faceName Corresponds to the Default entry in VT Fonts menu.
+!*.vt100.faceName: Diminutive
+
+! Goal: Geometry, canvas, and simple color tweaking.
+*.vt100.background:      black
+*.vt100.foreground:      gray
+*.vt100.colorMode:       true
+
+*.fontMenu*fontdefault*Label: Default-10
+*.vt100.faceName: Consolas
+*.vt100.faceSize: 10
+*.vt100.geometry: 132x40
+
+*.fontMenu*font1*Label: faceSize08
+*.vt100.faceSize1: 8
+!*.vt100.geometry1: 240x80
+
+*.fontMenu*font2*Label: faceSize09
+*.vt100.faceSize2: 9
+!*.vt100.geometry2: 160x40
+
+*.fontMenu*font3*Label: faceSize10
+*.vt100.faceSize3: 10
+!*.vt100.geometry3: 140x36
+
+*.fontMenu*font4*Label: facesize11
+*.vt100.faceSize4: 11
+!*.vt100.geometry4: 120x30
+
+*.fontMenu*font5*Label: facesize12
+*.vt100.faceSize5: 12
+!*.vt100.geometry5: 80x24
+
+*.fontMenu*font6*Label: facesize13
+*.vt100.faceSize6: 13
+!*.vt100.geometry6: 80x24
+
+
+! UTF-8 mode is initially on.  Escape sequences for turning UTF-8 mode on/off are allowed.
+! utf8 is respected only if locale is false.
+*.vt100.locale: false
+*.vt100.utf8:   1
+
+! These cargo-cult from the uterm command for unicode-useful settings.
+*.vt100.eightBitOutput:  true
+*.vt100.metaSendsEscape: true
+*.vt100.eightBitInput:   false
+*.vt100.allowTitleOps:   true
+*.vt100.allowTcapOps:    true
+
+! bogosity enables a funny little alien pointer.
+!*.vt100.pointerShape: bogosity
+
+! saveLines!
+*.vt100.saveLines:       40000
+*.vt100.scrollTtyOutput: false
+*.vt100.scrollKey:       false
+
+*.vt100.showMissingGlyphs:  true
+*.vt100.italicULMode:       true
+*.vt100.wideBoldFont:       true
+
+! trimSelection is false by default; this should get rid of trailing spaces in selections!
+*.vt100.trimSelection: true
+
+! @see https://wiki.archlinux.org/index.php/Xterm
+*.vt100.selectToClipboard: true
+
+! These seem to allow what was on the alt-screen to be recorded to scrollback.  Might be
+! nice when trying to recover lost data from old vim sessions.
+*.vt100.tiXtraScroll: true
+*.vt100.titeInhibit:  true
+
+! For translations, it seems the pointer cursor must be within the window.
+! Alt + / will complete the word under the cursor from scrollback!
+*.vt100.translations:    #override \n\
+  Meta  <KeyPress> /:       dabbrev-expand()\n\
+  Meta  <KeyPress> L:       hard-reset()\n\
+  Shift <KeyPress> Prior:   scroll-back(1, page)\n\
+  Shift <KeyPress> Next:    scroll-forw(1, page)\n\
+  Shift <KeyPress> Up:      scroll-back(1, line)\n\
+  Shift <KeyPress> Down:    scroll-forw(1, line)\n\
+  Shift <KeyPress> Home:    scroll-back(1000, page)\n\
+  Shift <KeyPress> End:     scroll-forw(1000, page)\n\
+  Ctrl  <KeyPress> Left:    string("0x1B") string("B")\n\
+  <Btn1Up>: select-end(PRIMARY, CLIPBOARD, CUT_BUFFER0)\n\
+  Ctrl  <KeyPress> Right:   string("0x1B") string("F")\n
+
+!*customization: -color
+
+! vim: ft=Xdefaults
+

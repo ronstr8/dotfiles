@@ -1,0 +1,5 @@
+ssh -t devex2 mysql -h devex.adblade.com devex_adblade
+#username=dbroot
+#password=pap0kebo
+#database=devex_adblade
+

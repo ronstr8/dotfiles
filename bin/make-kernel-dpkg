@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+export CONCURRENCY_LEVEL=2
+export APPEND_TO_VERSION="-$( date +%s )"
+
+make-kpkg --rootcmd="fakeroot" --append-to-version="$APPEND_TO_VERSION" kernel_image

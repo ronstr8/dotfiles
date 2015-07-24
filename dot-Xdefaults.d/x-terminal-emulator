@@ -1,0 +1,154 @@
+
+!#include "/etc/X11/app-defaults/XTerm-color"
+
+!! NOTES
+!! man xterm says to use XTerm.* and XTerm.vt100.*.  The latter does not seem to
+!! work for me on Cygwin, so I have used *.vt100.
+
+! Goal: Make VIM and others interpret BS as erase and DEL as delete-forward-char.
+! Seems to work on Cygwin with default settings, without these tweaks.
+!XTerm.backarrowKeyIsErase: true
+!XTerm.keyboardType:        tcap
+!XTerm.ptyInitialErase:     true
+! ttyModes overrides ptyInitialErase
+!XTerm.ttyModes:            erase 
+! allowTcapOps Apparently VIM uses this, so maybe it would help there.
+!*.vt100.allowTcapOps:  true
+! backarrowKey true sends backspace(8), false sends delete(127); default is true/backspace
+! Pressing control toggles it?
+!XTerm.backarrowKey:        true
+! deleteIsDel true sends delete(127), false sends some vt220 esc seq; default is false/vt220
+!XTerm.vt100.deleteIsDel:   true
+
+! Goal: Keep the xterm open in case there is stuff of import in scrollback.  Annoying while testing.
+! AKA: Close on Disconnect
+XTerm.hold:                false
+
+! Goal: Regardless of vt100 font, make the menus use the standard C locale.
+! This is probably just a failsafe in case one specifies overly-broad resources for their font.
+!XTerm.menuLocale:          C
+
+! Goal: Color!
+xterm.termName: xterm-256color
+
+! Goal: We need no stinking toolbar.
+XTerm.toolBar: false
+
+! Goal: Would this fix instances where the mouse is not getting through to a curses app?
+!*.vt100.allowSendEvents: true
+
+! boldColors maps 0-7 to 8-15, generally brighter.  Default true, false will use overstrike?
+! Oh, and false makes it just not work right, at least with green on kandev.
+!*.vt100.boldColors:      false
+!*.vt100.boldMode:        true
+
+*.vt100.cursorColor:     red
+*.vt100.pointerColor:     red
+
+! faceName Corresponds to the Default entry in VT Fonts menu.
+!*.vt100.faceName: Diminutive
+
+! Goal: Geometry, canvas, and simple color tweaking.
+*.vt100.background:      black
+*.vt100.foreground:      gray
+*.vt100.colorMode:       true
+
+! faceSize already defaults to 14.
+*.fontMenu*fontdefault*Label: Default
+
+!*.vt100.faceName: Consolas
+!*.vt100.faceSize: 8
+!*.vt100.geometry: 120x40
+
+*.vt100.faceName: DejaVuSansMono8
+*.vt100.faceSize: 8
+*.vt100.geometry: 160x48
+
+*.fontMenu*font1*Label: FaceSize08
+*.vt100.faceSize1: 8
+
+*.fontMenu*font2*Label: FaceSize10
+*.vt100.faceSize2: 10
+
+*.fontMenu*font3*Label: FaceSize12
+*.vt100.faceSize3: 12
+
+*.fontMenu*font4*Label: FaceSize14
+*.vt100.faceSize4: 14
+
+*.fontMenu*font5*Label: Geometry80x50
+*.vt100.geometry5: 80x48
+
+*.fontMenu*font6*Label: Geometry160x48
+*.vt100.geometry6: 160x48
+
+! *.vt100.faceName\d DOES NOT FUCKING WORK.
+!*.fontMenu*font6*Label: Change-Face-DejaVuSansMono-12-80x32
+!*.fontMenu*font6*Label: Change-Face-DejaVuSansMono-8-190x50
+!*.vt100.faceName6: DejaVuSansMono
+!*.vt100.faceSize6: 8
+!*.vt100.geometry6: 190x50
+
+! UTF-8 mode is initially on.  Escape sequences for turning UTF-8 mode on/off are allowed.
+! utf8 is respected only if locale is false.
+*.vt100.locale: false
+*.vt100.utf8:   1
+
+! These cargo-cult from the uterm command for unicode-useful settings.
+*.vt100.eightBitOutput:  true
+*.vt100.metaSendsEscape: true
+*.vt100.eightBitInput:   false
+*.vt100.allowTitleOps:   true
+*.vt100.allowTcapOps:    true
+
+! bogosity enables a funny little alien pointer.
+!*.vt100.pointerShape: bogosity
+
+! saveLines!
+*.vt100.saveLines:       40000
+*.vt100.scrollTtyOutput: false
+*.vt100.scrollKey:       true
+
+*.vt100.showMissingGlyphs:  true
+*.vt100.italicULMode:       true
+*.vt100.wideBoldFont:       true
+
+! trimSelection is false by default; this should get rid of trailing spaces in selections!
+*.vt100.trimSelection: true
+
+! selectToClipboard copies the PRIMARY selection into CLIPBOARD.
+*.vt100.selectToClipboard: true
+
+! These seem to allow what was on the alt-screen to be recorded to scrollback.  Might be
+! nice when trying to recover lost data from old vim sessions.
+*.vt100.tiXtraScroll: true
+! Setting below true prevents swapping to alternate screen.
+*.vt100.titeInhibit:  true
+
+! @see http://lukas.zapletalovi.com/2013/07/hidden-gems-of-xterm.html
+! @see http://invisible-island.net/xterm/manpage/xterm.html#h3-VT100-Widget-Resources
+! These set options for the print-immediate command, which can be invoked with the
+! following control sequence:
+! $ echo -e "\e[0i" # Sends current screen to `less`.  Need whole scrollback.  Hrm.
+! @see http://www.in-ulm.de/~mascheck/X11/xterm/ctlseqs.txt (or in ./closet here)
+! OH COOL THIS DOES IT:
+! echo -e "\e[?11i" ## Media Copy (MC, DEC-Specific)
+! Now if I could switch to the alterate screen and run less there...
+!*.vt100*printerCommand: xterm -T History -e sh -c 'less -r <&3' 3<&0 &
+*.vt100*printOptsImmediate: 9
+!*.vt100*printerCommand: xterm -T History -e sh -c 'less -r <&3' 3<&0 & disown
+!*.vt100*printerCommand: xterm -T History -e sh -c 'less -r <&3' 3<&0 & disown
+*.vt100*printerCommand: xterm -T History -e sh -c 'vim -R - <&3' 3<&0 & disown
+
+! For translations, it seems the pointer cursor must be within the window.
+*.vt100*translations:    #override \n\
+  Shift <KeyPress> Up:      scroll-back(1, line)\n\
+  Shift <KeyPress> Down:    scroll-forw(1, line)\n\
+  Shift <KeyPress> Home:    scroll-back(10000, page)\n\
+  Shift <KeyPress> End:     scroll-forw(10000, page)\n
+
+
+!*customization: -color
+
+! vim: ft=xdefaults
+

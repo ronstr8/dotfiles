@@ -1,0 +1,154 @@
+#!/bin/bash
+
+VIM_HOME="$HOME/.vim"
+VIMRC="${VIM_HOME}rc"
+
+VIM_SRC="${VIM_HOME}/src"
+VIM_AUTOLOAD="${VIM_HOME}/autoload"
+VIM_BUNDLES="${VIM_HOME}/bundle"
+
+REQUIRED_FOLDERS=(
+	$VIM_HOME
+	$VIM_SRC
+	$VIM_AUTOLOAD
+	$VIM_BUNDLES
+)
+
+function initRequirements() {
+	for folder in ${REQUIRED_FOLDERS[@]} ; do
+		mkdir -p "$folder" && continue
+
+		echo "Failed to make directory «$folder»." 1>&2 
+		return 1
+	done
+
+	return 0
+}
+
+function installPathogen() {
+	local packageName='pathogen'
+	local packageSrc="$VIM_SRC/vim-$packageName"
+	local packageFileSrc="$packageSrc/autoload/${packageName}.vim"
+	local packageFileInstalled="$VIM_AUTOLOAD/${packageName}.vim"
+	local packageUri='git://github.com/tpope/vim-pathogen.git'
+	local packageVimrc=(
+		'execute pathogen#infect()'
+	)
+
+	if [ -d "$packageSrc" ] ; then
+		echo "Package «$packageName» already installed; updating." 1>&2
+		pushd "$packageSrc" && git pull ; popd
+	else
+		echo "Package «$packageName» not found at «$packageFileInstalled»; installing ..." 1>&2
+		pushd "$VIM_SRC" && git clone "$packageUri" ; popd
+	fi
+
+	if ( diff "$packageFileSrc" "$packageFileInstalled" &>/dev/null ) ; then
+		cp -fb "$packageFileSrc" "$packageFileInstalled"
+	else
+		echo "Package file «$packageFileSrc» and «$packageFileInstalled» are the same; done." 1>&2
+		return 0
+	fi
+
+	if [ ! -e "$packageFileInstalled" ] ; then
+		echo "Failed to install «$packageFileInstalled»." 1>&2 
+		return 1
+	fi
+
+	for line in ${packageVimrc[@]} ; do
+		if fgrep --silent "$line" "$VIMRC" ; then
+			echo "Vimrc «$VIMRC» already contains directive required for «$packageName»: «$line»" 1>&2
+		else
+			echo "Vimrc «$VIMRC» is missing directive required for «$packageName»; appending «$line» ..." 1>&2
+			echo "$line" >> "$VIMRC"
+		fi
+
+		if ! fgrep --silent "$line" "$VIMRC" ; then
+			echo "Failed to add «$line» to vimrc «$VIMRC» for «$packageName»." 1>&2
+			return 1
+		fi
+	done
+
+	return 0
+}
+
+function installTabular() {
+	local packageName='tabular'
+	local packageHome="$VIM_BUNDLES/$packageName"
+	local packageUri='git://github.com/godlygeek/tabular.git'
+
+	if [ -d "$packageHome" ] ; then
+		echo "Package «$packageName» already installed; updating it." 1>&2
+		pushd "$packageHome" && git pull ; popd
+	else
+		echo "Installing «$packageName» ..." 1>&2
+		pushd "$VIM_BUNDLES" && git clone "$packageUri" ; popd
+	fi
+
+	vim -c Helptags -c quit
+
+	cat <<-EOT 1>&2
+
+You may want to add the following support mappings for ${packageName}
+to your ${VIMRC}.
+
+	let mapleader=','
+	if exists(":Tabularize")
+		nmap <Leader>a= :Tabularize /=<CR>
+		vmap <Leader>a= :Tabularize /=<CR>
+		nmap <Leader>a: :Tabularize /:\zs<CR>
+		vmap <Leader>a: :Tabularize /:\zs<CR>
+	endif
+
+EOT
+}
+
+function installVimJson() {
+	local packageName='vim-json'
+	local packageHome="$VIM_BUNDLES/$packageName"
+	local packageUri='https://github.com/elzr/vim-json.git'
+
+	if [ -d "$packageHome" ] ; then
+		echo "Package «$packageName» already installed; updating it." 1>&2
+		pushd "$packageHome" && git pull ; popd
+	else
+		echo "Installing «$packageName» ..." 1>&2
+		pushd "$VIM_BUNDLES" && git clone "$packageUri" ; popd
+	fi
+
+	vim -T dumb -c 'Helptags' -c quit
+
+	cat <<-EOT 1>&2
+
+You may want to add the following support mappings for ${packageName}
+to your ${VIMRC}.
+
+	let g:vim_json_syntax_conceal = 0
+
+EOT
+}
+
+
+function croak() {
+	local why="${1}"
+	local rv="${2-1}"
+
+	if [ "$why" ] ; then
+		echo "Bundler cannot proceed: «$why»." 1>&2
+	else
+		echo "Bundler encountered a fatal condition and cannot proceed." 1>&2
+	fi
+
+	exit $rv
+}
+
+initRequirements || croak 'failed to initialize directories' 1
+installPathogen  || croak 'failed to install pathogen' 2
+
+installTabular
+installVimJson
+
+## Possible future inclusion: https://github.com/junegunn/vim-easy-align
+## https://github.com/elzr/vim-json.git
+
+

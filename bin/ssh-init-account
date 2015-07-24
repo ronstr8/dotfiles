@@ -1,0 +1,202 @@
+#!/bin/bash
+## ssh-init-account [options] $ssh_username@$ssh_hostname
+##
+##		Copy a set of $HOME config files to the given login shell.
+##
+##        --reskel     Refresh the skeleton files.  (Use w/--dry-run to see what would change.)
+##        --prune      Delete remote files no longer in our skeleton.  [NOT IMPLEMENTED]
+##
+##        --dry-run    What --dry-run usually means.
+##        --verbose    Ditto.
+##        --debug      Mega-ditto.
+##
+##        --help       This message
+##
+## -- 
+## straightre@gmail.com
+
+cat << 'EOT' > /dev/null 
+	Finally, if the $ssh_username is different, you might want to edit your ~/.ssh/config:
+
+		[$ssh_hostname]
+			User			"$ssh_username"
+			ForwardAgent	yes
+			ForwardX11		yes
+
+EOT
+
+GOX=`getopt -o nv --long 'dry-run,verbose,debug,help,reskel,prune' --name "$0" -- "$@"`
+if [ $? != 0 ] ; then echo "Aborting..." >&2 ; exit 1 ; fi
+
+eval set -- "$GOX"
+
+verbose=""
+debug=""
+dry_run=""
+verbose_prefix=""
+reskel=""
+prune=""
+
+while true ; do
+    case "$1" in
+
+        --dry-run)
+            dry_run="--dry-run"
+			shift ;;
+
+        --verbose) 
+            verbose=1 ;
+			shift ;;
+        --debug) 
+            verbose=11 ;
+			debug=1 ;
+			shift ;;
+
+        --help)
+            do_help=1 ;
+			shift ;;
+
+        --reskel)
+            reskel=1 ;
+			shift ;;
+
+        --prune)
+#            prune="--delete" ;
+			shift ;;
+
+
+        --)
+            shift ;
+			break ;;
+    esac
+done
+
+if [ "$do_help" ] ; then awk  '/^## -- $/ { exit } !/^#!/ { gsub("^#+[[:space:]]?", "") ; print }' $0 >&2 ; exit ; fi
+
+function __updateSkeleton() {
+	local excludeFrom=$( cat <<-EOT
+auto-save-list
+backup
+bookmarks*
+closet
+cookies
+.emacs-places
+.emacs-desktop*
+.emacs.desktop*
+emacs-places
+emacs-desktop*
+emacs.desktop*
+fridge
+*hist
+profiles
+rgb.txt
+.screen/var
+secret
+tags
+workspaces
+.vim/colors/*.vim
+.vim/doc
+.vim/plugin
+.vim/src
+*.lock
+*.lck
+*.swp
+	EOT
+) ;
+
+	local includeFrom=$( cat <<-EOT
+fazigu.vim
+	EOT
+) ;
+
+	local skeleton=$( cat <<-EOT
+.bash
+.bcrc
+.elinks
+.emacs
+.emacs.d
+.gitconfig
+.inputrc
+.screenrc
+.toprc
+.vim
+.vimrc
+.Xdefaults
+.Xmodmap
+.xrdb
+	EOT
+) ;
+
+	## A slash after a directory name copies the directory instead of its contents.
+	## The behavior usually wanted is to specify the source as the full dir without a slash,
+	## and the dest as the parent folder of the source-- also without a slash.  Think of it
+	## as putting "this file" "over there", disregarding whether or not they are directories.
+
+	local fn
+
+	for fn in ${skeleton[@]} ; do
+		rsync $dry_run --archive --delete --delete-excluded --verbose --cvs-exclude --include-from <( echo "$includeFrom" ) --exclude-from <( echo "$excludeFrom" ) "$HOME/$fn" "$HOME/bin/skel" ;
+	done
+}
+
+function __validateUserhost() {
+	local sshUserhost="$1" ;
+
+	if [ ! "$sshUserhost" ] ; then
+		echo "Missing required argument of 'username@hostname' ssh login specifier." 1>&2 ;
+		exit 1 ; ## Yes, exit, even when called by $reskel.
+	fi
+
+	return 0 ;
+}
+
+ssh_userhost="$1" ;
+
+if [ "$reskel" ] ; then
+	__updateSkeleton ;
+	[ "$ssh_userhost" ] || exit ;
+fi
+
+
+if [ "$dry_run" ] ; then
+	verbose_prefix="--dry-run »»» "
+elif [ "$debug" ] ; then
+	verbose_prefix="--debug »»» "
+else
+	verbose_prefix="--verbose »»» "
+fi
+
+__validateUserhost "$ssh_userhost"  || exit ;
+
+#### scp our skel
+
+backup_suffix="~$( date +%y-%m-%d_%H%M )" ;
+mover_folder="$( dirname  $0 )" ;
+
+box_basename="skel" ;
+box_folder="$mover_folder/$box_basename" ;
+
+## The old way, using scp:
+# cmdline="scp -r $box_folder/"'.[a-zA-Z]*'" "
+# 
+# if ( ls $box_folder/* &> /dev/null ) ; then
+# 	cmdline="$cmdline $box_folder/"'* '
+# fi
+# 
+# cmdline="$cmdline ${ssh_userhost}: "
+# 
+# [ "$debug"   ] && echo "${verbose_prefix}\$ $cmdline" > /dev/stderr
+# [ "$dry_run" ] || eval "$cmdline"
+
+## The new way, using rsync:
+rsync $dry_run $prune --archive --verbose --cvs-exclude --backup --suffix="${backup_suffix}" "${box_folder}/" "${ssh_userhost}:" ;
+ssh "${ssh_userhost}" 'chmod go-w ~' ;
+
+cat <<EOT
+
+Done!  Now make sure you can 'ssh $ssh_userhost'.  Next, activate
+the copied bashrc with 'ln -sf --backup ~/.bash/rc ~/.bashrc', and
+then OPEN A NEW SESSION to ensure you can still connect.  Good luck!
+
+EOT
+

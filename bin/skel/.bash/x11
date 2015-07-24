@@ -1,0 +1,24 @@
+
+## These directives are questionable.  Might want to be nice and not
+## clobber existing settings (e.g. -merge with xrdb and something more
+## complex with xmodmap) if we've already been initialized.
+
+if [ "$DISPLAY" ] ; then
+	which xrdb &> /dev/null && xrdb $HOME/.Xdefaults
+	xmodmap $HOME/.Xmodmap
+
+	## This is extra-questionable, but fucking MobaXterm is forcing me.
+	## I think.
+#	stty erase ^H
+
+	## This Xterm sequence forces the Application keypad off.
+	## http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+	echo -e "\033>"
+
+	## Screen stuff.  Hrm.
+##	if [ "$STY" ] ; then
+##		echo -e "\001:at \"#\" wrap on\cM\n"
+##	fi
+fi
+
+# vim: ft=sh

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#echo
+#xdpyinfo | grep -E '(display|version|vendor|[[:space:]]screen)' #grep -Ev '^[[:space:]]'
+##echo
+##glxinfo | grep -E '(direct|GL.*version)'
+echo
+xdpyinfo -ext XINERAMA | tail -3 
+echo
+nvidia-settings --query=NvidiaDriverVersion 
+echo
+nvidia-settings --glxinfo | grep  'OpenGL.*string'
+#if ( ! nvidia-settings --glxinfo > /dev/null ) ; then echo -e '\n\n( Has the Nvidia GL driver been overwritten? Try reinstalling the drivers. )' ; fi
+
+echo
+xrandr
+
+#echo
+#xdpyinfo | grep -EA2 '^screen #'   ## ~A18 catches it all
+echo
+echo "REMINDER :: X11 Inspection: xwininfo, xprop, editres, xlsclients, xrestop"
+echo "		... dpkg --listfiles x11-utils x11-xserver-utils  | fgrep bin"
+echo "		... xfd -fa Consolas"
+echo "		... listres -all"
+echo "      ... appres"
+echo "      ... xwininfo"
+## vi: ft=sh

@@ -1,0 +1,19 @@
+DB_THERE="moo/ghost.db.new"
+DB_HERE="/usr/local/backup/quinn/ghost/ghost.db.`date +%w`"
+DB_HOST="casper.bga.com"
+SCRIPTNAME=/tmp/ghostgrabber.$$
+
+if [ -f $DB_HERE ]; then
+	rm -f $DB_HERE
+fi
+
+#cat <<EOF > $SCRIPTNAME
+ftp -i -n $DB_HOST <<EOF
+open $DB_HOST
+get $DB_THERE -o $DB_HERE
+EOF
+
+lftp -f $SCRIPTNAME >& /dev/null
+gzip $DB_HERE
+
+#ncftpget -Z -f $HOME/.casper $DB_HERE $DB_THERE >& /dev/null

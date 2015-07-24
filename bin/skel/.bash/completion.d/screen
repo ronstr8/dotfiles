@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# screen(1) completion
+#
+have="yes"
+_screen()
+{
+	local cur prev preprev
+
+	local profiles="$HOME/.screen/profiles"
+
+	COMPREPLY=()
+	cur=${COMP_WORDS[COMP_CWORD]}
+	prev=${COMP_WORDS[COMP_CWORD-1]}
+
+	[ "$COMP_CWORD" -ge 2 ] && preprev=${COMP_WORDS[COMP_CWORD-2]}
+
+	if [ "$preprev" = "-d" -o "$preprev" = "-D" -a "$prev" = "-r" -o \
+	     "$prev" = "-R" ]; then
+		# list all
+		COMPREPLY=( $( command screen -ls | \
+     				sed -ne 's#^['$'\t'']\+\('$cur'[0-9]\+\.[^'$'\t'']\+\|[0-9]\+\.'$cur'[^'$'\t'']\+\).*$#\1#p' ) )
+	else
+		case "$prev" in
+		-[rR])
+			# list detached
+			COMPREPLY=( $( command screen -ls | \
+					sed -ne 's#^['$'\t'']\+\('$cur'[0-9]\+\.[^'$'\t'']\+\|[0-9]\+\.'$cur'[^'$'\t'']\+\).*Detached.*$#\1#p' ) )
+			;;
+		-[dDx])
+			# list attached
+			COMPREPLY=( $( command screen -ls | \
+					sed -ne 's#^['$'\t'']\+\('$cur'[0-9]\+\.[^'$'\t'']\+\|[0-9]\+\.'$cur'[^'$'\t'']\+\).*Attached.*$#\1#p' ) )
+			;;
+		-c)
+			# use a configuration
+			COMPREPLY=( $( command ls $profiles/*$cur* 2> /dev/null ) )
+			;;
+		-s)
+			# shells
+			COMPREPLY=( $( grep ^${cur:-[^#]} /etc/shells ) )
+			;;
+		*)
+			;;
+		esac
+	fi
+
+	return 0
+} &&
+complete -F _screen $default screen
+
+# vi: ft=sh

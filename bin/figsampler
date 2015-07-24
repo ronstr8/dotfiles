@@ -1,0 +1,11 @@
+#!/bin/bash
+
+text=$1
+ffontdir="$HOME/src/figlet222/contributed"
+figfonts=$( ls $ffontdir/*.flf )
+
+for ffn in $figfonts ; do
+	fn=$( basename $ffn .flf ) ;
+	echo -e "\n===== $fn =====\n" ;
+	figlet -d$ffontdir -f$fn $text ;
+done

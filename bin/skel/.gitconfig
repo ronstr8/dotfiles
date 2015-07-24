@@ -1,0 +1,52 @@
+[user]
+; 	name = Ron \"Quinn\" Straight
+; 	email = quinnfazigu@gmail.com
+ 	name="Ronald E. Straight"
+ 	email="straight@adiant.com"
+
+
+[color]
+        ui = auto
+[color "branch"]
+        current = yellow reverse
+        local = yellow
+        remote = green
+[color "diff"]
+        meta = yellow bold
+        frag = magenta bold
+        old = red bold
+        new = green bold
+[color "status"]
+        added = yellow
+        changed = green
+        untracked = cyan
+
+[alias]
+;        st = status
+;        ci = commit
+;        br = branch
+;        co = checkout
+;        df = diff
+;        lg = log -p
+        lol = log --graph --decorate --pretty=oneline --abbrev-commit
+        lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+        ls = ls-files
+		unstage = reset HEAD 
+;		fork = checkout --track origin/develop -b 
+
+;       git-diff --unified=5 --word-diff=color --patience --full-index --find-renames --find-copies-harder --irreversible-delete --stat --ignore-all-space --minimal --relative --function-context --src-prefix=older/ --dst-prefix=newer/ origin/HEAD
+
+        dfr  = diff --unified=2 --irreversible-delete --ignore-all-space --minimal --src-prefix=lhs/base/ --dst-prefix=rhs/mine/ --relative
+        dfw  = diff --unified=2 --irreversible-delete --ignore-all-space --minimal --src-prefix=lhs/base/ --dst-prefix=rhs/mine/ --word-diff=color
+        dfn  = diff --unified=2 --irreversible-delete --ignore-all-space --minimal --src-prefix=lhs/base/ --dst-prefix=rhs/mine/ --function-context
+
+        base = commit FETCH_HEAD
+
+[branch]
+        autosetupmerge = true
+
+[push]
+#	default = current
+	default = simple
+
+

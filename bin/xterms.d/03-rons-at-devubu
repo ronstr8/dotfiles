@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Terminal=false
+Icon[C]=/home/rons/files/icons/icon-seevast.png
+Name[C]=rons@devweb
+Name=rons@devweb
+Comment=Connect to Seevast rons@devweb (Ubuntu)
+Comment[C]=Connect to Seevast rons@devweb (Ubuntu)
+Exec=x-terminal-emulator -title rons@devubu -e /home/rons/bin/p3-ssh rons@devubu
+Icon=/home/rons/files/icons/icon-seevast.png
+

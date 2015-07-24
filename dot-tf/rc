@@ -1,0 +1,29 @@
+;;; Enable windowing mode.
+/visual on
+
+;;; Enable paging
+/more on
+
+;;; Enable suppression of introductory MUD text.
+/quiet off
+
+;;; Disable old-style slash interpretation
+;;; I recommend this unless you have old macros containing multiple slashes.
+/set oldslash=off
+
+;;; Enter the directory where you keep your tf files.
+/cd ~/.tf/lib
+
+;;; Load files.
+
+/load mcp21.tf
+/load mcp-negotiate.tf
+/load simpleedit.tf
+/load local-edit.tf
+
+/def WORLDFILE	= ~/.tf/world.tf
+/def BINDFILE	= ~/.tf/bind.tf
+
+/loadworld
+/loadbind
+

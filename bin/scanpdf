@@ -1,0 +1,66 @@
+#!/bin/bash
+## scan.sh <output-image-filename> -- @args-for-scanimage
+##
+##		--verbose	Whatever verbose usually means
+##		--dry-run   Ditto
+##		--help		This message
+## -- 
+## quinnfazigu@gmail.com
+
+GOX=`getopt -o vhn --long 'verbose,help,dry-run' --name "$0" -- "$@"`
+if [ $? != 0 ] ; then echo "Aborting..." >&2 ; exit 1 ; fi
+
+eval set -- "$GOX"
+
+while true ; do
+    case "$1" in
+        -v|--verbose) 
+            verbose=1 ; shift ;;
+        -h|--help)
+            do_help=1 ; shift ;;
+        -n|--dry-run)
+            dry_run=1 ; shift ;;
+        --)
+            shift ; break ;;
+    esac
+done
+
+if [ $do_help ] ; then awk  '/^## -- $/ { exit } !/^#!/ { gsub("^#+[[:space:]]?", "") ; print }' $0 >&2 ; exit ; fi
+
+OFN=$1 ; shift
+
+if [ ! "$OFN" ] ; then
+	echo "missing required parameter of output filename" > /dev/stderr
+	exit 1
+fi
+
+EXE_SCAN='scanimage'
+EXE_T2PS='tiff2ps'
+EXE_TPDF='ps2pdf13'
+
+FMT='tiff'
+#RES='600'
+RES='150'
+GEO='-x 215 -y 297' ## '-x 215 -y 297'
+
+TFN=$( tempfile --suffix=".$FMT" )
+
+DRY_RUN_PREFIX=""
+[ "$dry_run" ] && DRY_RUN_PREFIX="--dry-run: "
+
+[ "$verbose" ] && echo -n "${DRY_RUN_PREFIX}Scanning for devices ... " > /dev/stderr
+#DEV=$( sane-find-scanner | grep -E '^found' | awk '{ print $NF }' )
+#DEV=$( scanimage -L | grep -Eo '\w+:\w+:[0-9]+:[0-9]+' )
+DEV=$( $EXE_SCAN -f '%d' )
+[ "$verbose" ] && echo "$DEV" > /dev/stderr
+
+CMDLINE="$EXE_SCAN --device="$DEV" $GEO --resolution="$RES" --format="$FMT" $* > $TFN && $EXE_T2PS $TFN | $EXE_TPDF - > $OFN"
+
+[   "$verbose" ] && echo "${DRY_RUN_PREFIX}$CMDLINE" > /dev/stderr
+[ ! "$dry_run" ] && eval $CMDLINE
+
+rm -f $TFN
+
+## $ sane-find-scanner
+## found USB scanner (vendor=0x04a9, product=0x2206, chip=LM983x?) at libusb:003:003
+

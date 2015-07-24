@@ -1,0 +1,76 @@
+#!/bin/bash
+
+
+declare -r -i RV_SUCCESS=0 RV_FAILURE=1 ;
+
+function __isInt()   { if [[ "$1" =~ ^-?[0-9]+$ ]] ; then echo $1 ; return $RV_SUCCESS ; fi ; echo ${2:-$RV_FAILURE} ; return $RV_FAILURE ; } ;
+function __Whinge()  { declare -i rv ; rv=$( __isInt "$1" ) && shift ; echo "[$( date -Is )]${WHINGEE:- }$*" 1>&2 ; return $rv ; } ;
+function __Croak()   { __Whinge "$*" ; exit ; } ;
+function __Eval()    { declare cmd="$1" ; __Whinge "\$ $cmd" ; eval "$cmd" ; } ;
+
+declare -r IM_CONVERT='convert-im6' ;
+declare -r MEDIARY_EXT='miff' ;
+
+declare -r DEFAULT_CROP_GEOMETRY='' ; ## '60%x+160' for original "Punisher" crapper-kill clip.
+declare -r DEFAULT_SCALE='' ; ## x80
+declare -r DEFAULT_QUALITY='50' ; ## 50 
+declare -r DEFAULT_COLOR_COUNT='32' ; ## 32
+
+## @see http://www.imagemagick.org/script/command-line-options.php#delay
+declare -r DEFAULT_DELAY='1x1' ; ## "${ticks}x${ticksPerSecond} ~~ ticks/ticksPerSecond seconds between each frame.
+
+## @see http://www.imagemagick.org/script/command-line-options.php#loop
+declare -r DEFAULT_LOOP_COUNT='0' ; ## 0=infinite
+
+function __Main() {
+    declare oFile=$1 ; shift ;
+
+    [[ -e "$oFile" ]] && __Croak "Will not overwrite existing file ${oFile}." ;
+
+    declare crop=${DEFAULT_CROP_GEOMETRY} ;
+    declare scale=${DEFAULT_SCALE} ;
+    declare qual=${DEFAULT_QUALITY} ;
+    declare colors=${DEFAULT_COLOR_COUNT} ;
+
+    declare delay=${DEFAULT_DELAY} ;
+    declare loops=${DEFAULT_LOOP_COUNT} ;
+
+    declare imScript=''
+    
+    imScript+=' +repage' ;
+
+    [[ -n "$crop"   ]] && cmdSuffix+=" -crop    '$crop'" ;
+    [[ -n "$scale"  ]] && cmdSuffix+=" -scale   '$scale'" ;
+    [[ -n "$qual"   ]] && cmdSuffix+=" -quality '$qual'" ;
+
+    imScript+=' \( -clone 1--1 -background none +append -quantize transparent' ;
+
+    [[ -n "$colors" ]] && cmdSuffix+=" -colors '$colors'" ;
+
+    imScript+=' -unique-colors -write mpr:cmap +delete \)' ;
+
+    declare    iFile='' mPrefix="animatemp$( date +%s )" mExt=${MEDIARY_EXT} mFile='' ;
+    declare    prepareCommand='' ;
+    declare -a tFiles=() ;
+    declare -i mIdx=0 ;
+
+    for iFile in "$@" ; do
+        mFile=$( printf '%q' "${mPrefix}_${mIdx}.${mExt}" ) ;
+        mIdx=$(( mIdx+1 )) ;
+
+        prepareCommand="$IM_CONVERT '$iFile' $imScript '$mFile'" ;
+        __Eval "$prepareCommand" && tFiles+=( "$mFile" ) ;
+    done
+
+   declare trapCommand="rm -f -- ${tFiles[@]}" ;
+   trap "$trapCommand" 'EXIT' ;
+
+   declare renderCommand="$IM_CONVERT -delay $delay -layers 'OptimizePlus' ${tFiles[@]} -loop $loops '$oFile'" ;
+   __Eval "$renderCommand" ; 
+
+#   ls -l $outFn ; eog $outFn
+} ;
+
+__Main "$@" ;
+
+

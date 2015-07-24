@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ "$*" ] ; then
+    titleText="$*" ;
+else
+    titleText="${USER}@${HOSTNAME}" ;
+fi
+
+echo -ne "\033]0;$titleText\007\n";
+
+unset titleText ;
+
+
+#### #!/bin/bash
+#### 
+#### ## TODO :: Only set if no -title passed
+#### 
+#### if [ "$DISPLAY" -a "$WINDOWID" ] ; then
+#### 	WM_XTERM_TITLE=$( xprop -id $WINDOWID WM_COMMAND | sed -r 's/^.*"-title", "([^"]+)".*$/\1/' )
+#### 	WM_XTERM_TITLE=${WM_XTERM_TITLE//X-Terminal-Emulator/xterm}
+#### ##	PROMPT_COMMAND=$'echo -e "\033]0;$WM_XTERM_TITLE - $(echo $PWD | sed -r \'s#^(/[^/]+).*(/[^/]+)$#\\1/...\\2#\') - $( history 1 | awk \'{print $2 }\')\007"'
+#### 	echo -e "\033]0;$WM_XTERM_TITLE - $(echo $PWD | sed -r \'s#^(/[^/]+).*(/[^/]+)$#\\1/...\\2#\') - $( history 1 | awk '{print $2 }')\007"
+#### fi

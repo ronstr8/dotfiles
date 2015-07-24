@@ -1,0 +1,71 @@
+#!/bin/bash
+## deathwatch - Watch files modified around last crash
+##
+##	--help
+##
+##	--verbose
+##	--dry-run
+##
+##	--just-the-files	Show files we'd tail, but don't tail
+##
+## -- 
+## quinnfazigu@gmail.com
+
+GOX=`getopt -o vhn --long 'verbose,help,dry-run,just-the-files' --name "$0" -- "$@"`
+if [ $? != 0 ] ; then echo "Aborting..." >&2 ; exit 1 ; fi
+
+eval set -- "$GOX"
+
+while true ; do
+    case "$1" in
+        -v|--verbose) 
+            verbose=1 ; shift ;;
+        -h|--help)
+            do_help=1 ; shift ;;
+        -n|--dry-run)
+            dry_run=1 ; shift ;;
+        -j|--just-the-files)
+            just_the_files=1 ; shift ;;
+        --)
+            shift ; break ;;
+    esac
+done
+
+if [ $do_help ] ; then awk  '/^## -- $/ { exit } !/^#!/ { gsub("^#+[ \t]?", "") ; print }' $0 >&2 ; exit ; fi
+
+
+CRASH_ALLOWANCE=5
+MINUTES_SINCE_BOOT=$( awk '{ print int($1 / 60) }' /proc/uptime )  ## $( uptime | awk '{ print $3 }' )
+[ "$verbose" ] && echo "Minutes since boot: $MINUTES_SINCE_BOOT" > /dev/stderr
+
+MINUTES_SINCE_CRASH=$(( $MINUTES_SINCE_BOOT + $CRASH_ALLOWANCE ))
+
+LOGS_SINCE_CRASH=$( find /var/log \
+	-type f \
+	-mmin -$MINUTES_SINCE_CRASH \
+	! -name '*.[0-9]' \
+	! -name '*.old' \
+	2> /dev/null )
+
+LOGS_TO_TAIL=''
+
+for fn in $LOGS_SINCE_CRASH ; do
+	MAGIC=$( file "$fn" )
+
+##	[ "$verbose" ] && echo "$fn :: $MAGIC" > /dev/stderr
+
+	if [[ "$MAGIC" =~ text$ ]] ; then
+		LOGS_TO_TAIL="$LOGS_TO_TAIL $fn"
+	fi
+done
+
+if [ "$just_the_files" ] ; then
+	echo "$LOGS_TO_TAIL"
+	exit
+fi
+
+[ "$verbose" ] && echo "Logs modified since crash ~$MINUTES_SINCE_CRASH minutes ago: $LOGS_TO_TAIL" > /dev/stderr
+[ "$dry_run" ] && exit
+
+tail -F $LOGS_TO_TAIL
+

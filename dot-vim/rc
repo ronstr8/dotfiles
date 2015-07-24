@@ -1,0 +1,221 @@
+" @see https://github.com/scrooloose/vimfiles/blob/master/vimrc#L78
+" @see https://github.com/powerline/powerline
+" @see http://www.slant.co/topics/67/viewpoints/17/~what-are-the-best-programming-fonts~pragmata-pro
+" @see https://github.com/xpando/Dash/blob/master/Fonts/PragmataPro.ttf
+" @see http://ethanschoonover.com/solarized/vim-colors-solarized
+" @see http://got-ravings.blogspot.com/2008/08/vim-pr0n-making-statuslines-that-own.html
+" @see https://github.com/bling/vim-airline
+" @see https://amix.dk/vim/vimrc.html
+
+set nocompatible
+
+set incsearch
+set ignorecase
+"set smartcase
+set showmatch
+set hlsearch
+
+set ruler
+
+set expandtab
+set tabstop=4
+set shiftwidth=4
+
+filetype plugin on
+
+execute pathogen#infect()
+
+"set autochdir
+set hidden
+"set confirm
+
+let loaded_matchparen = 1
+
+if has("autocmd")
+    " When editing a file, always jump to the last cursor position
+    autocmd BufReadPost * if line("'\"") > 0 && line ("'\"") <= line("$") | exe "normal g'\"" | endif
+endif
+
+nnoremap <F11> :set invpaste<CR> " toggle between paste and no-paste mode
+
+nnoremap <F5>  "=strftime("%F %T")<CR>P    " insert date and time
+inoremap <F5>  <C-R>=strftime("%F %T")<CR> " insert date and time
+
+noremap <F1>  :bprev<CR>        " switch to previous buffer
+noremap <F2>  :bnext<CR>        " switch to next buffer
+noremap <F8>  :nohl<CR>         " turn off all (search) highlighting
+noremap <F12> :set number!<CR>  " toggle line nuvigation like firefox
+
+" unmap <C-PageUp>
+" unmap <C-PageDown>
+" nnoremap <C-PageUp> :bprev<CR>
+" nnoremap <C-PageDown>   :bnext<CR>
+" inoremap <C-PageUp> <Esc>:bprev<CR>i
+" inoremap <C-PageDown>   <Esc>:bnext<CR>i
+
+:noremap <C-Left>  :bprev<CR> 
+:noremap <C-Right> :bnext<CR> 
+
+let g:no_italics = !!0
+let g:no_italics = !empty($SSH_CLIENT) && !empty(matchstr($SSH_CLIENT, '^76\.180\.125\.'))
+
+set t_Co=256
+set t_ZH="^[[3m"
+set t_ZR="^[[23m"
+
+syntax enable
+set background=dark
+colorscheme fazigu
+"colorscheme deveiate  ## horrible for perl
+"colorscheme inkpot
+"colorscheme gardener
+"let g:solarized_termcolors=256 " If no solarized Xdefaults modifications.
+"colorscheme solarized
+
+set encoding=utf8
+
+set autoindent
+set gfn="Consolas 10"
+
+"set ttymouse=xterm
+"set mouse=a
+
+"set statusline=%<%f%h%m%r%=%b\ 0x%B\ \ %l,%c%V\ %P
+"highlight StatusLineNC cterm=NONE ctermbg=DarkGray  ctermfg=LightGray
+highlight StatusLine cterm=NONE ctermbg=DarkGray  ctermfg=LightGray
+highlight User1      cterm=NONE ctermbg=LightGray ctermfg=Black
+"   StatusLine is default window color.  Active window is difference between that
+"   color and (in this case as per g:buftabs_active_highlight_group below) User1.
+"set statusline="%#User1#%<%f%h%m%r%=Col\ %c\ Line\ %l/%L\ %P"
+"set statusline="%#User1#%<%*1f%h%m%r%=Col\ %c\ Line\ %l/%L\ %P"
+set statusline=%<%f%h%m%r%=Col\ %3c\ Line\ %4l/%4L\ (%-3P)
+"set statusline=┌%{buftabs#statusline()}┐\ %<%f%h%m%r%=Col\ %3c\ Line\ %4l/%4L\ (%-3P)
+set laststatus=2
+"set cmdheight=2
+
+
+" buftags plugin.
+"  By default buftabs will take up the whole of the left-aligned section of
+"  your statusline. You can alternatively specify precisely where it goes
+"  using %{buftabs#statusline()} e.g.:
+"set statusline=%=buffers:\ %{buftabs#statusline()}
+"set statusline="%{buftabs#statusline()}\ %=\ Col\ %c\ Line\ %l/%L\ %P"
+"highlight BufTabActive   cterm=NONE ctermbg=Green     ctermfg=Black
+"highlight BufTabInactive cterm=NONE ctermbg=LightGray ctermfg=White
+let g:buftabs_in_statusline=1
+let g:buftabs_only_basename=1
+let g:buftabs_active_highlight_group="User1"
+"let g:buftabs_inactive_highlight_group="BufTabInactive"
+"let g:buftabs_separator = ":«"
+"let g:buftabs_separator = "┤ "
+let g:buftabs_separator = ": "
+let g:buftabs_marker_start = "["
+"let g:buftabs_marker_end = "┌┤"
+"let g:buftabs_marker_end = "»┐"
+let g:buftabs_marker_end = " ]"
+let g:buftabs_marker_modified = "≠"
+
+" →  ←  ±  ·  «  »  ≠  ‽ ₍  ₎  ╠  ╣  ├─  ─┤  ┌  ┐
+"   ╔══╦══╗  ┌──┬──┐  ╭──┬──╮  ╭──┬──╮
+"   ║┌─╨─┐║  │╔═╧═╗│  │╒═╪═╕│  │╓─╁─╖│
+"   ║│╲ ╱│║  │║   ║│  ││ │ ││  │║ ┃ ║│
+"   ╠╡ ╳ ╞╣  ├╢   ╟┤  ├┼─┼─┼┤  ├╫─╂─╫┤
+"   ║│╱ ╲│║  │║   ║│  ││ │ ││  │║ ┃ ║│
+"   ║└─╥─┘║  │╚═╤═╝│  │╘═╪═╛│  │╙─╀─╜│
+"   ╚══╩══╝  └──┴──┘  ╰──┴──╯  ╰──┴──╯
+
+
+"" http://www.techrepublic.com/article/configure-vi-for-java-application-development/#
+"" http://www.techrepublic.com/html/tr/sidebars/5054618-0.html
+let java_highlight_all=1
+let java_highlight_functions="style"
+let java_allow_cpp_keywords=1
+
+"" http://www.techrepublic.com/html/tr/sidebars/5054618-2.html
+set makeprg=vimAnt
+set efm=\ %#[javac]\ %#%f:%l:%c:%*\\d:%*\\d:\ %t%[%^:]%#:%m,
+    \%A\ %#[javac]\ %f:%l:\ %m,%-Z\ %#[javac]\ %p^,%-C%.%#
+
+" ctags -f valuescore-main.tags --sort=yes -R
+" /srv/code.adiant.com/valuescore/java/adserv*/src
+" /srv/code.adiant.com/valuescore/java/common*/src
+" /srv/code.adiant.com/valuescore/java/dmp/src/main/java/
+autocmd Filetype java set tags=/home/rons/.vim/tags/valuescore-main.tags
+set complete=.,w,b,u,t,i
+set omnifunc=syntaxcomplete#Complete
+
+map <Leader>cc :cwindow<CR>:cc<CR><c-w>bz<CR><CR>
+map <Leader>cn :cwindow<CR>:cn<CR><c-w>bz<CR><CR>
+map <Leader>cp :cwindow<CR>:cp<CR><c-w>bz<CR><CR>
+
+if has("multi_byte")
+    if &termencoding == ""
+        let &termencoding = &encoding
+    endif
+    set encoding=utf-8
+    setglobal fileencoding=utf-8
+    "setglobal bomb
+    "set fileencodings=ucs-bom,utf-8,latin1
+
+	digraph ?! 8253
+	digraph !? 8253
+    digraph .3 2026
+elseif &encoding == "iso-8859-15"
+ 	digraph oe 189
+endif
+
+
+" @see http://vim.wikia.com/wiki/Create_underlines,_overlines,_and_strikethroughs_using_combining_characters
+" @see http://vim.wikia.com/wiki/Working_with_Unicode
+" modify selected text using combining diacritics
+command! -range -nargs=0 Overline        call s:CombineSelection(<line1>, <line2>, '0305')
+command! -range -nargs=0 Underline       call s:CombineSelection(<line1>, <line2>, '0332')
+command! -range -nargs=0 DoubleUnderline call s:CombineSelection(<line1>, <line2>, '0333')
+command! -range -nargs=0 Strikethrough   call s:CombineSelection(<line1>, <line2>, '0336')
+
+function! s:CombineSelection(line1, line2, cp)
+  execute 'let char = "\u'.a:cp.'"'
+  execute a:line1.','.a:line2.'s/\%V[^[:cntrl:]]/&'.char.'/ge'
+endfunction
+
+if has("conceal")
+    set conceallevel=0 
+    autocmd FileType json setlocal conceallevel=0 
+endif 
+
+" Airline <https://github.com/bling/vim-airline/blob/master/README.md>
+if !exists('g:airline_symbols')
+    let g:airline_symbols = {}
+endif
+
+let g:airline_extensions = [ 'buftabs' ]
+
+let g:airline_left_sep='»'
+let g:airline_right_sep='«'
+let g:airline_detect_modified=1
+let g:airline_detect_paste=1
+let g:airline_detect_iminsert=0
+let g:airline_inactive_collapse=1
+
+let g:airline_powerline_fonts=0
+
+let g:airline_mode_map = { '__' : '-', 'n'  : 'N', 'i'  : 'I', 'R'  : 'R', 'c'  : 'C', 'v'  : 'V', 'V'  : 'V', '^V' : 'V', 's'  : 'S', 'S'  : 'S', '^S' : 'S', }
+
+let g:airline_section_a       = '' " (mode, paste, iminsert)
+let g:airline_section_b       = '' " (hunks, branch)
+let g:airline_section_c       = '%n%t%m' " (bufferline or filename)
+let g:airline_section_gutter  = '' " (readonly, csv)
+let g:airline_section_x       = '' " (tagbar, filetype, virtualenv)
+let g:airline_section_y       = '' " (fileencoding, fileformat)
+let g:airline_section_z       = '' " (percentage, line number, column number)
+let g:airline_section_warning = '' " (syntastic, whitespace)
+
+
+" here is an example of how you could replace the branch indicator with
+" the current working directory, followed by the filename.
+let g:airline_section_b = '%{getcwd()}'
+let g:airline_section_c = '%t'
+
+
+" vim: filetype=vim:
+

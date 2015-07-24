@@ -1,0 +1,16 @@
+#!/bin/bash
+
+## @see http://lukas.zapletalovi.com/2013/07/hidden-gems-of-xterm.html
+## @see http://invisible-island.net/xterm/manpage/xterm.html#h3-VT100-Widget-Resources
+## @see http://www.in-ulm.de/~mascheck/X11/xterm/ctlseqs.txt (or in ./closet here)
+
+## Need the following in .Xdefaults or elsewhere read from the xrdb command.
+#
+# *.vt100*printOptsImmediate: 9
+# *.vt100*printerCommand: less -r <&3 3<&0 
+
+# Switch to alternate screen.
+#echo -e "\e[?47h" ;
+# Media Copy (MC, DEC-Specific) - Invoke print-screen command.
+echo -e "\e[?11i" ## Media Copy (MC, DEC-Specific)
+

@@ -1,0 +1,114 @@
+# Write your default config options here!
+
+##  ./mplayer -vc ffh264vdpau -vo vdpau hd-movie.mkv
+## man mplayer, search for "keyboard control" for keys
+
+stop-xscreensaver=1
+xineramascreen=1
+msgcolor=1
+fs=1
+
+#geometry=+2000+200
+
+## Is "ASS" required for legible subs?
+#ass=1
+
+#lavdopts=threads=2
+
+## 1.0 works from the back panel outputs.
+#ao=alsa:device=hw=1.0
+#ao=alsa:device=hw=1.2
+#ao=alsa:device=hw=1.3
+#ao=alsa:device=hw=1.4
+#ao=alsa:device=iec958:CARD=NVidia,DEV=0
+#ao=alsa:device=surround51
+#ao=pulse
+#ao=alsa:device=hw=0.0
+#ao=alsa:device=hdmi
+#ao=alsa:device=iec958
+#ao=alsa:device=hw=0.1
+## http://www.mythtv.org/wiki?title=User:Trogod/System0Setup&redirect=no
+
+
+
+osdlevel=3
+subfont-osd-scale=2
+subfont-text-scale=2
+subpos=85
+#unrarexec=/usr/bin/unrar
+
+monitoraspect=16:9
+#monitoraspect=4:3
+
+#vo=vdpau:fps=120
+#vo=vdpau
+vc=ffh264vdpau,ffmpeg12vdpau,ffvc1vdpau,ffwmv3vdpau,
+#channels=6
+#lavcac3enc[=tospdif[:bitrate[:minchn]]]
+#af=lavcac3enc=1:48
+#ac=hwac3,hwdts,a52,
+
+# font=/usr/share/fonts/truetype/msttcorefonts/impact.ttf
+#ffactor="10" #black outline
+#sub-bg-alpha="0" #background color ala closed captions
+#sub-bg-color="0" #black to white
+#subfont-text-scale="3.7" #truetype font scaling
+#subfont-blur="1" #Slight blur
+
+###af=equalizer=-10:-10:-10:-10:0:0:0:0:0:0
+
+## aplay -L to list available devices (40,41,50,51,71)
+#ao=alsa:device=surround40
+#ao=alsa
+#lavdopts=threads=2:fast=1:skiploopfilter=all
+#lavdopts=threads=2:skiploopfilter=all
+#ac=hwdts
+#channels=6
+#channels=4
+#msglevel:all=1
+#vo=gl:yuv=2:force-pbo:ati-hack
+#dr=1
+#noslices=1
+#menu=yes
+#vc=ffh264vdpau
+#vf=screenshot
+
+##              No. frequency (-12 silent .. 12 loud)
+##              0    31.25 Hz
+##              1    62.50 Hz
+##              2   125.00 Hz
+##              3   250.00 Hz
+##              4   500.00 Hz
+##              5    1.00 kHz
+##              6    2.00 kHz
+##              7    4.00 kHz
+##              8    8.00 kHz
+##              9   16.00 kHz
+## Quiet the damned bass in big-budget SFX movies?
+#af=channels=6:3:1:4:2:5:3:6
+#af=channels=6:4:0:0:0:1:0:2:0:3
+
+ao='alsa:device=hdmi'
+
+[extension.mp3]
+profile-desc="profile for .mp3 files"
+autosync=0
+#cache=1024
+gapless-audio=1
+ao='alsa:device=front'
+
+[extension.avi]
+ac=hwac3,
+
+[extension.mkv]
+ac=hwac3,
+
+[extension.wmv]
+ac=hwac3,
+
+#[extension.mp4]
+#ac=hwac3,
+#
+#[extension.f4v]
+#ac=hwac3,
+

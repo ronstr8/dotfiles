@@ -1,0 +1,18 @@
+#!/bin/bash
+
+## IDE_BIN="/usr/local/java/eclipse/eclipse"
+IDE_BIN="/opt/eclipse/eclipse"
+#MY_IDE_HOME="$HOME/src/java/eclipse"
+MY_IDE_HOME="$HOME/work/adblade/eclipse"
+MY_IDE_LOG="$MY_IDE_HOME/eclipse-$( date +%Y%m%d ).log"
+
+if [ ! "$DISPLAY" ] ; then
+	export DISPLAY="localhost:10.0"
+fi
+
+## Fix help browser "Cannot resolve proxy hostname ()"
+## http://stackoverflow.com/questions/3396485/eclipse-help-wont-show-under-ubuntu
+export no_proxy=127.0.0.1,localhost
+## https://bugs.eclipse.org/bugs/show_bug.cgi?id=301424
+export NO_PROXY="localhost,127.0.0.1,127.0.0.0/8"
+nohup $IDE_BIN < /dev/null &>> $MY_IDE_LOG & disown

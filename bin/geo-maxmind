@@ -1,0 +1,110 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+geo-maxmind - Lookup geo info for an IP address
+
+=head1 SYNOPSIS
+
+  geo-maxmind <ip-address>
+
+
+=head1 DESCRIPTION
+
+=cut
+
+use strict;
+use warnings;
+use English qw( -no_match_vars );
+
+### Sneaky Library Inclusion {{{
+
+BEGIN
+{
+	use File::Spec;
+
+	my @libs = qw( . ./lib );
+
+	my  $whereami = File::Spec->rel2abs(__FILE__);
+	my  @whereami = File::Spec->splitpath($whereami);
+	    @whereami = File::Spec->splitdir($whereami[1]);
+	pop @whereami;
+	    $whereami = File::Spec->catdir(@whereami);
+
+	my  @dotdotlib = @whereami;
+	pop @dotdotlib;
+	my  $dotdotlib = File::Spec->catdir(@dotdotlib, 'lib');
+
+	push @libs, $dotdotlib if $dotdotlib and -d $dotdotlib;
+
+	if ($whereami =~ m{^(<uplib>.+/lib)}) {
+		my $uplib = $+{'uplib'};
+		push @libs, $uplib if $uplib and -d $uplib;
+	}
+
+	unshift @INC, @libs;
+}
+### }}}
+
+use Data::Dumper; local $Data::Dumper::Terse  = 1;
+                  local $Data::Dumper::Indent = 0;
+
+use Carp    qw( croak confess  );
+use Quack;
+use Data::Dumper;
+use Geo::IP::PurePerl;
+
+
+### Getopt Boilerplate {{{
+
+my %ALL_OPTIONS = (
+	'--verbose!' => '',
+	'--dry-run!' => '',
+);
+
+my %opts;
+my @missing;
+
+use Getopt::Long;
+my $getopt = new Getopt::Long::Parser 'config' => [qw/auto_help/];
+   $getopt->getoptions(\%opts, ( keys %ALL_OPTIONS )) or die "failed to parse all options\n";
+
+while (my($opt, $required) = each(%ALL_OPTIONS)) {
+	next unless my $msg = $required;
+	next if defined $opts{$opt} and $opts{$opt} ne '';
+	push @missing, $msg =~ /^\d+$/ ? "missing required parameter --$opt\n" : $msg;
+}
+
+die join('', @missing) if @missing;
+die "the --dry-run parameter is not yet implemented\n" if $opts{'dry-run'};
+
+### }}}
+
+my $ip4addr = shift @ARGV
+	or die "missing required argument of ip-address to lookup\n";
+
+my $gi = Geo::IP::PurePerl->new(GEOIP_STANDARD);
+quack { $gi->get_city_record_as_hash($ip4addr) };
+
+
+__END__
+
+=head1 SEE ALSO
+
+=over
+
+=item * L<Something> - Does something
+
+=back
+
+=head1 AUTHOR
+
+Ron "Quinn" Straight E<lt>quinnfazigu@gmail.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Public domain.  Free to use and distribute, appreciate attribution.
+
+=cut
+
+## vim: foldmethod=marker

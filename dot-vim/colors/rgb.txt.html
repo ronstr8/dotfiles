@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>RGB dot TXT</title>
+<!-- @see http://www.w3.org/MarkUp/Guide/Style -->
+<!-- @see https://web.njit.edu/~kevin/rgb.txt.html -->
+</head>
+<body>
+
+
+<pre>
+## 2015-07-10 13:33:24 :: ~/src/mtr
+##  rons@rons-VM$ cat /usr/share/X11/rgb.txt | awk 'BEGIN { sp=" "; } !/^!/ { gsub(/^\s+/, ""); printf("%02x%02x%02x%s(%03d,%03d,%03d)%s", $1, $2, $3, sp, $1, $2, $3, sp); gsub(/^[0-9[:space:]]+/, ""); cc=$0; printf("\"%s\"\n", $cc);  }' > ~/tmp/rgb-rosetta-rgb.txt
+</pre>
+
+<table>
+<tbody>
+<tr> <td>	fffafa	</td> <td>	(255,250,250)	</td> <td>	snow	</td> </tr>
+<tr> <td>	f8f8ff	</td> <td>	(248,248,255)	</td> <td>	ghost white	</td> </tr>
+<tr> <td>	f8f8ff	</td> <td>	(248,248,255)	</td> <td>	GhostWhite	</td> </tr>
+<tr> <td>	f5f5f5	</td> <td>	(245,245,245)	</td> <td>	white smoke	</td> </tr>
+<tr> <td>	f5f5f5	</td> <td>	(245,245,245)	</td> <td>	WhiteSmoke	</td> </tr>
+<tr> <td>	dcdcdc	</td> <td>	(220,220,220)	</td> <td>	gainsboro	</td> </tr>
+<tr> <td>	fffaf0	</td> <td>	(255,250,240)	</td> <td>	floral white	</td> </tr>
+<tr> <td>	fffaf0	</td> <td>	(255,250,240)	</td> <td>	FloralWhite	</td> </tr>
+<tr> <td>	fdf5e6	</td> <td>	(253,245,230)	</td> <td>	old lace	</td> </tr>
+<tr> <td>	fdf5e6	</td> <td>	(253,245,230)	</td> <td>	OldLace	</td> </tr>
+<tr> <td>	faf0e6	</td> <td>	(250,240,230)	</td> <td>	linen	</td> </tr>
+<tr> <td>	faebd7	</td> <td>	(250,235,215)	</td> <td>	antique white	</td> </tr>
+<tr> <td>	faebd7	</td> <td>	(250,235,215)	</td> <td>	AntiqueWhite	</td> </tr>
+<tr> <td>	ffefd5	</td> <td>	(255,239,213)	</td> <td>	papaya whip	</td> </tr>
+<tr> <td>	ffefd5	</td> <td>	(255,239,213)	</td> <td>	PapayaWhip	</td> </tr>
+<tr> <td>	ffebcd	</td> <td>	(255,235,205)	</td> <td>	blanched almond	</td> </tr>
+<tr> <td>	ffebcd	</td> <td>	(255,235,205)	</td> <td>	BlanchedAlmond	</td> </tr>
+<tr> <td>	ffe4c4	</td> <td>	(255,228,196)	</td> <td>	bisque	</td> </tr>
+<tr> <td>	ffdab9	</td> <td>	(255,218,185)	</td> <td>	peach puff	</td> </tr>
+<tr> <td>	ffdab9	</td> <td>	(255,218,185)	</td> <td>	PeachPuff	</td> </tr>
+<tr> <td>	ffdead	</td> <td>	(255,222,173)	</td> <td>	navajo white	</td> </tr>
+<tr> <td>	ffdead	</td> <td>	(255,222,173)	</td> <td>	NavajoWhite	</td> </tr>
+<tr> <td>	ffe4b5	</td> <td>	(255,228,181)	</td> <td>	moccasin	</td> </tr>
+<tr> <td>	fff8dc	</td> <td>	(255,248,220)	</td> <td>	cornsilk	</td> </tr>
+<tr> <td>	fffff0	</td> <td>	(255,255,240)	</td> <td>	ivory	</td> </tr>
+<tr> <td>	fffacd	</td> <td>	(255,250,205)	</td> <td>	lemon chiffon	</td> </tr>
+<tr> <td>	fffacd	</td> <td>	(255,250,205)	</td> <td>	LemonChiffon	</td> </tr>
+<tr> <td>	fff5ee	</td> <td>	(255,245,238)	</td> <td>	seashell	</td> </tr>
+<tr> <td>	f0fff0	</td> <td>	(240,255,240)	</td> <td>	honeydew	</td> </tr>
+<tr> <td>	f5fffa	</td> <td>	(245,255,250)	</td> <td>	mint cream	</td> </tr>
+<tr> <td>	f5fffa	</td> <td>	(245,255,250)	</td> <td>	MintCream	</td> </tr>
+<tr> <td>	f0ffff	</td> <td>	(240,255,255)	</td> <td>	azure	</td> </tr>
+<tr> <td>	f0f8ff	</td> <td>	(240,248,255)	</td> <td>	alice blue	</td> </tr>
+<tr> <td>	f0f8ff	</td> <td>	(240,248,255)	</td> <td>	AliceBlue	</td> </tr>
+<tr> <td>	e6e6fa	</td> <td>	(230,230,250)	</td> <td>	lavender	</td> </tr>
+<tr> <td>	fff0f5	</td> <td>	(255,240,245)	</td> <td>	lavender blush	</td> </tr>
+<tr> <td>	fff0f5	</td> <td>	(255,240,245)	</td> <td>	LavenderBlush	</td> </tr>
+<tr> <td>	ffe4e1	</td> <td>	(255,228,225)	</td> <td>	misty rose	</td> </tr>
+<tr> <td>	ffe4e1	</td> <td>	(255,228,225)	</td> <td>	MistyRose	</td> </tr>
+<tr> <td>	ffffff	</td> <td>	(255,255,255)	</td> <td>	white	</td> </tr>
+<tr> <td>	000000	</td> <td>	(000,000,000)	</td> <td>	black	</td> </tr>
+<tr> <td>	2f4f4f	</td> <td>	(047,079,079)	</td> <td>	dark slate gray	</td> </tr>
+<tr> <td>	2f4f4f	</td> <td>	(047,079,079)	</td> <td>	DarkSlateGray	</td> </tr>
+<tr> <td>	2f4f4f	</td> <td>	(047,079,079)	</td> <td>	dark slate grey	</td> </tr>
+<tr> <td>	2f4f4f	</td> <td>	(047,079,079)	</td> <td>	DarkSlateGrey	</td> </tr>
+<tr> <td>	696969	</td> <td>	(105,105,105)	</td> <td>	dim gray	</td> </tr>
+<tr> <td>	696969	</td> <td>	(105,105,105)	</td> <td>	DimGray	</td> </tr>
+<tr> <td>	696969	</td> <td>	(105,105,105)	</td> <td>	dim grey	</td> </tr>
+<tr> <td>	696969	</td> <td>	(105,105,105)	</td> <td>	DimGrey	</td> </tr>
+<tr> <td>	708090	</td> <td>	(112,128,144)	</td> <td>	slate gray	</td> </tr>
+<tr> <td>	708090	</td> <td>	(112,128,144)	</td> <td>	SlateGray	</td> </tr>
+<tr> <td>	708090	</td> <td>	(112,128,144)	</td> <td>	slate grey	</td> </tr>
+<tr> <td>	708090	</td> <td>	(112,128,144)	</td> <td>	SlateGrey	</td> </tr>
+<tr> <td>	778899	</td> <td>	(119,136,153)	</td> <td>	light slate gray	</td> </tr>
+<tr> <td>	778899	</td> <td>	(119,136,153)	</td> <td>	LightSlateGray	</td> </tr>
+<tr> <td>	778899	</td> <td>	(119,136,153)	</td> <td>	light slate grey	</td> </tr>
+<tr> <td>	778899	</td> <td>	(119,136,153)	</td> <td>	LightSlateGrey	</td> </tr>
+<tr> <td>	bebebe	</td> <td>	(190,190,190)	</td> <td>	gray	</td> </tr>
+<tr> <td>	bebebe	</td> <td>	(190,190,190)	</td> <td>	grey	</td> </tr>
+<tr> <td>	d3d3d3	</td> <td>	(211,211,211)	</td> <td>	light grey	</td> </tr>
+<tr> <td>	d3d3d3	</td> <td>	(211,211,211)	</td> <td>	LightGrey	</td> </tr>
+<tr> <td>	d3d3d3	</td> <td>	(211,211,211)	</td> <td>	light gray	</td> </tr>
+<tr> <td>	d3d3d3	</td> <td>	(211,211,211)	</td> <td>	LightGray	</td> </tr>
+<tr> <td>	191970	</td> <td>	(025,025,112)	</td> <td>	midnight blue	</td> </tr>
+<tr> <td>	191970	</td> <td>	(025,025,112)	</td> <td>	MidnightBlue	</td> </tr>
+<tr> <td>	000080	</td> <td>	(000,000,128)	</td> <td>	navy	</td> </tr>
+<tr> <td>	000080	</td> <td>	(000,000,128)	</td> <td>	navy blue	</td> </tr>
+<tr> <td>	000080	</td> <td>	(000,000,128)	</td> <td>	NavyBlue	</td> </tr>
+<tr> <td>	6495ed	</td> <td>	(100,149,237)	</td> <td>	cornflower blue	</td> </tr>
+<tr> <td>	6495ed	</td> <td>	(100,149,237)	</td> <td>	CornflowerBlue	</td> </tr>
+<tr> <td>	483d8b	</td> <td>	(072,061,139)	</td> <td>	dark slate blue	</td> </tr>
+<tr> <td>	483d8b	</td> <td>	(072,061,139)	</td> <td>	DarkSlateBlue	</td> </tr>
+<tr> <td>	6a5acd	</td> <td>	(106,090,205)	</td> <td>	slate blue	</td> </tr>
+<tr> <td>	6a5acd	</td> <td>	(106,090,205)	</td> <td>	SlateBlue	</td> </tr>
+<tr> <td>	7b68ee	</td> <td>	(123,104,238)	</td> <td>	medium slate blue	</td> </tr>
+<tr> <td>	7b68ee	</td> <td>	(123,104,238)	</td> <td>	MediumSlateBlue	</td> </tr>
+<tr> <td>	8470ff	</td> <td>	(132,112,255)	</td> <td>	light slate blue	</td> </tr>
+<tr> <td>	8470ff	</td> <td>	(132,112,255)	</td> <td>	LightSlateBlue	</td> </tr>
+<tr> <td>	0000cd	</td> <td>	(000,000,205)	</td> <td>	medium blue	</td> </tr>
+<tr> <td>	0000cd	</td> <td>	(000,000,205)	</td> <td>	MediumBlue	</td> </tr>
+<tr> <td>	4169e1	</td> <td>	(065,105,225)	</td> <td>	royal blue	</td> </tr>
+<tr> <td>	4169e1	</td> <td>	(065,105,225)	</td> <td>	RoyalBlue	</td> </tr>
+<tr> <td>	0000ff	</td> <td>	(000,000,255)	</td> <td>	blue	</td> </tr>
+<tr> <td>	1e90ff	</td> <td>	(030,144,255)	</td> <td>	dodger blue	</td> </tr>
+<tr> <td>	1e90ff	</td> <td>	(030,144,255)	</td> <td>	DodgerBlue	</td> </tr>
+<tr> <td>	00bfff	</td> <td>	(000,191,255)	</td> <td>	deep sky blue	</td> </tr>
+<tr> <td>	00bfff	</td> <td>	(000,191,255)	</td> <td>	DeepSkyBlue	</td> </tr>
+<tr> <td>	87ceeb	</td> <td>	(135,206,235)	</td> <td>	sky blue	</td> </tr>
+<tr> <td>	87ceeb	</td> <td>	(135,206,235)	</td> <td>	SkyBlue	</td> </tr>
+<tr> <td>	87cefa	</td> <td>	(135,206,250)	</td> <td>	light sky blue	</td> </tr>
+<tr> <td>	87cefa	</td> <td>	(135,206,250)	</td> <td>	LightSkyBlue	</td> </tr>
+<tr> <td>	4682b4	</td> <td>	(070,130,180)	</td> <td>	steel blue	</td> </tr>
+<tr> <td>	4682b4	</td> <td>	(070,130,180)	</td> <td>	SteelBlue	</td> </tr>
+<tr> <td>	b0c4de	</td> <td>	(176,196,222)	</td> <td>	light steel blue	</td> </tr>
+<tr> <td>	b0c4de	</td> <td>	(176,196,222)	</td> <td>	LightSteelBlue	</td> </tr>
+<tr> <td>	add8e6	</td> <td>	(173,216,230)	</td> <td>	light blue	</td> </tr>
+<tr> <td>	add8e6	</td> <td>	(173,216,230)	</td> <td>	LightBlue	</td> </tr>
+<tr> <td>	b0e0e6	</td> <td>	(176,224,230)	</td> <td>	powder blue	</td> </tr>
+<tr> <td>	b0e0e6	</td> <td>	(176,224,230)	</td> <td>	PowderBlue	</td> </tr>
+<tr> <td>	afeeee	</td> <td>	(175,238,238)	</td> <td>	pale turquoise	</td> </tr>
+<tr> <td>	afeeee	</td> <td>	(175,238,238)	</td> <td>	PaleTurquoise	</td> </tr>
+<tr> <td>	00ced1	</td> <td>	(000,206,209)	</td> <td>	dark turquoise	</td> </tr>
+<tr> <td>	00ced1	</td> <td>	(000,206,209)	</td> <td>	DarkTurquoise	</td> </tr>
+<tr> <td>	48d1cc	</td> <td>	(072,209,204)	</td> <td>	medium turquoise	</td> </tr>
+<tr> <td>	48d1cc	</td> <td>	(072,209,204)	</td> <td>	MediumTurquoise	</td> </tr>
+<tr> <td>	40e0d0	</td> <td>	(064,224,208)	</td> <td>	turquoise	</td> </tr>
+<tr> <td>	00ffff	</td> <td>	(000,255,255)	</td> <td>	cyan	</td> </tr>
+<tr> <td>	e0ffff	</td> <td>	(224,255,255)	</td> <td>	light cyan	</td> </tr>
+<tr> <td>	e0ffff	</td> <td>	(224,255,255)	</td> <td>	LightCyan	</td> </tr>
+<tr> <td>	5f9ea0	</td> <td>	(095,158,160)	</td> <td>	cadet blue	</td> </tr>
+<tr> <td>	5f9ea0	</td> <td>	(095,158,160)	</td> <td>	CadetBlue	</td> </tr>
+<tr> <td>	66cdaa	</td> <td>	(102,205,170)	</td> <td>	medium aquamarine	</td> </tr>
+<tr> <td>	66cdaa	</td> <td>	(102,205,170)	</td> <td>	MediumAquamarine	</td> </tr>
+<tr> <td>	7fffd4	</td> <td>	(127,255,212)	</td> <td>	aquamarine	</td> </tr>
+<tr> <td>	006400	</td> <td>	(000,100,000)	</td> <td>	dark green	</td> </tr>
+<tr> <td>	006400	</td> <td>	(000,100,000)	</td> <td>	DarkGreen	</td> </tr>
+<tr> <td>	556b2f	</td> <td>	(085,107,047)	</td> <td>	dark olive green	</td> </tr>
+<tr> <td>	556b2f	</td> <td>	(085,107,047)	</td> <td>	DarkOliveGreen	</td> </tr>
+<tr> <td>	8fbc8f	</td> <td>	(143,188,143)	</td> <td>	dark sea green	</td> </tr>
+<tr> <td>	8fbc8f	</td> <td>	(143,188,143)	</td> <td>	DarkSeaGreen	</td> </tr>
+<tr> <td>	2e8b57	</td> <td>	(046,139,087)	</td> <td>	sea green	</td> </tr>
+<tr> <td>	2e8b57	</td> <td>	(046,139,087)	</td> <td>	SeaGreen	</td> </tr>
+<tr> <td>	3cb371	</td> <td>	(060,179,113)	</td> <td>	medium sea green	</td> </tr>
+<tr> <td>	3cb371	</td> <td>	(060,179,113)	</td> <td>	MediumSeaGreen	</td> </tr>
+<tr> <td>	20b2aa	</td> <td>	(032,178,170)	</td> <td>	light sea green	</td> </tr>
+<tr> <td>	20b2aa	</td> <td>	(032,178,170)	</td> <td>	LightSeaGreen	</td> </tr>
+<tr> <td>	98fb98	</td> <td>	(152,251,152)	</td> <td>	pale green	</td> </tr>
+<tr> <td>	98fb98	</td> <td>	(152,251,152)	</td> <td>	PaleGreen	</td> </tr>
+<tr> <td>	00ff7f	</td> <td>	(000,255,127)	</td> <td>	spring green	</td> </tr>
+<tr> <td>	00ff7f	</td> <td>	(000,255,127)	</td> <td>	SpringGreen	</td> </tr>
+<tr> <td>	7cfc00	</td> <td>	(124,252,000)	</td> <td>	lawn green	</td> </tr>
+<tr> <td>	7cfc00	</td> <td>	(124,252,000)	</td> <td>	LawnGreen	</td> </tr>
+<tr> <td>	00ff00	</td> <td>	(000,255,000)	</td> <td>	green	</td> </tr>
+<tr> <td>	7fff00	</td> <td>	(127,255,000)	</td> <td>	chartreuse	</td> </tr>
+<tr> <td>	00fa9a	</td> <td>	(000,250,154)	</td> <td>	medium spring green	</td> </tr>
+<tr> <td>	00fa9a	</td> <td>	(000,250,154)	</td> <td>	MediumSpringGreen	</td> </tr>
+<tr> <td>	adff2f	</td> <td>	(173,255,047)	</td> <td>	green yellow	</td> </tr>
+<tr> <td>	adff2f	</td> <td>	(173,255,047)	</td> <td>	GreenYellow	</td> </tr>
+<tr> <td>	32cd32	</td> <td>	(050,205,050)	</td> <td>	lime green	</td> </tr>
+<tr> <td>	32cd32	</td> <td>	(050,205,050)	</td> <td>	LimeGreen	</td> </tr>
+<tr> <td>	9acd32	</td> <td>	(154,205,050)	</td> <td>	yellow green	</td> </tr>
+<tr> <td>	9acd32	</td> <td>	(154,205,050)	</td> <td>	YellowGreen	</td> </tr>
+<tr> <td>	228b22	</td> <td>	(034,139,034)	</td> <td>	forest green	</td> </tr>
+<tr> <td>	228b22	</td> <td>	(034,139,034)	</td> <td>	ForestGreen	</td> </tr>
+<tr> <td>	6b8e23	</td> <td>	(107,142,035)	</td> <td>	olive drab	</td> </tr>
+<tr> <td>	6b8e23	</td> <td>	(107,142,035)	</td> <td>	OliveDrab	</td> </tr>
+<tr> <td>	bdb76b	</td> <td>	(189,183,107)	</td> <td>	dark khaki	</td> </tr>
+<tr> <td>	bdb76b	</td> <td>	(189,183,107)	</td> <td>	DarkKhaki	</td> </tr>
+<tr> <td>	f0e68c	</td> <td>	(240,230,140)	</td> <td>	khaki	</td> </tr>
+<tr> <td>	eee8aa	</td> <td>	(238,232,170)	</td> <td>	pale goldenrod	</td> </tr>
+<tr> <td>	eee8aa	</td> <td>	(238,232,170)	</td> <td>	PaleGoldenrod	</td> </tr>
+<tr> <td>	fafad2	</td> <td>	(250,250,210)	</td> <td>	light goldenrod yellow	</td> </tr>
+<tr> <td>	fafad2	</td> <td>	(250,250,210)	</td> <td>	LightGoldenrodYellow	</td> </tr>
+<tr> <td>	ffffe0	</td> <td>	(255,255,224)	</td> <td>	light yellow	</td> </tr>
+<tr> <td>	ffffe0	</td> <td>	(255,255,224)	</td> <td>	LightYellow	</td> </tr>
+<tr> <td>	ffff00	</td> <td>	(255,255,000)	</td> <td>	yellow	</td> </tr>
+<tr> <td>	ffd700	</td> <td>	(255,215,000)	</td> <td>	gold	</td> </tr>
+<tr> <td>	eedd82	</td> <td>	(238,221,130)	</td> <td>	light goldenrod	</td> </tr>
+<tr> <td>	eedd82	</td> <td>	(238,221,130)	</td> <td>	LightGoldenrod	</td> </tr>
+<tr> <td>	daa520	</td> <td>	(218,165,032)	</td> <td>	goldenrod	</td> </tr>
+<tr> <td>	b8860b	</td> <td>	(184,134,011)	</td> <td>	dark goldenrod	</td> </tr>
+<tr> <td>	b8860b	</td> <td>	(184,134,011)	</td> <td>	DarkGoldenrod	</td> </tr>
+<tr> <td>	bc8f8f	</td> <td>	(188,143,143)	</td> <td>	rosy brown	</td> </tr>
+<tr> <td>	bc8f8f	</td> <td>	(188,143,143)	</td> <td>	RosyBrown	</td> </tr>
+<tr> <td>	cd5c5c	</td> <td>	(205,092,092)	</td> <td>	indian red	</td> </tr>
+<tr> <td>	cd5c5c	</td> <td>	(205,092,092)	</td> <td>	IndianRed	</td> </tr>
+<tr> <td>	8b4513	</td> <td>	(139,069,019)	</td> <td>	saddle brown	</td> </tr>
+<tr> <td>	8b4513	</td> <td>	(139,069,019)	</td> <td>	SaddleBrown	</td> </tr>
+<tr> <td>	a0522d	</td> <td>	(160,082,045)	</td> <td>	sienna	</td> </tr>
+<tr> <td>	cd853f	</td> <td>	(205,133,063)	</td> <td>	peru	</td> </tr>
+<tr> <td>	deb887	</td> <td>	(222,184,135)	</td> <td>	burlywood	</td> </tr>
+<tr> <td>	f5f5dc	</td> <td>	(245,245,220)	</td> <td>	beige	</td> </tr>
+<tr> <td>	f5deb3	</td> <td>	(245,222,179)	</td> <td>	wheat	</td> </tr>
+<tr> <td>	f4a460	</td> <td>	(244,164,096)	</td> <td>	sandy brown	</td> </tr>
+<tr> <td>	f4a460	</td> <td>	(244,164,096)	</td> <td>	SandyBrown	</td> </tr>
+<tr> <td>	d2b48c	</td> <td>	(210,180,140)	</td> <td>	tan	</td> </tr>
+<tr> <td>	d2691e	</td> <td>	(210,105,030)	</td> <td>	chocolate	</td> </tr>
+<tr> <td>	b22222	</td> <td>	(178,034,034)	</td> <td>	firebrick	</td> </tr>
+<tr> <td>	a52a2a	</td> <td>	(165,042,042)	</td> <td>	brown	</td> </tr>
+<tr> <td>	e9967a	</td> <td>	(233,150,122)	</td> <td>	dark salmon	</td> </tr>
+<tr> <td>	e9967a	</td> <td>	(233,150,122)	</td> <td>	DarkSalmon	</td> </tr>
+<tr> <td>	fa8072	</td> <td>	(250,128,114)	</td> <td>	salmon	</td> </tr>
+<tr> <td>	ffa07a	</td> <td>	(255,160,122)	</td> <td>	light salmon	</td> </tr>
+<tr> <td>	ffa07a	</td> <td>	(255,160,122)	</td> <td>	LightSalmon	</td> </tr>
+<tr> <td>	ffa500	</td> <td>	(255,165,000)	</td> <td>	orange	</td> </tr>
+<tr> <td>	ff8c00	</td> <td>	(255,140,000)	</td> <td>	dark orange	</td> </tr>
+<tr> <td>	ff8c00	</td> <td>	(255,140,000)	</td> <td>	DarkOrange	</td> </tr>
+<tr> <td>	ff7f50	</td> <td>	(255,127,080)	</td> <td>	coral	</td> </tr>
+<tr> <td>	f08080	</td> <td>	(240,128,128)	</td> <td>	light coral	</td> </tr>
+<tr> <td>	f08080	</td> <td>	(240,128,128)	</td> <td>	LightCoral	</td> </tr>
+<tr> <td>	ff6347	</td> <td>	(255,099,071)	</td> <td>	tomato	</td> </tr>
+<tr> <td>	ff4500	</td> <td>	(255,069,000)	</td> <td>	orange red	</td> </tr>
+<tr> <td>	ff4500	</td> <td>	(255,069,000)	</td> <td>	OrangeRed	</td> </tr>
+<tr> <td>	ff0000	</td> <td>	(255,000,000)	</td> <td>	red	</td> </tr>
+<tr> <td>	ff69b4	</td> <td>	(255,105,180)	</td> <td>	hot pink	</td> </tr>
+<tr> <td>	ff69b4	</td> <td>	(255,105,180)	</td> <td>	HotPink	</td> </tr>
+<tr> <td>	ff1493	</td> <td>	(255,020,147)	</td> <td>	deep pink	</td> </tr>
+<tr> <td>	ff1493	</td> <td>	(255,020,147)	</td> <td>	DeepPink	</td> </tr>
+<tr> <td>	ffc0cb	</td> <td>	(255,192,203)	</td> <td>	pink	</td> </tr>
+<tr> <td>	ffb6c1	</td> <td>	(255,182,193)	</td> <td>	light pink	</td> </tr>
+<tr> <td>	ffb6c1	</td> <td>	(255,182,193)	</td> <td>	LightPink	</td> </tr>
+<tr> <td>	db7093	</td> <td>	(219,112,147)	</td> <td>	pale violet red	</td> </tr>
+<tr> <td>	db7093	</td> <td>	(219,112,147)	</td> <td>	PaleVioletRed	</td> </tr>
+<tr> <td>	b03060	</td> <td>	(176,048,096)	</td> <td>	maroon	</td> </tr>
+<tr> <td>	c71585	</td> <td>	(199,021,133)	</td> <td>	medium violet red	</td> </tr>
+<tr> <td>	c71585	</td> <td>	(199,021,133)	</td> <td>	MediumVioletRed	</td> </tr>
+<tr> <td>	d02090	</td> <td>	(208,032,144)	</td> <td>	violet red	</td> </tr>
+<tr> <td>	d02090	</td> <td>	(208,032,144)	</td> <td>	VioletRed	</td> </tr>
+<tr> <td>	ff00ff	</td> <td>	(255,000,255)	</td> <td>	magenta	</td> </tr>
+<tr> <td>	ee82ee	</td> <td>	(238,130,238)	</td> <td>	violet	</td> </tr>
+<tr> <td>	dda0dd	</td> <td>	(221,160,221)	</td> <td>	plum	</td> </tr>
+<tr> <td>	da70d6	</td> <td>	(218,112,214)	</td> <td>	orchid	</td> </tr>
+<tr> <td>	ba55d3	</td> <td>	(186,085,211)	</td> <td>	medium orchid	</td> </tr>
+<tr> <td>	ba55d3	</td> <td>	(186,085,211)	</td> <td>	MediumOrchid	</td> </tr>
+<tr> <td>	9932cc	</td> <td>	(153,050,204)	</td> <td>	dark orchid	</td> </tr>
+<tr> <td>	9932cc	</td> <td>	(153,050,204)	</td> <td>	DarkOrchid	</td> </tr>
+<tr> <td>	9400d3	</td> <td>	(148,000,211)	</td> <td>	dark violet	</td> </tr>
+<tr> <td>	9400d3	</td> <td>	(148,000,211)	</td> <td>	DarkViolet	</td> </tr>
+<tr> <td>	8a2be2	</td> <td>	(138,043,226)	</td> <td>	blue violet	</td> </tr>
+<tr> <td>	8a2be2	</td> <td>	(138,043,226)	</td> <td>	BlueViolet	</td> </tr>
+<tr> <td>	a020f0	</td> <td>	(160,032,240)	</td> <td>	purple	</td> </tr>
+<tr> <td>	9370db	</td> <td>	(147,112,219)	</td> <td>	medium purple	</td> </tr>
+<tr> <td>	9370db	</td> <td>	(147,112,219)	</td> <td>	MediumPurple	</td> </tr>
+<tr> <td>	d8bfd8	</td> <td>	(216,191,216)	</td> <td>	thistle	</td> </tr>
+<tr> <td>	fffafa	</td> <td>	(255,250,250)	</td> <td>	snow1	</td> </tr>
+<tr> <td>	eee9e9	</td> <td>	(238,233,233)	</td> <td>	snow2	</td> </tr>
+<tr> <td>	cdc9c9	</td> <td>	(205,201,201)	</td> <td>	snow3	</td> </tr>
+<tr> <td>	8b8989	</td> <td>	(139,137,137)	</td> <td>	snow4	</td> </tr>
+<tr> <td>	fff5ee	</td> <td>	(255,245,238)	</td> <td>	seashell1	</td> </tr>
+<tr> <td>	eee5de	</td> <td>	(238,229,222)	</td> <td>	seashell2	</td> </tr>
+<tr> <td>	cdc5bf	</td> <td>	(205,197,191)	</td> <td>	seashell3	</td> </tr>
+<tr> <td>	8b8682	</td> <td>	(139,134,130)	</td> <td>	seashell4	</td> </tr>
+<tr> <td>	ffefdb	</td> <td>	(255,239,219)	</td> <td>	AntiqueWhite1	</td> </tr>
+<tr> <td>	eedfcc	</td> <td>	(238,223,204)	</td> <td>	AntiqueWhite2	</td> </tr>
+<tr> <td>	cdc0b0	</td> <td>	(205,192,176)	</td> <td>	AntiqueWhite3	</td> </tr>
+<tr> <td>	8b8378	</td> <td>	(139,131,120)	</td> <td>	AntiqueWhite4	</td> </tr>
+<tr> <td>	ffe4c4	</td> <td>	(255,228,196)	</td> <td>	bisque1	</td> </tr>
+<tr> <td>	eed5b7	</td> <td>	(238,213,183)	</td> <td>	bisque2	</td> </tr>
+<tr> <td>	cdb79e	</td> <td>	(205,183,158)	</td> <td>	bisque3	</td> </tr>
+<tr> <td>	8b7d6b	</td> <td>	(139,125,107)	</td> <td>	bisque4	</td> </tr>
+<tr> <td>	ffdab9	</td> <td>	(255,218,185)	</td> <td>	PeachPuff1	</td> </tr>
+<tr> <td>	eecbad	</td> <td>	(238,203,173)	</td> <td>	PeachPuff2	</td> </tr>
+<tr> <td>	cdaf95	</td> <td>	(205,175,149)	</td> <td>	PeachPuff3	</td> </tr>
+<tr> <td>	8b7765	</td> <td>	(139,119,101)	</td> <td>	PeachPuff4	</td> </tr>
+<tr> <td>	ffdead	</td> <td>	(255,222,173)	</td> <td>	NavajoWhite1	</td> </tr>
+<tr> <td>	eecfa1	</td> <td>	(238,207,161)	</td> <td>	NavajoWhite2	</td> </tr>
+<tr> <td>	cdb38b	</td> <td>	(205,179,139)	</td> <td>	NavajoWhite3	</td> </tr>
+<tr> <td>	8b795e	</td> <td>	(139,121,094)	</td> <td>	NavajoWhite4	</td> </tr>
+<tr> <td>	fffacd	</td> <td>	(255,250,205)	</td> <td>	LemonChiffon1	</td> </tr>
+<tr> <td>	eee9bf	</td> <td>	(238,233,191)	</td> <td>	LemonChiffon2	</td> </tr>
+<tr> <td>	cdc9a5	</td> <td>	(205,201,165)	</td> <td>	LemonChiffon3	</td> </tr>
+<tr> <td>	8b8970	</td> <td>	(139,137,112)	</td> <td>	LemonChiffon4	</td> </tr>
+<tr> <td>	fff8dc	</td> <td>	(255,248,220)	</td> <td>	cornsilk1	</td> </tr>
+<tr> <td>	eee8cd	</td> <td>	(238,232,205)	</td> <td>	cornsilk2	</td> </tr>
+<tr> <td>	cdc8b1	</td> <td>	(205,200,177)	</td> <td>	cornsilk3	</td> </tr>
+<tr> <td>	8b8878	</td> <td>	(139,136,120)	</td> <td>	cornsilk4	</td> </tr>
+<tr> <td>	fffff0	</td> <td>	(255,255,240)	</td> <td>	ivory1	</td> </tr>
+<tr> <td>	eeeee0	</td> <td>	(238,238,224)	</td> <td>	ivory2	</td> </tr>
+<tr> <td>	cdcdc1	</td> <td>	(205,205,193)	</td> <td>	ivory3	</td> </tr>
+<tr> <td>	8b8b83	</td> <td>	(139,139,131)	</td> <td>	ivory4	</td> </tr>
+<tr> <td>	f0fff0	</td> <td>	(240,255,240)	</td> <td>	honeydew1	</td> </tr>
+<tr> <td>	e0eee0	</td> <td>	(224,238,224)	</td> <td>	honeydew2	</td> </tr>
+<tr> <td>	c1cdc1	</td> <td>	(193,205,193)	</td> <td>	honeydew3	</td> </tr>
+<tr> <td>	838b83	</td> <td>	(131,139,131)	</td> <td>	honeydew4	</td> </tr>
+<tr> <td>	fff0f5	</td> <td>	(255,240,245)	</td> <td>	LavenderBlush1	</td> </tr>
+<tr> <td>	eee0e5	</td> <td>	(238,224,229)	</td> <td>	LavenderBlush2	</td> </tr>
+<tr> <td>	cdc1c5	</td> <td>	(205,193,197)	</td> <td>	LavenderBlush3	</td> </tr>
+<tr> <td>	8b8386	</td> <td>	(139,131,134)	</td> <td>	LavenderBlush4	</td> </tr>
+<tr> <td>	ffe4e1	</td> <td>	(255,228,225)	</td> <td>	MistyRose1	</td> </tr>
+<tr> <td>	eed5d2	</td> <td>	(238,213,210)	</td> <td>	MistyRose2	</td> </tr>
+<tr> <td>	cdb7b5	</td> <td>	(205,183,181)	</td> <td>	MistyRose3	</td> </tr>
+<tr> <td>	8b7d7b	</td> <td>	(139,125,123)	</td> <td>	MistyRose4	</td> </tr>
+<tr> <td>	f0ffff	</td> <td>	(240,255,255)	</td> <td>	azure1	</td> </tr>
+<tr> <td>	e0eeee	</td> <td>	(224,238,238)	</td> <td>	azure2	</td> </tr>
+<tr> <td>	c1cdcd	</td> <td>	(193,205,205)	</td> <td>	azure3	</td> </tr>
+<tr> <td>	838b8b	</td> <td>	(131,139,139)	</td> <td>	azure4	</td> </tr>
+<tr> <td>	836fff	</td> <td>	(131,111,255)	</td> <td>	SlateBlue1	</td> </tr>
+<tr> <td>	7a67ee	</td> <td>	(122,103,238)	</td> <td>	SlateBlue2	</td> </tr>
+<tr> <td>	6959cd	</td> <td>	(105,089,205)	</td> <td>	SlateBlue3	</td> </tr>
+<tr> <td>	473c8b	</td> <td>	(071,060,139)	</td> <td>	SlateBlue4	</td> </tr>
+<tr> <td>	4876ff	</td> <td>	(072,118,255)	</td> <td>	RoyalBlue1	</td> </tr>
+<tr> <td>	436eee	</td> <td>	(067,110,238)	</td> <td>	RoyalBlue2	</td> </tr>
+<tr> <td>	3a5fcd	</td> <td>	(058,095,205)	</td> <td>	RoyalBlue3	</td> </tr>
+<tr> <td>	27408b	</td> <td>	(039,064,139)	</td> <td>	RoyalBlue4	</td> </tr>
+<tr> <td>	0000ff	</td> <td>	(000,000,255)	</td> <td>	blue1	</td> </tr>
+<tr> <td>	0000ee	</td> <td>	(000,000,238)	</td> <td>	blue2	</td> </tr>
+<tr> <td>	0000cd	</td> <td>	(000,000,205)	</td> <td>	blue3	</td> </tr>
+<tr> <td>	00008b	</td> <td>	(000,000,139)	</td> <td>	blue4	</td> </tr>
+<tr> <td>	1e90ff	</td> <td>	(030,144,255)	</td> <td>	DodgerBlue1	</td> </tr>
+<tr> <td>	1c86ee	</td> <td>	(028,134,238)	</td> <td>	DodgerBlue2	</td> </tr>
+<tr> <td>	1874cd	</td> <td>	(024,116,205)	</td> <td>	DodgerBlue3	</td> </tr>
+<tr> <td>	104e8b	</td> <td>	(016,078,139)	</td> <td>	DodgerBlue4	</td> </tr>
+<tr> <td>	63b8ff	</td> <td>	(099,184,255)	</td> <td>	SteelBlue1	</td> </tr>
+<tr> <td>	5cacee	</td> <td>	(092,172,238)	</td> <td>	SteelBlue2	</td> </tr>
+<tr> <td>	4f94cd	</td> <td>	(079,148,205)	</td> <td>	SteelBlue3	</td> </tr>
+<tr> <td>	36648b	</td> <td>	(054,100,139)	</td> <td>	SteelBlue4	</td> </tr>
+<tr> <td>	00bfff	</td> <td>	(000,191,255)	</td> <td>	DeepSkyBlue1	</td> </tr>
+<tr> <td>	00b2ee	</td> <td>	(000,178,238)	</td> <td>	DeepSkyBlue2	</td> </tr>
+<tr> <td>	009acd	</td> <td>	(000,154,205)	</td> <td>	DeepSkyBlue3	</td> </tr>
+<tr> <td>	00688b	</td> <td>	(000,104,139)	</td> <td>	DeepSkyBlue4	</td> </tr>
+<tr> <td>	87ceff	</td> <td>	(135,206,255)	</td> <td>	SkyBlue1	</td> </tr>
+<tr> <td>	7ec0ee	</td> <td>	(126,192,238)	</td> <td>	SkyBlue2	</td> </tr>
+<tr> <td>	6ca6cd	</td> <td>	(108,166,205)	</td> <td>	SkyBlue3	</td> </tr>
+<tr> <td>	4a708b	</td> <td>	(074,112,139)	</td> <td>	SkyBlue4	</td> </tr>
+<tr> <td>	b0e2ff	</td> <td>	(176,226,255)	</td> <td>	LightSkyBlue1	</td> </tr>
+<tr> <td>	a4d3ee	</td> <td>	(164,211,238)	</td> <td>	LightSkyBlue2	</td> </tr>
+<tr> <td>	8db6cd	</td> <td>	(141,182,205)	</td> <td>	LightSkyBlue3	</td> </tr>
+<tr> <td>	607b8b	</td> <td>	(096,123,139)	</td> <td>	LightSkyBlue4	</td> </tr>
+<tr> <td>	c6e2ff	</td> <td>	(198,226,255)	</td> <td>	SlateGray1	</td> </tr>
+<tr> <td>	b9d3ee	</td> <td>	(185,211,238)	</td> <td>	SlateGray2	</td> </tr>
+<tr> <td>	9fb6cd	</td> <td>	(159,182,205)	</td> <td>	SlateGray3	</td> </tr>
+<tr> <td>	6c7b8b	</td> <td>	(108,123,139)	</td> <td>	SlateGray4	</td> </tr>
+<tr> <td>	cae1ff	</td> <td>	(202,225,255)	</td> <td>	LightSteelBlue1	</td> </tr>
+<tr> <td>	bcd2ee	</td> <td>	(188,210,238)	</td> <td>	LightSteelBlue2	</td> </tr>
+<tr> <td>	a2b5cd	</td> <td>	(162,181,205)	</td> <td>	LightSteelBlue3	</td> </tr>
+<tr> <td>	6e7b8b	</td> <td>	(110,123,139)	</td> <td>	LightSteelBlue4	</td> </tr>
+<tr> <td>	bfefff	</td> <td>	(191,239,255)	</td> <td>	LightBlue1	</td> </tr>
+<tr> <td>	b2dfee	</td> <td>	(178,223,238)	</td> <td>	LightBlue2	</td> </tr>
+<tr> <td>	9ac0cd	</td> <td>	(154,192,205)	</td> <td>	LightBlue3	</td> </tr>
+<tr> <td>	68838b	</td> <td>	(104,131,139)	</td> <td>	LightBlue4	</td> </tr>
+<tr> <td>	e0ffff	</td> <td>	(224,255,255)	</td> <td>	LightCyan1	</td> </tr>
+<tr> <td>	d1eeee	</td> <td>	(209,238,238)	</td> <td>	LightCyan2	</td> </tr>
+<tr> <td>	b4cdcd	</td> <td>	(180,205,205)	</td> <td>	LightCyan3	</td> </tr>
+<tr> <td>	7a8b8b	</td> <td>	(122,139,139)	</td> <td>	LightCyan4	</td> </tr>
+<tr> <td>	bbffff	</td> <td>	(187,255,255)	</td> <td>	PaleTurquoise1	</td> </tr>
+<tr> <td>	aeeeee	</td> <td>	(174,238,238)	</td> <td>	PaleTurquoise2	</td> </tr>
+<tr> <td>	96cdcd	</td> <td>	(150,205,205)	</td> <td>	PaleTurquoise3	</td> </tr>
+<tr> <td>	668b8b	</td> <td>	(102,139,139)	</td> <td>	PaleTurquoise4	</td> </tr>
+<tr> <td>	98f5ff	</td> <td>	(152,245,255)	</td> <td>	CadetBlue1	</td> </tr>
+<tr> <td>	8ee5ee	</td> <td>	(142,229,238)	</td> <td>	CadetBlue2	</td> </tr>
+<tr> <td>	7ac5cd	</td> <td>	(122,197,205)	</td> <td>	CadetBlue3	</td> </tr>
+<tr> <td>	53868b	</td> <td>	(083,134,139)	</td> <td>	CadetBlue4	</td> </tr>
+<tr> <td>	00f5ff	</td> <td>	(000,245,255)	</td> <td>	turquoise1	</td> </tr>
+<tr> <td>	00e5ee	</td> <td>	(000,229,238)	</td> <td>	turquoise2	</td> </tr>
+<tr> <td>	00c5cd	</td> <td>	(000,197,205)	</td> <td>	turquoise3	</td> </tr>
+<tr> <td>	00868b	</td> <td>	(000,134,139)	</td> <td>	turquoise4	</td> </tr>
+<tr> <td>	00ffff	</td> <td>	(000,255,255)	</td> <td>	cyan1	</td> </tr>
+<tr> <td>	00eeee	</td> <td>	(000,238,238)	</td> <td>	cyan2	</td> </tr>
+<tr> <td>	00cdcd	</td> <td>	(000,205,205)	</td> <td>	cyan3	</td> </tr>
+<tr> <td>	008b8b	</td> <td>	(000,139,139)	</td> <td>	cyan4	</td> </tr>
+<tr> <td>	97ffff	</td> <td>	(151,255,255)	</td> <td>	DarkSlateGray1	</td> </tr>
+<tr> <td>	8deeee	</td> <td>	(141,238,238)	</td> <td>	DarkSlateGray2	</td> </tr>
+<tr> <td>	79cdcd	</td> <td>	(121,205,205)	</td> <td>	DarkSlateGray3	</td> </tr>
+<tr> <td>	528b8b	</td> <td>	(082,139,139)	</td> <td>	DarkSlateGray4	</td> </tr>
+<tr> <td>	7fffd4	</td> <td>	(127,255,212)	</td> <td>	aquamarine1	</td> </tr>
+<tr> <td>	76eec6	</td> <td>	(118,238,198)	</td> <td>	aquamarine2	</td> </tr>
+<tr> <td>	66cdaa	</td> <td>	(102,205,170)	</td> <td>	aquamarine3	</td> </tr>
+<tr> <td>	458b74	</td> <td>	(069,139,116)	</td> <td>	aquamarine4	</td> </tr>
+<tr> <td>	c1ffc1	</td> <td>	(193,255,193)	</td> <td>	DarkSeaGreen1	</td> </tr>
+<tr> <td>	b4eeb4	</td> <td>	(180,238,180)	</td> <td>	DarkSeaGreen2	</td> </tr>
+<tr> <td>	9bcd9b	</td> <td>	(155,205,155)	</td> <td>	DarkSeaGreen3	</td> </tr>
+<tr> <td>	698b69	</td> <td>	(105,139,105)	</td> <td>	DarkSeaGreen4	</td> </tr>
+<tr> <td>	54ff9f	</td> <td>	(084,255,159)	</td> <td>	SeaGreen1	</td> </tr>
+<tr> <td>	4eee94	</td> <td>	(078,238,148)	</td> <td>	SeaGreen2	</td> </tr>
+<tr> <td>	43cd80	</td> <td>	(067,205,128)	</td> <td>	SeaGreen3	</td> </tr>
+<tr> <td>	2e8b57	</td> <td>	(046,139,087)	</td> <td>	SeaGreen4	</td> </tr>
+<tr> <td>	9aff9a	</td> <td>	(154,255,154)	</td> <td>	PaleGreen1	</td> </tr>
+<tr> <td>	90ee90	</td> <td>	(144,238,144)	</td> <td>	PaleGreen2	</td> </tr>
+<tr> <td>	7ccd7c	</td> <td>	(124,205,124)	</td> <td>	PaleGreen3	</td> </tr>
+<tr> <td>	548b54	</td> <td>	(084,139,084)	</td> <td>	PaleGreen4	</td> </tr>
+<tr> <td>	00ff7f	</td> <td>	(000,255,127)	</td> <td>	SpringGreen1	</td> </tr>
+<tr> <td>	00ee76	</td> <td>	(000,238,118)	</td> <td>	SpringGreen2	</td> </tr>
+<tr> <td>	00cd66	</td> <td>	(000,205,102)	</td> <td>	SpringGreen3	</td> </tr>
+<tr> <td>	008b45	</td> <td>	(000,139,069)	</td> <td>	SpringGreen4	</td> </tr>
+<tr> <td>	00ff00	</td> <td>	(000,255,000)	</td> <td>	green1	</td> </tr>
+<tr> <td>	00ee00	</td> <td>	(000,238,000)	</td> <td>	green2	</td> </tr>
+<tr> <td>	00cd00	</td> <td>	(000,205,000)	</td> <td>	green3	</td> </tr>
+<tr> <td>	008b00	</td> <td>	(000,139,000)	</td> <td>	green4	</td> </tr>
+<tr> <td>	7fff00	</td> <td>	(127,255,000)	</td> <td>	chartreuse1	</td> </tr>
+<tr> <td>	76ee00	</td> <td>	(118,238,000)	</td> <td>	chartreuse2	</td> </tr>
+<tr> <td>	66cd00	</td> <td>	(102,205,000)	</td> <td>	chartreuse3	</td> </tr>
+<tr> <td>	458b00	</td> <td>	(069,139,000)	</td> <td>	chartreuse4	</td> </tr>
+<tr> <td>	c0ff3e	</td> <td>	(192,255,062)	</td> <td>	OliveDrab1	</td> </tr>
+<tr> <td>	b3ee3a	</td> <td>	(179,238,058)	</td> <td>	OliveDrab2	</td> </tr>
+<tr> <td>	9acd32	</td> <td>	(154,205,050)	</td> <td>	OliveDrab3	</td> </tr>
+<tr> <td>	698b22	</td> <td>	(105,139,034)	</td> <td>	OliveDrab4	</td> </tr>
+<tr> <td>	caff70	</td> <td>	(202,255,112)	</td> <td>	DarkOliveGreen1	</td> </tr>
+<tr> <td>	bcee68	</td> <td>	(188,238,104)	</td> <td>	DarkOliveGreen2	</td> </tr>
+<tr> <td>	a2cd5a	</td> <td>	(162,205,090)	</td> <td>	DarkOliveGreen3	</td> </tr>
+<tr> <td>	6e8b3d	</td> <td>	(110,139,061)	</td> <td>	DarkOliveGreen4	</td> </tr>
+<tr> <td>	fff68f	</td> <td>	(255,246,143)	</td> <td>	khaki1	</td> </tr>
+<tr> <td>	eee685	</td> <td>	(238,230,133)	</td> <td>	khaki2	</td> </tr>
+<tr> <td>	cdc673	</td> <td>	(205,198,115)	</td> <td>	khaki3	</td> </tr>
+<tr> <td>	8b864e	</td> <td>	(139,134,078)	</td> <td>	khaki4	</td> </tr>
+<tr> <td>	ffec8b	</td> <td>	(255,236,139)	</td> <td>	LightGoldenrod1	</td> </tr>
+<tr> <td>	eedc82	</td> <td>	(238,220,130)	</td> <td>	LightGoldenrod2	</td> </tr>
+<tr> <td>	cdbe70	</td> <td>	(205,190,112)	</td> <td>	LightGoldenrod3	</td> </tr>
+<tr> <td>	8b814c	</td> <td>	(139,129,076)	</td> <td>	LightGoldenrod4	</td> </tr>
+<tr> <td>	ffffe0	</td> <td>	(255,255,224)	</td> <td>	LightYellow1	</td> </tr>
+<tr> <td>	eeeed1	</td> <td>	(238,238,209)	</td> <td>	LightYellow2	</td> </tr>
+<tr> <td>	cdcdb4	</td> <td>	(205,205,180)	</td> <td>	LightYellow3	</td> </tr>
+<tr> <td>	8b8b7a	</td> <td>	(139,139,122)	</td> <td>	LightYellow4	</td> </tr>
+<tr> <td>	ffff00	</td> <td>	(255,255,000)	</td> <td>	yellow1	</td> </tr>
+<tr> <td>	eeee00	</td> <td>	(238,238,000)	</td> <td>	yellow2	</td> </tr>
+<tr> <td>	cdcd00	</td> <td>	(205,205,000)	</td> <td>	yellow3	</td> </tr>
+<tr> <td>	8b8b00	</td> <td>	(139,139,000)	</td> <td>	yellow4	</td> </tr>
+<tr> <td>	ffd700	</td> <td>	(255,215,000)	</td> <td>	gold1	</td> </tr>
+<tr> <td>	eec900	</td> <td>	(238,201,000)	</td> <td>	gold2	</td> </tr>
+<tr> <td>	cdad00	</td> <td>	(205,173,000)	</td> <td>	gold3	</td> </tr>
+<tr> <td>	8b7500	</td> <td>	(139,117,000)	</td> <td>	gold4	</td> </tr>
+<tr> <td>	ffc125	</td> <td>	(255,193,037)	</td> <td>	goldenrod1	</td> </tr>
+<tr> <td>	eeb422	</td> <td>	(238,180,034)	</td> <td>	goldenrod2	</td> </tr>
+<tr> <td>	cd9b1d	</td> <td>	(205,155,029)	</td> <td>	goldenrod3	</td> </tr>
+<tr> <td>	8b6914	</td> <td>	(139,105,020)	</td> <td>	goldenrod4	</td> </tr>
+<tr> <td>	ffb90f	</td> <td>	(255,185,015)	</td> <td>	DarkGoldenrod1	</td> </tr>
+<tr> <td>	eead0e	</td> <td>	(238,173,014)	</td> <td>	DarkGoldenrod2	</td> </tr>
+<tr> <td>	cd950c	</td> <td>	(205,149,012)	</td> <td>	DarkGoldenrod3	</td> </tr>
+<tr> <td>	8b6508	</td> <td>	(139,101,008)	</td> <td>	DarkGoldenrod4	</td> </tr>
+<tr> <td>	ffc1c1	</td> <td>	(255,193,193)	</td> <td>	RosyBrown1	</td> </tr>
+<tr> <td>	eeb4b4	</td> <td>	(238,180,180)	</td> <td>	RosyBrown2	</td> </tr>
+<tr> <td>	cd9b9b	</td> <td>	(205,155,155)	</td> <td>	RosyBrown3	</td> </tr>
+<tr> <td>	8b6969	</td> <td>	(139,105,105)	</td> <td>	RosyBrown4	</td> </tr>
+<tr> <td>	ff6a6a	</td> <td>	(255,106,106)	</td> <td>	IndianRed1	</td> </tr>
+<tr> <td>	ee6363	</td> <td>	(238,099,099)	</td> <td>	IndianRed2	</td> </tr>
+<tr> <td>	cd5555	</td> <td>	(205,085,085)	</td> <td>	IndianRed3	</td> </tr>
+<tr> <td>	8b3a3a	</td> <td>	(139,058,058)	</td> <td>	IndianRed4	</td> </tr>
+<tr> <td>	ff8247	</td> <td>	(255,130,071)	</td> <td>	sienna1	</td> </tr>
+<tr> <td>	ee7942	</td> <td>	(238,121,066)	</td> <td>	sienna2	</td> </tr>
+<tr> <td>	cd6839	</td> <td>	(205,104,057)	</td> <td>	sienna3	</td> </tr>
+<tr> <td>	8b4726	</td> <td>	(139,071,038)	</td> <td>	sienna4	</td> </tr>
+<tr> <td>	ffd39b	</td> <td>	(255,211,155)	</td> <td>	burlywood1	</td> </tr>
+<tr> <td>	eec591	</td> <td>	(238,197,145)	</td> <td>	burlywood2	</td> </tr>
+<tr> <td>	cdaa7d	</td> <td>	(205,170,125)	</td> <td>	burlywood3	</td> </tr>
+<tr> <td>	8b7355	</td> <td>	(139,115,085)	</td> <td>	burlywood4	</td> </tr>
+<tr> <td>	ffe7ba	</td> <td>	(255,231,186)	</td> <td>	wheat1	</td> </tr>
+<tr> <td>	eed8ae	</td> <td>	(238,216,174)	</td> <td>	wheat2	</td> </tr>
+<tr> <td>	cdba96	</td> <td>	(205,186,150)	</td> <td>	wheat3	</td> </tr>
+<tr> <td>	8b7e66	</td> <td>	(139,126,102)	</td> <td>	wheat4	</td> </tr>
+<tr> <td>	ffa54f	</td> <td>	(255,165,079)	</td> <td>	tan1	</td> </tr>
+<tr> <td>	ee9a49	</td> <td>	(238,154,073)	</td> <td>	tan2	</td> </tr>
+<tr> <td>	cd853f	</td> <td>	(205,133,063)	</td> <td>	tan3	</td> </tr>
+<tr> <td>	8b5a2b	</td> <td>	(139,090,043)	</td> <td>	tan4	</td> </tr>
+<tr> <td>	ff7f24	</td> <td>	(255,127,036)	</td> <td>	chocolate1	</td> </tr>
+<tr> <td>	ee7621	</td> <td>	(238,118,033)	</td> <td>	chocolate2	</td> </tr>
+<tr> <td>	cd661d	</td> <td>	(205,102,029)	</td> <td>	chocolate3	</td> </tr>
+<tr> <td>	8b4513	</td> <td>	(139,069,019)	</td> <td>	chocolate4	</td> </tr>
+<tr> <td>	ff3030	</td> <td>	(255,048,048)	</td> <td>	firebrick1	</td> </tr>
+<tr> <td>	ee2c2c	</td> <td>	(238,044,044)	</td> <td>	firebrick2	</td> </tr>
+<tr> <td>	cd2626	</td> <td>	(205,038,038)	</td> <td>	firebrick3	</td> </tr>
+<tr> <td>	8b1a1a	</td> <td>	(139,026,026)	</td> <td>	firebrick4	</td> </tr>
+<tr> <td>	ff4040	</td> <td>	(255,064,064)	</td> <td>	brown1	</td> </tr>
+<tr> <td>	ee3b3b	</td> <td>	(238,059,059)	</td> <td>	brown2	</td> </tr>
+<tr> <td>	cd3333	</td> <td>	(205,051,051)	</td> <td>	brown3	</td> </tr>
+<tr> <td>	8b2323	</td> <td>	(139,035,035)	</td> <td>	brown4	</td> </tr>
+<tr> <td>	ff8c69	</td> <td>	(255,140,105)	</td> <td>	salmon1	</td> </tr>
+<tr> <td>	ee8262	</td> <td>	(238,130,098)	</td> <td>	salmon2	</td> </tr>
+<tr> <td>	cd7054	</td> <td>	(205,112,084)	</td> <td>	salmon3	</td> </tr>
+<tr> <td>	8b4c39	</td> <td>	(139,076,057)	</td> <td>	salmon4	</td> </tr>
+<tr> <td>	ffa07a	</td> <td>	(255,160,122)	</td> <td>	LightSalmon1	</td> </tr>
+<tr> <td>	ee9572	</td> <td>	(238,149,114)	</td> <td>	LightSalmon2	</td> </tr>
+<tr> <td>	cd8162	</td> <td>	(205,129,098)	</td> <td>	LightSalmon3	</td> </tr>
+<tr> <td>	8b5742	</td> <td>	(139,087,066)	</td> <td>	LightSalmon4	</td> </tr>
+<tr> <td>	ffa500	</td> <td>	(255,165,000)	</td> <td>	orange1	</td> </tr>
+<tr> <td>	ee9a00	</td> <td>	(238,154,000)	</td> <td>	orange2	</td> </tr>
+<tr> <td>	cd8500	</td> <td>	(205,133,000)	</td> <td>	orange3	</td> </tr>
+<tr> <td>	8b5a00	</td> <td>	(139,090,000)	</td> <td>	orange4	</td> </tr>
+<tr> <td>	ff7f00	</td> <td>	(255,127,000)	</td> <td>	DarkOrange1	</td> </tr>
+<tr> <td>	ee7600	</td> <td>	(238,118,000)	</td> <td>	DarkOrange2	</td> </tr>
+<tr> <td>	cd6600	</td> <td>	(205,102,000)	</td> <td>	DarkOrange3	</td> </tr>
+<tr> <td>	8b4500	</td> <td>	(139,069,000)	</td> <td>	DarkOrange4	</td> </tr>
+<tr> <td>	ff7256	</td> <td>	(255,114,086)	</td> <td>	coral1	</td> </tr>
+<tr> <td>	ee6a50	</td> <td>	(238,106,080)	</td> <td>	coral2	</td> </tr>
+<tr> <td>	cd5b45	</td> <td>	(205,091,069)	</td> <td>	coral3	</td> </tr>
+<tr> <td>	8b3e2f	</td> <td>	(139,062,047)	</td> <td>	coral4	</td> </tr>
+<tr> <td>	ff6347	</td> <td>	(255,099,071)	</td> <td>	tomato1	</td> </tr>
+<tr> <td>	ee5c42	</td> <td>	(238,092,066)	</td> <td>	tomato2	</td> </tr>
+<tr> <td>	cd4f39	</td> <td>	(205,079,057)	</td> <td>	tomato3	</td> </tr>
+<tr> <td>	8b3626	</td> <td>	(139,054,038)	</td> <td>	tomato4	</td> </tr>
+<tr> <td>	ff4500	</td> <td>	(255,069,000)	</td> <td>	OrangeRed1	</td> </tr>
+<tr> <td>	ee4000	</td> <td>	(238,064,000)	</td> <td>	OrangeRed2	</td> </tr>
+<tr> <td>	cd3700	</td> <td>	(205,055,000)	</td> <td>	OrangeRed3	</td> </tr>
+<tr> <td>	8b2500	</td> <td>	(139,037,000)	</td> <td>	OrangeRed4	</td> </tr>
+<tr> <td>	ff0000	</td> <td>	(255,000,000)	</td> <td>	red1	</td> </tr>
+<tr> <td>	ee0000	</td> <td>	(238,000,000)	</td> <td>	red2	</td> </tr>
+<tr> <td>	cd0000	</td> <td>	(205,000,000)	</td> <td>	red3	</td> </tr>
+<tr> <td>	8b0000	</td> <td>	(139,000,000)	</td> <td>	red4	</td> </tr>
+<tr> <td>	ff1493	</td> <td>	(255,020,147)	</td> <td>	DeepPink1	</td> </tr>
+<tr> <td>	ee1289	</td> <td>	(238,018,137)	</td> <td>	DeepPink2	</td> </tr>
+<tr> <td>	cd1076	</td> <td>	(205,016,118)	</td> <td>	DeepPink3	</td> </tr>
+<tr> <td>	8b0a50	</td> <td>	(139,010,080)	</td> <td>	DeepPink4	</td> </tr>
+<tr> <td>	ff6eb4	</td> <td>	(255,110,180)	</td> <td>	HotPink1	</td> </tr>
+<tr> <td>	ee6aa7	</td> <td>	(238,106,167)	</td> <td>	HotPink2	</td> </tr>
+<tr> <td>	cd6090	</td> <td>	(205,096,144)	</td> <td>	HotPink3	</td> </tr>
+<tr> <td>	8b3a62	</td> <td>	(139,058,098)	</td> <td>	HotPink4	</td> </tr>
+<tr> <td>	ffb5c5	</td> <td>	(255,181,197)	</td> <td>	pink1	</td> </tr>
+<tr> <td>	eea9b8	</td> <td>	(238,169,184)	</td> <td>	pink2	</td> </tr>
+<tr> <td>	cd919e	</td> <td>	(205,145,158)	</td> <td>	pink3	</td> </tr>
+<tr> <td>	8b636c	</td> <td>	(139,099,108)	</td> <td>	pink4	</td> </tr>
+<tr> <td>	ffaeb9	</td> <td>	(255,174,185)	</td> <td>	LightPink1	</td> </tr>
+<tr> <td>	eea2ad	</td> <td>	(238,162,173)	</td> <td>	LightPink2	</td> </tr>
+<tr> <td>	cd8c95	</td> <td>	(205,140,149)	</td> <td>	LightPink3	</td> </tr>
+<tr> <td>	8b5f65	</td> <td>	(139,095,101)	</td> <td>	LightPink4	</td> </tr>
+<tr> <td>	ff82ab	</td> <td>	(255,130,171)	</td> <td>	PaleVioletRed1	</td> </tr>
+<tr> <td>	ee799f	</td> <td>	(238,121,159)	</td> <td>	PaleVioletRed2	</td> </tr>
+<tr> <td>	cd6889	</td> <td>	(205,104,137)	</td> <td>	PaleVioletRed3	</td> </tr>
+<tr> <td>	8b475d	</td> <td>	(139,071,093)	</td> <td>	PaleVioletRed4	</td> </tr>
+<tr> <td>	ff34b3	</td> <td>	(255,052,179)	</td> <td>	maroon1	</td> </tr>
+<tr> <td>	ee30a7	</td> <td>	(238,048,167)	</td> <td>	maroon2	</td> </tr>
+<tr> <td>	cd2990	</td> <td>	(205,041,144)	</td> <td>	maroon3	</td> </tr>
+<tr> <td>	8b1c62	</td> <td>	(139,028,098)	</td> <td>	maroon4	</td> </tr>
+<tr> <td>	ff3e96	</td> <td>	(255,062,150)	</td> <td>	VioletRed1	</td> </tr>
+<tr> <td>	ee3a8c	</td> <td>	(238,058,140)	</td> <td>	VioletRed2	</td> </tr>
+<tr> <td>	cd3278	</td> <td>	(205,050,120)	</td> <td>	VioletRed3	</td> </tr>
+<tr> <td>	8b2252	</td> <td>	(139,034,082)	</td> <td>	VioletRed4	</td> </tr>
+<tr> <td>	ff00ff	</td> <td>	(255,000,255)	</td> <td>	magenta1	</td> </tr>
+<tr> <td>	ee00ee	</td> <td>	(238,000,238)	</td> <td>	magenta2	</td> </tr>
+<tr> <td>	cd00cd	</td> <td>	(205,000,205)	</td> <td>	magenta3	</td> </tr>
+<tr> <td>	8b008b	</td> <td>	(139,000,139)	</td> <td>	magenta4	</td> </tr>
+<tr> <td>	ff83fa	</td> <td>	(255,131,250)	</td> <td>	orchid1	</td> </tr>
+<tr> <td>	ee7ae9	</td> <td>	(238,122,233)	</td> <td>	orchid2	</td> </tr>
+<tr> <td>	cd69c9	</td> <td>	(205,105,201)	</td> <td>	orchid3	</td> </tr>
+<tr> <td>	8b4789	</td> <td>	(139,071,137)	</td> <td>	orchid4	</td> </tr>
+<tr> <td>	ffbbff	</td> <td>	(255,187,255)	</td> <td>	plum1	</td> </tr>
+<tr> <td>	eeaeee	</td> <td>	(238,174,238)	</td> <td>	plum2	</td> </tr>
+<tr> <td>	cd96cd	</td> <td>	(205,150,205)	</td> <td>	plum3	</td> </tr>
+<tr> <td>	8b668b	</td> <td>	(139,102,139)	</td> <td>	plum4	</td> </tr>
+<tr> <td>	e066ff	</td> <td>	(224,102,255)	</td> <td>	MediumOrchid1	</td> </tr>
+<tr> <td>	d15fee	</td> <td>	(209,095,238)	</td> <td>	MediumOrchid2	</td> </tr>
+<tr> <td>	b452cd	</td> <td>	(180,082,205)	</td> <td>	MediumOrchid3	</td> </tr>
+<tr> <td>	7a378b	</td> <td>	(122,055,139)	</td> <td>	MediumOrchid4	</td> </tr>
+<tr> <td>	bf3eff	</td> <td>	(191,062,255)	</td> <td>	DarkOrchid1	</td> </tr>
+<tr> <td>	b23aee	</td> <td>	(178,058,238)	</td> <td>	DarkOrchid2	</td> </tr>
+<tr> <td>	9a32cd	</td> <td>	(154,050,205)	</td> <td>	DarkOrchid3	</td> </tr>
+<tr> <td>	68228b	</td> <td>	(104,034,139)	</td> <td>	DarkOrchid4	</td> </tr>
+<tr> <td>	9b30ff	</td> <td>	(155,048,255)	</td> <td>	purple1	</td> </tr>
+<tr> <td>	912cee	</td> <td>	(145,044,238)	</td> <td>	purple2	</td> </tr>
+<tr> <td>	7d26cd	</td> <td>	(125,038,205)	</td> <td>	purple3	</td> </tr>
+<tr> <td>	551a8b	</td> <td>	(085,026,139)	</td> <td>	purple4	</td> </tr>
+<tr> <td>	ab82ff	</td> <td>	(171,130,255)	</td> <td>	MediumPurple1	</td> </tr>
+<tr> <td>	9f79ee	</td> <td>	(159,121,238)	</td> <td>	MediumPurple2	</td> </tr>
+<tr> <td>	8968cd	</td> <td>	(137,104,205)	</td> <td>	MediumPurple3	</td> </tr>
+<tr> <td>	5d478b	</td> <td>	(093,071,139)	</td> <td>	MediumPurple4	</td> </tr>
+<tr> <td>	ffe1ff	</td> <td>	(255,225,255)	</td> <td>	thistle1	</td> </tr>
+<tr> <td>	eed2ee	</td> <td>	(238,210,238)	</td> <td>	thistle2	</td> </tr>
+<tr> <td>	cdb5cd	</td> <td>	(205,181,205)	</td> <td>	thistle3	</td> </tr>
+<tr> <td>	8b7b8b	</td> <td>	(139,123,139)	</td> <td>	thistle4	</td> </tr>
+<tr> <td>	000000	</td> <td>	(000,000,000)	</td> <td>	gray0	</td> </tr>
+<tr> <td>	000000	</td> <td>	(000,000,000)	</td> <td>	grey0	</td> </tr>
+<tr> <td>	030303	</td> <td>	(003,003,003)	</td> <td>	gray1	</td> </tr>
+<tr> <td>	030303	</td> <td>	(003,003,003)	</td> <td>	grey1	</td> </tr>
+<tr> <td>	050505	</td> <td>	(005,005,005)	</td> <td>	gray2	</td> </tr>
+<tr> <td>	050505	</td> <td>	(005,005,005)	</td> <td>	grey2	</td> </tr>
+<tr> <td>	080808	</td> <td>	(008,008,008)	</td> <td>	gray3	</td> </tr>
+<tr> <td>	080808	</td> <td>	(008,008,008)	</td> <td>	grey3	</td> </tr>
+<tr> <td>	0a0a0a	</td> <td>	(010,010,010)	</td> <td>	gray4	</td> </tr>
+<tr> <td>	0a0a0a	</td> <td>	(010,010,010)	</td> <td>	grey4	</td> </tr>
+<tr> <td>	0d0d0d	</td> <td>	(013,013,013)	</td> <td>	gray5	</td> </tr>
+<tr> <td>	0d0d0d	</td> <td>	(013,013,013)	</td> <td>	grey5	</td> </tr>
+<tr> <td>	0f0f0f	</td> <td>	(015,015,015)	</td> <td>	gray6	</td> </tr>
+<tr> <td>	0f0f0f	</td> <td>	(015,015,015)	</td> <td>	grey6	</td> </tr>
+<tr> <td>	121212	</td> <td>	(018,018,018)	</td> <td>	gray7	</td> </tr>
+<tr> <td>	121212	</td> <td>	(018,018,018)	</td> <td>	grey7	</td> </tr>
+<tr> <td>	141414	</td> <td>	(020,020,020)	</td> <td>	gray8	</td> </tr>
+<tr> <td>	141414	</td> <td>	(020,020,020)	</td> <td>	grey8	</td> </tr>
+<tr> <td>	171717	</td> <td>	(023,023,023)	</td> <td>	gray9	</td> </tr>
+<tr> <td>	171717	</td> <td>	(023,023,023)	</td> <td>	grey9	</td> </tr>
+<tr> <td>	1a1a1a	</td> <td>	(026,026,026)	</td> <td>	gray10	</td> </tr>
+<tr> <td>	1a1a1a	</td> <td>	(026,026,026)	</td> <td>	grey10	</td> </tr>
+<tr> <td>	1c1c1c	</td> <td>	(028,028,028)	</td> <td>	gray11	</td> </tr>
+<tr> <td>	1c1c1c	</td> <td>	(028,028,028)	</td> <td>	grey11	</td> </tr>
+<tr> <td>	1f1f1f	</td> <td>	(031,031,031)	</td> <td>	gray12	</td> </tr>
+<tr> <td>	1f1f1f	</td> <td>	(031,031,031)	</td> <td>	grey12	</td> </tr>
+<tr> <td>	212121	</td> <td>	(033,033,033)	</td> <td>	gray13	</td> </tr>
+<tr> <td>	212121	</td> <td>	(033,033,033)	</td> <td>	grey13	</td> </tr>
+<tr> <td>	242424	</td> <td>	(036,036,036)	</td> <td>	gray14	</td> </tr>
+<tr> <td>	242424	</td> <td>	(036,036,036)	</td> <td>	grey14	</td> </tr>
+<tr> <td>	262626	</td> <td>	(038,038,038)	</td> <td>	gray15	</td> </tr>
+<tr> <td>	262626	</td> <td>	(038,038,038)	</td> <td>	grey15	</td> </tr>
+<tr> <td>	292929	</td> <td>	(041,041,041)	</td> <td>	gray16	</td> </tr>
+<tr> <td>	292929	</td> <td>	(041,041,041)	</td> <td>	grey16	</td> </tr>
+<tr> <td>	2b2b2b	</td> <td>	(043,043,043)	</td> <td>	gray17	</td> </tr>
+<tr> <td>	2b2b2b	</td> <td>	(043,043,043)	</td> <td>	grey17	</td> </tr>
+<tr> <td>	2e2e2e	</td> <td>	(046,046,046)	</td> <td>	gray18	</td> </tr>
+<tr> <td>	2e2e2e	</td> <td>	(046,046,046)	</td> <td>	grey18	</td> </tr>
+<tr> <td>	303030	</td> <td>	(048,048,048)	</td> <td>	gray19	</td> </tr>
+<tr> <td>	303030	</td> <td>	(048,048,048)	</td> <td>	grey19	</td> </tr>
+<tr> <td>	333333	</td> <td>	(051,051,051)	</td> <td>	gray20	</td> </tr>
+<tr> <td>	333333	</td> <td>	(051,051,051)	</td> <td>	grey20	</td> </tr>
+<tr> <td>	363636	</td> <td>	(054,054,054)	</td> <td>	gray21	</td> </tr>
+<tr> <td>	363636	</td> <td>	(054,054,054)	</td> <td>	grey21	</td> </tr>
+<tr> <td>	383838	</td> <td>	(056,056,056)	</td> <td>	gray22	</td> </tr>
+<tr> <td>	383838	</td> <td>	(056,056,056)	</td> <td>	grey22	</td> </tr>
+<tr> <td>	3b3b3b	</td> <td>	(059,059,059)	</td> <td>	gray23	</td> </tr>
+<tr> <td>	3b3b3b	</td> <td>	(059,059,059)	</td> <td>	grey23	</td> </tr>
+<tr> <td>	3d3d3d	</td> <td>	(061,061,061)	</td> <td>	gray24	</td> </tr>
+<tr> <td>	3d3d3d	</td> <td>	(061,061,061)	</td> <td>	grey24	</td> </tr>
+<tr> <td>	404040	</td> <td>	(064,064,064)	</td> <td>	gray25	</td> </tr>
+<tr> <td>	404040	</td> <td>	(064,064,064)	</td> <td>	grey25	</td> </tr>
+<tr> <td>	424242	</td> <td>	(066,066,066)	</td> <td>	gray26	</td> </tr>
+<tr> <td>	424242	</td> <td>	(066,066,066)	</td> <td>	grey26	</td> </tr>
+<tr> <td>	454545	</td> <td>	(069,069,069)	</td> <td>	gray27	</td> </tr>
+<tr> <td>	454545	</td> <td>	(069,069,069)	</td> <td>	grey27	</td> </tr>
+<tr> <td>	474747	</td> <td>	(071,071,071)	</td> <td>	gray28	</td> </tr>
+<tr> <td>	474747	</td> <td>	(071,071,071)	</td> <td>	grey28	</td> </tr>
+<tr> <td>	4a4a4a	</td> <td>	(074,074,074)	</td> <td>	gray29	</td> </tr>
+<tr> <td>	4a4a4a	</td> <td>	(074,074,074)	</td> <td>	grey29	</td> </tr>
+<tr> <td>	4d4d4d	</td> <td>	(077,077,077)	</td> <td>	gray30	</td> </tr>
+<tr> <td>	4d4d4d	</td> <td>	(077,077,077)	</td> <td>	grey30	</td> </tr>
+<tr> <td>	4f4f4f	</td> <td>	(079,079,079)	</td> <td>	gray31	</td> </tr>
+<tr> <td>	4f4f4f	</td> <td>	(079,079,079)	</td> <td>	grey31	</td> </tr>
+<tr> <td>	525252	</td> <td>	(082,082,082)	</td> <td>	gray32	</td> </tr>
+<tr> <td>	525252	</td> <td>	(082,082,082)	</td> <td>	grey32	</td> </tr>
+<tr> <td>	545454	</td> <td>	(084,084,084)	</td> <td>	gray33	</td> </tr>
+<tr> <td>	545454	</td> <td>	(084,084,084)	</td> <td>	grey33	</td> </tr>
+<tr> <td>	575757	</td> <td>	(087,087,087)	</td> <td>	gray34	</td> </tr>
+<tr> <td>	575757	</td> <td>	(087,087,087)	</td> <td>	grey34	</td> </tr>
+<tr> <td>	595959	</td> <td>	(089,089,089)	</td> <td>	gray35	</td> </tr>
+<tr> <td>	595959	</td> <td>	(089,089,089)	</td> <td>	grey35	</td> </tr>
+<tr> <td>	5c5c5c	</td> <td>	(092,092,092)	</td> <td>	gray36	</td> </tr>
+<tr> <td>	5c5c5c	</td> <td>	(092,092,092)	</td> <td>	grey36	</td> </tr>
+<tr> <td>	5e5e5e	</td> <td>	(094,094,094)	</td> <td>	gray37	</td> </tr>
+<tr> <td>	5e5e5e	</td> <td>	(094,094,094)	</td> <td>	grey37	</td> </tr>
+<tr> <td>	616161	</td> <td>	(097,097,097)	</td> <td>	gray38	</td> </tr>
+<tr> <td>	616161	</td> <td>	(097,097,097)	</td> <td>	grey38	</td> </tr>
+<tr> <td>	636363	</td> <td>	(099,099,099)	</td> <td>	gray39	</td> </tr>
+<tr> <td>	636363	</td> <td>	(099,099,099)	</td> <td>	grey39	</td> </tr>
+<tr> <td>	666666	</td> <td>	(102,102,102)	</td> <td>	gray40	</td> </tr>
+<tr> <td>	666666	</td> <td>	(102,102,102)	</td> <td>	grey40	</td> </tr>
+<tr> <td>	696969	</td> <td>	(105,105,105)	</td> <td>	gray41	</td> </tr>
+<tr> <td>	696969	</td> <td>	(105,105,105)	</td> <td>	grey41	</td> </tr>
+<tr> <td>	6b6b6b	</td> <td>	(107,107,107)	</td> <td>	gray42	</td> </tr>
+<tr> <td>	6b6b6b	</td> <td>	(107,107,107)	</td> <td>	grey42	</td> </tr>
+<tr> <td>	6e6e6e	</td> <td>	(110,110,110)	</td> <td>	gray43	</td> </tr>
+<tr> <td>	6e6e6e	</td> <td>	(110,110,110)	</td> <td>	grey43	</td> </tr>
+<tr> <td>	707070	</td> <td>	(112,112,112)	</td> <td>	gray44	</td> </tr>
+<tr> <td>	707070	</td> <td>	(112,112,112)	</td> <td>	grey44	</td> </tr>
+<tr> <td>	737373	</td> <td>	(115,115,115)	</td> <td>	gray45	</td> </tr>
+<tr> <td>	737373	</td> <td>	(115,115,115)	</td> <td>	grey45	</td> </tr>
+<tr> <td>	757575	</td> <td>	(117,117,117)	</td> <td>	gray46	</td> </tr>
+<tr> <td>	757575	</td> <td>	(117,117,117)	</td> <td>	grey46	</td> </tr>
+<tr> <td>	787878	</td> <td>	(120,120,120)	</td> <td>	gray47	</td> </tr>
+<tr> <td>	787878	</td> <td>	(120,120,120)	</td> <td>	grey47	</td> </tr>
+<tr> <td>	7a7a7a	</td> <td>	(122,122,122)	</td> <td>	gray48	</td> </tr>
+<tr> <td>	7a7a7a	</td> <td>	(122,122,122)	</td> <td>	grey48	</td> </tr>
+<tr> <td>	7d7d7d	</td> <td>	(125,125,125)	</td> <td>	gray49	</td> </tr>
+<tr> <td>	7d7d7d	</td> <td>	(125,125,125)	</td> <td>	grey49	</td> </tr>
+<tr> <td>	7f7f7f	</td> <td>	(127,127,127)	</td> <td>	gray50	</td> </tr>
+<tr> <td>	7f7f7f	</td> <td>	(127,127,127)	</td> <td>	grey50	</td> </tr>
+<tr> <td>	828282	</td> <td>	(130,130,130)	</td> <td>	gray51	</td> </tr>
+<tr> <td>	828282	</td> <td>	(130,130,130)	</td> <td>	grey51	</td> </tr>
+<tr> <td>	858585	</td> <td>	(133,133,133)	</td> <td>	gray52	</td> </tr>
+<tr> <td>	858585	</td> <td>	(133,133,133)	</td> <td>	grey52	</td> </tr>
+<tr> <td>	878787	</td> <td>	(135,135,135)	</td> <td>	gray53	</td> </tr>
+<tr> <td>	878787	</td> <td>	(135,135,135)	</td> <td>	grey53	</td> </tr>
+<tr> <td>	8a8a8a	</td> <td>	(138,138,138)	</td> <td>	gray54	</td> </tr>
+<tr> <td>	8a8a8a	</td> <td>	(138,138,138)	</td> <td>	grey54	</td> </tr>
+<tr> <td>	8c8c8c	</td> <td>	(140,140,140)	</td> <td>	gray55	</td> </tr>
+<tr> <td>	8c8c8c	</td> <td>	(140,140,140)	</td> <td>	grey55	</td> </tr>
+<tr> <td>	8f8f8f	</td> <td>	(143,143,143)	</td> <td>	gray56	</td> </tr>
+<tr> <td>	8f8f8f	</td> <td>	(143,143,143)	</td> <td>	grey56	</td> </tr>
+<tr> <td>	919191	</td> <td>	(145,145,145)	</td> <td>	gray57	</td> </tr>
+<tr> <td>	919191	</td> <td>	(145,145,145)	</td> <td>	grey57	</td> </tr>
+<tr> <td>	949494	</td> <td>	(148,148,148)	</td> <td>	gray58	</td> </tr>
+<tr> <td>	949494	</td> <td>	(148,148,148)	</td> <td>	grey58	</td> </tr>
+<tr> <td>	969696	</td> <td>	(150,150,150)	</td> <td>	gray59	</td> </tr>
+<tr> <td>	969696	</td> <td>	(150,150,150)	</td> <td>	grey59	</td> </tr>
+<tr> <td>	999999	</td> <td>	(153,153,153)	</td> <td>	gray60	</td> </tr>
+<tr> <td>	999999	</td> <td>	(153,153,153)	</td> <td>	grey60	</td> </tr>
+<tr> <td>	9c9c9c	</td> <td>	(156,156,156)	</td> <td>	gray61	</td> </tr>
+<tr> <td>	9c9c9c	</td> <td>	(156,156,156)	</td> <td>	grey61	</td> </tr>
+<tr> <td>	9e9e9e	</td> <td>	(158,158,158)	</td> <td>	gray62	</td> </tr>
+<tr> <td>	9e9e9e	</td> <td>	(158,158,158)	</td> <td>	grey62	</td> </tr>
+<tr> <td>	a1a1a1	</td> <td>	(161,161,161)	</td> <td>	gray63	</td> </tr>
+<tr> <td>	a1a1a1	</td> <td>	(161,161,161)	</td> <td>	grey63	</td> </tr>
+<tr> <td>	a3a3a3	</td> <td>	(163,163,163)	</td> <td>	gray64	</td> </tr>
+<tr> <td>	a3a3a3	</td> <td>	(163,163,163)	</td> <td>	grey64	</td> </tr>
+<tr> <td>	a6a6a6	</td> <td>	(166,166,166)	</td> <td>	gray65	</td> </tr>
+<tr> <td>	a6a6a6	</td> <td>	(166,166,166)	</td> <td>	grey65	</td> </tr>
+<tr> <td>	a8a8a8	</td> <td>	(168,168,168)	</td> <td>	gray66	</td> </tr>
+<tr> <td>	a8a8a8	</td> <td>	(168,168,168)	</td> <td>	grey66	</td> </tr>
+<tr> <td>	ababab	</td> <td>	(171,171,171)	</td> <td>	gray67	</td> </tr>
+<tr> <td>	ababab	</td> <td>	(171,171,171)	</td> <td>	grey67	</td> </tr>
+<tr> <td>	adadad	</td> <td>	(173,173,173)	</td> <td>	gray68	</td> </tr>
+<tr> <td>	adadad	</td> <td>	(173,173,173)	</td> <td>	grey68	</td> </tr>
+<tr> <td>	b0b0b0	</td> <td>	(176,176,176)	</td> <td>	gray69	</td> </tr>
+<tr> <td>	b0b0b0	</td> <td>	(176,176,176)	</td> <td>	grey69	</td> </tr>
+<tr> <td>	b3b3b3	</td> <td>	(179,179,179)	</td> <td>	gray70	</td> </tr>
+<tr> <td>	b3b3b3	</td> <td>	(179,179,179)	</td> <td>	grey70	</td> </tr>
+<tr> <td>	b5b5b5	</td> <td>	(181,181,181)	</td> <td>	gray71	</td> </tr>
+<tr> <td>	b5b5b5	</td> <td>	(181,181,181)	</td> <td>	grey71	</td> </tr>
+<tr> <td>	b8b8b8	</td> <td>	(184,184,184)	</td> <td>	gray72	</td> </tr>
+<tr> <td>	b8b8b8	</td> <td>	(184,184,184)	</td> <td>	grey72	</td> </tr>
+<tr> <td>	bababa	</td> <td>	(186,186,186)	</td> <td>	gray73	</td> </tr>
+<tr> <td>	bababa	</td> <td>	(186,186,186)	</td> <td>	grey73	</td> </tr>
+<tr> <td>	bdbdbd	</td> <td>	(189,189,189)	</td> <td>	gray74	</td> </tr>
+<tr> <td>	bdbdbd	</td> <td>	(189,189,189)	</td> <td>	grey74	</td> </tr>
+<tr> <td>	bfbfbf	</td> <td>	(191,191,191)	</td> <td>	gray75	</td> </tr>
+<tr> <td>	bfbfbf	</td> <td>	(191,191,191)	</td> <td>	grey75	</td> </tr>
+<tr> <td>	c2c2c2	</td> <td>	(194,194,194)	</td> <td>	gray76	</td> </tr>
+<tr> <td>	c2c2c2	</td> <td>	(194,194,194)	</td> <td>	grey76	</td> </tr>
+<tr> <td>	c4c4c4	</td> <td>	(196,196,196)	</td> <td>	gray77	</td> </tr>
+<tr> <td>	c4c4c4	</td> <td>	(196,196,196)	</td> <td>	grey77	</td> </tr>
+<tr> <td>	c7c7c7	</td> <td>	(199,199,199)	</td> <td>	gray78	</td> </tr>
+<tr> <td>	c7c7c7	</td> <td>	(199,199,199)	</td> <td>	grey78	</td> </tr>
+<tr> <td>	c9c9c9	</td> <td>	(201,201,201)	</td> <td>	gray79	</td> </tr>
+<tr> <td>	c9c9c9	</td> <td>	(201,201,201)	</td> <td>	grey79	</td> </tr>
+<tr> <td>	cccccc	</td> <td>	(204,204,204)	</td> <td>	gray80	</td> </tr>
+<tr> <td>	cccccc	</td> <td>	(204,204,204)	</td> <td>	grey80	</td> </tr>
+<tr> <td>	cfcfcf	</td> <td>	(207,207,207)	</td> <td>	gray81	</td> </tr>
+<tr> <td>	cfcfcf	</td> <td>	(207,207,207)	</td> <td>	grey81	</td> </tr>
+<tr> <td>	d1d1d1	</td> <td>	(209,209,209)	</td> <td>	gray82	</td> </tr>
+<tr> <td>	d1d1d1	</td> <td>	(209,209,209)	</td> <td>	grey82	</td> </tr>
+<tr> <td>	d4d4d4	</td> <td>	(212,212,212)	</td> <td>	gray83	</td> </tr>
+<tr> <td>	d4d4d4	</td> <td>	(212,212,212)	</td> <td>	grey83	</td> </tr>
+<tr> <td>	d6d6d6	</td> <td>	(214,214,214)	</td> <td>	gray84	</td> </tr>
+<tr> <td>	d6d6d6	</td> <td>	(214,214,214)	</td> <td>	grey84	</td> </tr>
+<tr> <td>	d9d9d9	</td> <td>	(217,217,217)	</td> <td>	gray85	</td> </tr>
+<tr> <td>	d9d9d9	</td> <td>	(217,217,217)	</td> <td>	grey85	</td> </tr>
+<tr> <td>	dbdbdb	</td> <td>	(219,219,219)	</td> <td>	gray86	</td> </tr>
+<tr> <td>	dbdbdb	</td> <td>	(219,219,219)	</td> <td>	grey86	</td> </tr>
+<tr> <td>	dedede	</td> <td>	(222,222,222)	</td> <td>	gray87	</td> </tr>
+<tr> <td>	dedede	</td> <td>	(222,222,222)	</td> <td>	grey87	</td> </tr>
+<tr> <td>	e0e0e0	</td> <td>	(224,224,224)	</td> <td>	gray88	</td> </tr>
+<tr> <td>	e0e0e0	</td> <td>	(224,224,224)	</td> <td>	grey88	</td> </tr>
+<tr> <td>	e3e3e3	</td> <td>	(227,227,227)	</td> <td>	gray89	</td> </tr>
+<tr> <td>	e3e3e3	</td> <td>	(227,227,227)	</td> <td>	grey89	</td> </tr>
+<tr> <td>	e5e5e5	</td> <td>	(229,229,229)	</td> <td>	gray90	</td> </tr>
+<tr> <td>	e5e5e5	</td> <td>	(229,229,229)	</td> <td>	grey90	</td> </tr>
+<tr> <td>	e8e8e8	</td> <td>	(232,232,232)	</td> <td>	gray91	</td> </tr>
+<tr> <td>	e8e8e8	</td> <td>	(232,232,232)	</td> <td>	grey91	</td> </tr>
+<tr> <td>	ebebeb	</td> <td>	(235,235,235)	</td> <td>	gray92	</td> </tr>
+<tr> <td>	ebebeb	</td> <td>	(235,235,235)	</td> <td>	grey92	</td> </tr>
+<tr> <td>	ededed	</td> <td>	(237,237,237)	</td> <td>	gray93	</td> </tr>
+<tr> <td>	ededed	</td> <td>	(237,237,237)	</td> <td>	grey93	</td> </tr>
+<tr> <td>	f0f0f0	</td> <td>	(240,240,240)	</td> <td>	gray94	</td> </tr>
+<tr> <td>	f0f0f0	</td> <td>	(240,240,240)	</td> <td>	grey94	</td> </tr>
+<tr> <td>	f2f2f2	</td> <td>	(242,242,242)	</td> <td>	gray95	</td> </tr>
+<tr> <td>	f2f2f2	</td> <td>	(242,242,242)	</td> <td>	grey95	</td> </tr>
+<tr> <td>	f5f5f5	</td> <td>	(245,245,245)	</td> <td>	gray96	</td> </tr>
+<tr> <td>	f5f5f5	</td> <td>	(245,245,245)	</td> <td>	grey96	</td> </tr>
+<tr> <td>	f7f7f7	</td> <td>	(247,247,247)	</td> <td>	gray97	</td> </tr>
+<tr> <td>	f7f7f7	</td> <td>	(247,247,247)	</td> <td>	grey97	</td> </tr>
+<tr> <td>	fafafa	</td> <td>	(250,250,250)	</td> <td>	gray98	</td> </tr>
+<tr> <td>	fafafa	</td> <td>	(250,250,250)	</td> <td>	grey98	</td> </tr>
+<tr> <td>	fcfcfc	</td> <td>	(252,252,252)	</td> <td>	gray99	</td> </tr>
+<tr> <td>	fcfcfc	</td> <td>	(252,252,252)	</td> <td>	grey99	</td> </tr>
+<tr> <td>	ffffff	</td> <td>	(255,255,255)	</td> <td>	gray100	</td> </tr>
+<tr> <td>	ffffff	</td> <td>	(255,255,255)	</td> <td>	grey100	</td> </tr>
+<tr> <td>	a9a9a9	</td> <td>	(169,169,169)	</td> <td>	dark grey	</td> </tr>
+<tr> <td>	a9a9a9	</td> <td>	(169,169,169)	</td> <td>	DarkGrey	</td> </tr>
+<tr> <td>	a9a9a9	</td> <td>	(169,169,169)	</td> <td>	dark gray	</td> </tr>
+<tr> <td>	a9a9a9	</td> <td>	(169,169,169)	</td> <td>	DarkGray	</td> </tr>
+<tr> <td>	00008b	</td> <td>	(000,000,139)	</td> <td>	dark blue	</td> </tr>
+<tr> <td>	00008b	</td> <td>	(000,000,139)	</td> <td>	DarkBlue	</td> </tr>
+<tr> <td>	008b8b	</td> <td>	(000,139,139)	</td> <td>	dark cyan	</td> </tr>
+<tr> <td>	008b8b	</td> <td>	(000,139,139)	</td> <td>	DarkCyan	</td> </tr>
+<tr> <td>	8b008b	</td> <td>	(139,000,139)	</td> <td>	dark magenta	</td> </tr>
+<tr> <td>	8b008b	</td> <td>	(139,000,139)	</td> <td>	DarkMagenta	</td> </tr>
+<tr> <td>	8b0000	</td> <td>	(139,000,000)	</td> <td>	dark red	</td> </tr>
+<tr> <td>	8b0000	</td> <td>	(139,000,000)	</td> <td>	DarkRed	</td> </tr>
+<tr> <td>	90ee90	</td> <td>	(144,238,144)	</td> <td>	light green	</td> </tr>
+<tr> <td>	90ee90	</td> <td>	(144,238,144)	</td> <td>	LightGreen	</td> </tr>
+</tbody>
+</table>
+
+</body>
+</html>
+
+<!-- Keeping tabs embedded in the table above to facilitate simpler shell processing.
+
+$ awk -F\\t  '/^<tr>/ { printf("#%s %s \"%s\"\n", $2, $4, $6); }' /var/www/html/tmp/rgb.txt.html
+
+$ cat /var/www/html/tmp/rgb.txt.html | grep '^<tr>' | cut -f2,4,6
+
+2015-07-10 14:35:43 :: ~
+ rons@rons-PC$ curl -# 'http://rons-VM/ref/rgb.txt.html' | grep -i -v -e '[a-z] [a-z]' | sed -e 's/\([Gg]\)r[ea]y/\1rey/g;' | grep -F -i -f <( grep -o -e 'gui[fb]g=[0-9a-f]\{6\}' opt/Vim/vimfiles/colors/fazigu.vim | sort | uniq | cut -d= -f2 ) | cut -f2,6 | sort | uniq -w6 | sed -e 's#^#s/=#; s#\s\+#/="#; s#$#"/g;#g;'
+
+-->
+
+
+<!-- vim: set noexpandtab: -->
+

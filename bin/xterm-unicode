@@ -1,0 +1,3 @@
+#!/bin/bash
+export LANG="en_US.UTF-8"
+LANG="en_US.UTF-8" uxterm -u8 -fa dejavu -fs 10 -geometry 100x30 &

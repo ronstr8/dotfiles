@@ -1,0 +1,102 @@
+#!/bin/bash
+## xlv-snapper /dump/to/path
+##		Snapshots from an XBOX Live Vision cam using the UVC libraries.
+##
+##		--device	[/dev/video1]		Video device
+##		--interval	[30]				Seconds to pause between snaps
+##		--template	["xlv-snap-%Y-%m-%d-%H-%M-%S"]	Template for snapshot basename
+## 
+##		--verbose	Whatever verbose usually means
+##		--help		This message
+##
+## -- 
+## quinnfazigu@gmail.com
+
+GOX=`getopt -o vhd:i:t:g: --long 'verbose,help,device:,interval:,template:,geometry:' --name "$0" -- "$@"`
+if [ $? != 0 ] ; then echo "Aborting..." >&2 ; exit 1 ; fi
+
+eval set -- "$GOX"
+
+device='/dev/video1'
+interval=30
+template='xlv-snap-%Y-%m-%d-%H-%M-%S'
+#geometry='640x480' ## @ 30 Hz
+geometry='320x240' ## @ 60 Hz
+
+while true ; do
+    case "$1" in
+        -v|--verbose) 
+            verbose=1   ; shift 1 ;;
+        --debug) 
+            debug=1     ; shift 1 ;;
+        -h|--help)
+            do_help=1   ; shift 1 ;;
+        -d|--device)
+            device=$2   ; shift 2 ;;
+        -i|--interval)
+            interval=$2 ; shift 2 ;;
+        -t|--template)
+            template=$2 ; shift 2 ;;
+        -g|--geometry)
+            geometry=$2 ; shift 2 ;;
+        --)
+            shift ; break ;;
+    esac
+done
+
+if [ $do_help ] ; then awk  '/^## -- $/ { exit } !/^#!/ { gsub("^#+[[:space:]]?", "") ; print }' $0 >&2 ; exit ; fi
+
+base_snapcmd="uvccapture -w -d$device"
+base_snapcmd="$base_snapcmd $( echo $geometry | awk -Fx '{ print " -x" $1 " -y" $2 }' )"
+[ "$debug" ] && base_snapcmd="$base_snapcmd -v"
+
+dump_to_path=$1 ; shift
+
+if [ ! "$dump_to_path" ] ; then
+	echo "missing required argument of path to dump images" > /dev/stderr
+
+	exit 1
+fi
+
+diff_ext='-xlv-snapper-reference-file.tiff'
+diff_threshold=8000
+diff_reference_file=""
+		
+rm -f $dump_to_path/*$diff_ext
+
+while ( true ) ; do
+	dump_to_file="$dump_to_path/$( date +"$template" )"
+	snapcmd="$base_snapcmd -o'$dump_to_file'"
+
+	[ "$verbose" ] && echo "Running: $snapcmd" > /dev/stderr
+	eval $snapcmd
+
+	save_to_file="$dump_to_file.jpg"
+	diff_current_file="${dump_to_file}${diff_ext}"
+	convert "$dump_to_file" "$diff_current_file"
+
+	if [ -z "$diff_reference_file" ] ; then
+		diff_reference_file="$diff_current_file"
+		mv "$dump_to_file" "$save_to_file"
+	else
+		diffcmd="perceptualdiff \"$diff_reference_file\" \"$diff_current_file\" -threshold $diff_threshold &> /dev/null"
+		[ "$verbose" ] && echo "Running: $diffcmd" > /dev/stderr
+
+		if ( eval $diffcmd ) ; then
+			[ "$verbose" ] && echo "Saving perceptually distinguishable snapshot to $save_to_file ..." > /dev/stderr
+
+			rm "$diff_reference_file"
+			diff_reference_file="$diff_current_file"
+			mv "$dump_to_file" "$save_to_file"
+		else
+			[ "$verbose" ] && echo "Ignoring perceptually indistinguishable snapshot $save_to_file ..." > /dev/stderr
+
+			rm "$dump_to_file"
+			[ "$diff_current_file" != "$diff_reference_file" ] && rm "$diff_current_file"
+		fi
+	fi
+
+	sleep $interval
+done
+
+

@@ -1,0 +1,6 @@
+## http://projects.gnome.org/evolution/bugs.shtml
+export CAMEL_DEBUG=all
+export E2K_DEBUG=5 
+evolution --force-shutdown
+/usr/lib/evolution/2.26/evolution-exchange-storage >& $HOME/var/log/evolution-exchange-storage &
+evolution >& $HOME/var/log/evolution &

@@ -1,0 +1,57 @@
+## Fixeds some problems with perldoc and special chaacyeres
+#export LANG=C
+## Can they stay fixed and have my Unicode cake, too?
+#export LANG="en_US.UTF-8"
+
+function __findTermType() {
+	## Forced here so screen recognizes the full spectrum of colors.
+	case "$TERM" in
+		*screen* )
+			preferredTermTypes=( screen-256color-bce screen-256color $TERM xterm-256color xterm-color ansi )
+			echo "→ Recognized TERM='$TERM'." 1>&2
+			;;
+		*xterm* )
+			preferredTermTypes=( xterm-256color $TERM xterm-88color xterm-16color xterm-color xterm )
+			echo "→ Recognized TERM='$TERM'." 1>&2
+			;;
+		* )
+			preferredTermTypes=( $TERM )
+			echo "→ Unrecognized TERM='$TERM'." 1>&2
+	esac
+
+	#echo "Starting with preferredTermTypes: ${preferredTermTypes[@]}." 1>&2
+
+	for fallback in vt220 vt102 ansi vt100 ; do
+		preferredTermTypes[${#preferredTermTypes[@]}]="$fallback"
+	done
+
+	#echo "After adding fallbacks to preferredTermTypes: ${preferredTermTypes[@]}." 1>&2
+
+	## toe (toe -a on some systems) lists all supported terminal types.
+	## tt="xtermolor" ; infocmp $tt &> /dev/null && echo "$tt is a valid terminal type" || echo "$tt is NOT a valid terminal type"
+
+	effectiveTermType=""
+
+	for preferredTermType in ${preferredTermTypes[*]} ; do
+	#	echo "Checking $preferredTermTypes ..." 1>&2
+		if infocmp "$preferredTermType" &> /dev/null ; then
+			effectiveTermType="$preferredTermType"
+			break
+		fi
+	done
+
+	if [ ! "$effectiveTermType" ] ; then
+		echo "→ TERM='$TERM' unknown here, and fallback search failed." 1>&2
+	elif [ "$effectiveTermType" != "$TERM" ] ; then
+		echo "→ TERM='$TERM' unknown here, but found '$effectiveTermType'." 1>&2
+		export TERM="$effectiveTermType"
+	fi
+}
+
+## Turn off ^s flow control
+stty stop  undef >& /dev/null
+## Turn off ^q flow control
+stty start undef >& /dev/null
+
+# vim: ft=sh
+

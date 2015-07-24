@@ -1,0 +1,4 @@
+.netrwhist
+tags/*.ctags
+tags/*.tags
+sessions/*.vim

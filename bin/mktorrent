@@ -1,0 +1,53 @@
+#!/usr/bin/python
+
+import sys, os, getpass, urllib, tempfile, re
+
+HPJ_USER = 'the_y_man'
+
+def create_torrent(source):
+prog = 'btmakemetafile'
+tracker = 'http://im.lazy.as.fuck/announce'
+torrent = source + '.torrent'
+r = os.spawnlp(os.P_WAIT, prog, prog, '--target', torrent, tracker, source)
+if r != 0:
+print 'ERROR:', prog, 'aborted'
+sys.exit(1)
+return torrent
+
+def upload_torrent(password, torrent):
+prog = 'curl'
+tmp = tempfile.mkstemp()[1]
+r = os.spawnlp(os.P_WAIT, prog, prog,
+'-s', '-F', 'torrent=@%s' % torrent, '-o', tmp,
+'-u', '%s:%s' % (HPJ_USER, password), 'http://hpj.cc/u.php')
+if r != 0:
+print 'ERROR:', prog, 'aborted or program not found'
+sys.exit(1)
+html = open(tmp).read()
+os.unlink(tmp)
+return html
+
+if len(sys.argv) != 2 or not os.path.exists(sys.argv[1]):
+print 'Usage: mkhpj FILE_OR_DIRECTORY'
+print 'Will create a torrent, upload it to hpj, and re-download it'
+sys.exit(2)
+
+source = sys.argv[1]
+torrent = create_torrent(source)
+password = getpass.getpass('\nhpj user %s, password: ' % HPJ_USER)
+print 'Uploading...'
+html = upload_torrent(password, torrent)
+m = re.search(r'<p>(A file with the same info_hash .* already exists\.)', html)
+if m:
+print 'ERROR:', m.group(1)
+sys.exit(3)
+m = re.search(r'<p>Successfully uploaded (\w+)\.</p>', html)
+if not m:
+open('mkhpj.log', 'a').write('\n----- HTML:\n' + html + '\n-----\n')
+print 'ERROR uploading torrent; see mkhpj.log'
+sys.exit(1)
+hash = m.group(1)
+urllib.urlretrieve(
+'http://%s:%s@hpj.cc/d.php?r=%s' % (HPJ_USER, password, hash), torrent)
+print 'Done:', torrent
+print 'BBCode: [stats]%s[/stats]' % hash

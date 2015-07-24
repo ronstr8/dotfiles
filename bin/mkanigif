@@ -1,0 +1,12 @@
+## 2013-05-17 11:49:54 :: /data/tmp/roku/punanim/staging
+## rons@GA-E7AUM-DS2H$
+echo" for fn in shot00*.png ; do convert $fn -crop '75%x+320' -scale x120 +repage $( basename $fn .png ).miff ; done ; convert -dispose previous -delay 2 -coalesce -layers RemoveDups *.miff -loop 0  Animated.gif"
+## rons@GA-E7AUM-DS2H$ convert -delay 5 -layers OptimizePlus $( ls reframed-shot00?[3579].png reframed-shot006[0-4].png reframed-shot008*.png ) -loop 5 Animated.gif
+##  rons@GA-E7AUM-DS2H$ for fn in shot00*.png ; do convert $fn -crop '75%x+320' -scale x120 +repage -quality 80 reframed-$( basename $fn .png ).jpg ; done 
+##  rons@GA-E7AUM-DS2H$ ( export ext=miff ; convert -delay 5 -layers OptimizePlus $( ls reframed-shot00?[357].$ext reframed-shot006[0-4].$ext reframed-shot008*.$ext ) -loop 5 Animated.gif )
+##  rons@GA-E7AUM-DS2H$ for fn in reframed-shot00*.miff ; do convert $fn \( -clone 0--1 -background none +append -quantize transparent -colors 63 -unique-colors -write mpr:cmap +delete \) $( basename $fn .miff ).gif ; done
+##  rons@GA-E7AUM-DS2H$ export ext=miff ; ( for fn in shot00*.png ; do convert $fn -crop '75%x+320' -scale x120 +repage -quality 80 \( -clone 0--1 -background none +append -quantize transparent -colors 63 -unique-colors -write mpr:cmap +delete \) optimized-$( basename $fn .png ).$ext ; done ) ; ( convert -delay 5 -layers OptimizePlus $( ls optimized-shot00?[357].$ext optimized-shot006[0-4].$ext optimized-shot008*.$ext ) -loop 5 Animated.gif )
+2013-06-10 12:04:04 :: /av/UNSORTED
+ rons@GA-E7AUM-DS2H$ ( export ext=miff ; ( for fn in shot00*.png ; do convert $fn -crop '60%x+160' -scale x80 +repage -quality 50 \( -clone 0--1 -background none +append -quantize transparent -colors 32 -unique-colors -write mpr:cmap +delete \) optimized-$( basename $fn .png ).$ext ; done ) ; ( convert -delay 5 -layers OptimizePlus $( ls optimized-shot*.$ext ) -loop 5 Animated.gif ) ) ; ll Animated.gif ; eog Animated.gif
+ -rw-rw-r-- 1 rons rons 314779 Jun 10 12:05 Animated.gif
+

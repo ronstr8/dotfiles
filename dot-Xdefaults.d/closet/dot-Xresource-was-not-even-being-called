@@ -1,0 +1,123 @@
+
+*blinkRate: 100
+
+!XTerm*termName:	xterm-debian
+!XTerm*activeIcon:	false
+
+!XTerm*faceName:  -bitstream-bitstream vera sans mono-medium-r-normal--*-100-*-*-m-*-iso8859-1
+!XTerm*faceName:  Inconsolata
+!XTerm*faceName:  Vera Sans Mono
+
+XTerm*faceName: Consolas
+XTerm*faceSize: 10
+XTerm*italicULMode: true
+XTerm.vt100.geometry: 165x40
+
+UXTerm*faceName: Consolas
+!UXTerm*faceName: Inconsolata
+!UXTerm*faceName: DejaVu Sans Mono
+!UXTerm*faceName: Freefont
+!UXTerm*faceName: Unifont
+!UXTerm*faceName: Vera Sans Mono
+UXTerm*faceSize: 10
+UXTerm*italicULMode: true
+UXTerm.vt100.geometry: 165x40
+!UXTerm.vt100.font: -misc-fixed-medium-r-normal--20-200-75-75-c-100-iso10646-1
+
+!*eightBitInput:   true
+!*eightBitControl: true
+
+!Emacs*menubar*font: -*-clean-medium-r-*-*-12-*-*-*-*-*-*-*
+!Emacs*menu*font:    -*-clean-medium-r-*-*-12-*-*-*-*-*-*-*
+!Emacs*popup*font:   -*-clean-medium-r-*-*-12-*-*-*-*-*-*-*
+!Emacs*font:         xft:monospace:pixelsize=11
+
+Xft.dpi:                 96
+!Xft.antialias:           true
+!Xft.hinting:             true
+!Xft.hintstyle:           3
+
+
+!*fontMenu.Label:  VT Fonts
+!*fontMenu*fontdefault*Label:    Default
+!*fontMenu*font1*Label:  Unreadable
+!*VT100.font1:           nil2
+!*IconFont:              nil2
+!*fontMenu*font2*Label:  Tiny
+!*VT100.font2:           5x7
+!*fontMenu*font3*Label:  Small
+!*VT100.font3:           6x10
+!*fontMenu*font4*Label:  Medium
+!*VT100.font4:           7x13
+!*fontMenu*font5*Label:  Large
+!*VT100.font5:           9x15
+!*fontMenu*font6*Label:  Huge
+!*VT100.font6:           10x20
+
+*vt100*background:      black
+*vt100*foreground:      gray
+
+!#if WIDTH <= 1024
+!*vt100*font:            10x20
+!*vt100*geometry:        80x24
+!#else
+!*vt100*font:            7x13
+!*vt100*geometry:        80x40
+!#endif
+
+
+*vt100*visualBell:      false
+*vt100*scrollBar:       false
+*vt100*eightBitInput:   true
+*vt100*scrollTtyOutput: false
+*vt100*scrollKey:       false
+!*.vt100.boldColors:false
+*vt100*boldColors:		true
+
+XTerm*saveLines:        987654
+
+   *vt100*translations: #override \n\
+Shift <KeyPress> Prior:scroll-back(1, page) \n\
+ Shift <KeyPress> Next:scroll-forw(1, page)  \n\
+   Shift <KeyPress> Up:scroll-back(1, line)    \n\
+ Shift <KeyPress> Down:scroll-forw(1, line)  \n\
+ Shift <KeyPress> Home:scroll-back(1000, page) \n\
+  Shift <KeyPress> End:scroll-forw(1000, page)  \n\
+   Ctrl  <KeyPress> Up:string("0x10")            \n\
+ Ctrl  <KeyPress> Down:string("0x0E")          \n\
+ Ctrl  <KeyPress> Left:string("0x1B") string("B")       \n\
+Ctrl  <KeyPress> Right:string("0x1B") string("F") \n\
+       <KeyPress> Home:string("0x01") \n\
+        <KeyPress> End:string("0x05") \n\
+        <Key>BackSpace:    string(0x7F) \n
+
+
+ptyInitialErase:     false
+backarrowKeyIsErase: true
+
+!! WM_CLASS(STRING) = "XTerm.My-XTerm-Work", "XTerm"
+!! echo "REMINDER :: Use xinfo, xprop, and editres to inspect a window."
+
+!XTerm*My-XTerm-Fazigu*faceSize: 9
+!XTerm*My-XTerm-Fazigu*geometry: 80x60
+
+XTerm.My-XTerm-Work*faceSize: 9
+XTerm.My-XTerm-Work.vt100.geometry: 160x40
+
+*color0: black
+*color1: red3
+*color2: green3
+*color3: yellow3
+*color4: blue2
+*color5: magenta3
+*color6: cyan3
+*color7: gray90
+*color8: gray50
+*color9: red
+*color10: green
+*color11: yellow
+*color12: rgb:5c/5c/ff
+*color13: magenta
+*color14: cyan
+*color15: white
+

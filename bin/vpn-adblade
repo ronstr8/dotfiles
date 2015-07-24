@@ -1,0 +1,65 @@
+#!/bin/bash
+
+VPN_CONF="${HOME}/.datapipe-auth" ;
+
+. "${VPN_CONF}"
+
+if [ ! "$VPN_USERLEVEL_PIN" ] ; then
+	echo "Failed to read user-level PIN from ${VPN_CONF}" 1>&2 ;
+	exit 1 ;
+fi
+
+VPN_USER='root'
+VPN_EXEC='vpnc-connect'
+VPN_PID="$( pgrep -f -U "$VPN_USER" "$VPN_EXEC" )"
+VPN_PROFILE='adblade-datapipe-auth'
+
+if [ "$VPN_PID" ] ; then
+	echo "Process-id ${VPN_PID} already running ${VPN_EXEC} as user ${VPN_USER}." 1>&2 ;
+	exit 0 ;
+fi
+
+CMD_CONNECT="$VPN_EXEC $* $VPN_PROFILE"
+
+function echoObfuscationRow() {
+	local rowLength="${1-32}" ;
+	local insertVal="${2- }"  ;
+	local insertCol="${3-1}"  ;  ## 1 .. (rowLength-1)
+
+	## Just assuming below we'll get enough characters to handle $rowLength.
+	## This really is not important enough to over-engineer more than it is.
+	local row="$( dd if=/dev/urandom bs=4096 count=1 2>/dev/null | tr -cd 'a-uw-z[:upper:][:punct:][:digit:]' )" ;
+	local obf="${row:0:$insertCol}${insertVal}${row:$insertCol}" ;
+
+	echo "${obf:0:$rowLength}" ;
+}
+
+function echoObfuscationBlock() {
+	local clearVal="${1}" ;
+	local blockCols="$(( ( ${#clearVal} + 4 ) * 3 ))" ;
+	local insertCol="$(( RANDOM % blockCols ))" ;
+	local obfusChar='' ;
+
+	for obfusChar in '|' 'v' $( echo "${clearVal}" | sed -e 's/\B/ /g;' ) '^' '|' ; do
+		echoObfuscationRow "${blockCols}" "${obfusChar}" "${insertCol}" ;
+	done
+}
+
+function attemptVpnConnection() {
+	echoObfuscationBlock "${VPN_USERLEVEL_PIN}" ;
+	echo ;
+
+	sudo $CMD_CONNECT ;
+}
+
+attemptVpnConnection
+
+
+#if [ $UID -ne 0 ] ; then
+#	exec sudo su root - -c "$CMD_CONNECT"
+#else
+#	exec "$CMD_CONNECT"
+#fi
+
+## sudo su root - -c "vpnc-connect $* adblade || vpnc-connect $* adblade"
+## sudo su root - -c 'vpnc-connect adblade & kill %1 ; vpnc-connect adblade'

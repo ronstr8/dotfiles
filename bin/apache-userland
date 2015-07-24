@@ -1,0 +1,20 @@
+#!/bin/bash
+##	apache-userland $HOME/src/WiiCR//apache/conf/httpd.conf -k restart && tail -f apache/logs/error.log
+##
+## --
+## quinnfazigu@gmail.com
+
+
+APACHE_RUN_USER=$USER
+APACHE_RUN_GROUP=$USER
+
+CONF=$1
+shift
+
+apache2 -f $CONF $*
+
+## apache2  [ -d serverroot ] [ -f config ] [ -C directive ]\
+## 		[ -c directive ] [ -D parameter ] [ -e level ] [ -E file ]\
+##		[ -k start|restart|graceful|stop|graceful-stop ] [ -R directory ]\
+##		[ -h ] [ -l ] [ -L ] [ -S ] [ -t ] [ -v ] [ -V ] [ -X ] [ -M ]
+

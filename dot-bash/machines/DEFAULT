@@ -1,0 +1,6 @@
+
+#echo "colorseedstr=$colorseedstr; colorseedint=$colorint; colorcount=$colorcount; maybecolor=$maybecolor;" 1>&2
+
+# echo "$TERM" | fgrep xterm && bashprompt || export PS1="\\u@\\h\\$ " ;
+
+

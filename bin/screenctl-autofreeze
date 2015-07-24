@@ -1,0 +1,235 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+screenctl-autofreeze - Periodically freeze detached screens
+
+=head1 SYNOPSIS
+
+screenctl-autofreeze [options] <>
+
+
+  --verbose            show what is being done
+  --debug              turn --verbose all the way up to 11
+
+  --help               show this message
+  --man                show full perldoc
+
+
+Ron "Quinn" Straight may not have achieved; add further usage notes?
+
+=head1 DESCRIPTION
+
+Ron "Quinn" Straight did not achieve; needs to write a description.
+
+	crontab -e:
+	0 */8  *   *   *        /home/rons/bin/screenctl-autofreeze
+	15 * * * * /home/rons/bin/screenctl-autofreeze
+
+=cut
+
+use 5.010;
+
+use strict;
+use warnings;
+
+use English qw( -no_match_vars );
+
+use Cwd qw( getcwd abs_path );
+use FileHandle;
+use List::Util();
+use POSIX qw( strftime );
+
+BEGIN { while (my($k, $v) = each(%ENV)) { printf("%s => %s\n", $k, $v); } }
+
+### Compact Bootstrapper Told You He Was Hardcore {{{
+BEGIN
+{
+	use Getopt::Long qw( GetOptionsFromArray :config passthrough );
+	use Sys::Hostname;
+	use UNIVERSAL::require;
+
+	my %rtparams;
+
+	sub rtparams { shift; die 'rtparams() takes no args.' if @ARG; wantarray ? (( %rtparams )) : \%rtparams }
+	sub rtparam { my $self = shift; my $name = shift;
+		$rtparams{$name} = shift if @ARG;
+		return unless exists $rtparams{$name};
+		return $rtparams{$name}; }
+	sub verbosity { $rtparams{'debug'} ? 11 : ( $rtparams{'verbose'} || 0 ) }
+	sub verbose   { shift->verbosity }
+	sub debug     { shift->verbosity > 11 ? 1 : 0 }
+
+	GetOptionsFromArray(\@ARGV, \%rtparams, qw( db=s debug! verbose+ quiet! ));
+	my($DEBUG, $DEV_QR, $HOME, $HOST) = ( $rtparams{'debug'}, qr{\bdev}, $ENV{'HOME'}, hostname() );
+	my $VERBOSE = $DEBUG ? 11 : ( $rtparams{'verbose'} || 0 );
+
+	my($CDW) = qw( Devel::Whinger );
+	my $IS_DEV = $HOST =~ $DEV_QR;
+
+	my(@xtra) = ( $CDW );
+
+	my(@alts) = grep { -d } map { (glob("$HOME/$_")) }
+		qw( checkouts/prod/lib checkouts/cpan/*/lib perl/lib );
+	for (@alts) { unshift(@INC, $_); 0 && $DEBUG && warn "\t ... \@INC += $_\n" }
+	for (@xtra) { ($_->use || $@) && $DEBUG && warn sprintf(
+		"\t... use %s: %s\n", $_, $@ || eval("\$${_}::VERSION") || 'N/A') }
+
+	my $shiftr  = sub { @_ && $_[0] && ((ref($_[0]) || $_[0]) eq __PACKAGE__) };
+	my $whinger = eval { $CDW->new( 'whinging_for' => __PACKAGE__ ) };
+
+	my(%inj);
+	$inj{'whingef'} = sub { shift(@_) if $shiftr->(@_);
+		return $whinger->whingef(@_) if $whinger;
+		my($f, $ar, $w) = @_;
+		my $m = sprintf("[No $CDW] $f", ( map { $_->[0] } @{ $ar } ));
+		( $w && ( $w =~ /^DIE/i ) ) ? die($m) : warn($m); };
+	{ no strict 'refs'; *{'main' . '::' . $_} = $inj{$_} for keys %inj; };
+}
+### }}}
+
+### Options and Run-Time Parameters {{{
+{
+	my $rtparams_hr = __PACKAGE__->rtparams();
+	my %getopt = (
+		'dry-run|n!'      => {},
+		'verbose+'        => { 'default' =>  0 },
+		'debug!'          => { 'default' =>  0 },
+		'man!'            => {},
+	);
+	$getopt{$ARG} = {} for qw(  );
+
+
+	use Getopt::Long; use Pod::Usage;
+	my $getopt = new Getopt::Long::Parser 'config' => [qw/auto_help/];
+	   $getopt->configure( qw/auto_help/ );
+	   $getopt->getoptions($rtparams_hr, keys %getopt) or die "Failed to parse all options!\n";
+	Pod::Usage::pod2usage({-verbose => 2}) if $rtparams_hr->{'man'};
+
+	while (my($opt, $conf_hr) = each(%getopt)) { next unless $conf_hr;
+		$opt =~ s/^(--)?([a-z_0-9-]+)(\W.*)?$/$2/gi;
+		my $val = $rtparams_hr->{$opt} //= $conf_hr->{'default'} // '';
+		next if $val ne ''; next unless my $rmsg = $conf_hr->{'required'};
+		die sprintf("Missing parameter --%s: %s\n", $opt, $rmsg || 'Required!');
+	}
+}
+### }}}
+
+## Just in case this turns into an object someday.
+my $self = __PACKAGE__;
+
+my $HOME = List::Util::first {
+	-d "$ARG/.screen/fridge"
+} ( $ENV{'HOME'}, '/home/' . $ENV{'USER'}, abs_path( __FILE__ ), getcwd(), '/home/rons' );
+
+my $SCREENCTL    = "$HOME/bin/screenctl";
+my $FRIDGE_DIR   = "$HOME/.screen/fridge";
+my $MAX_ROTATION = 8;
+
+my(@detached_screens) = qx" screen -ls | awk '/[[:space:]].+Detached/ { print \$1 }' ";
+
+foreach my $screen_id (@detached_screens) {
+	chomp($screen_id);
+	$self->whingef("Processing $screen_id ...", [ [$screen_id] ], 'NOTIFY!');
+
+	my($spid, $sname) = split(/\./, $screen_id, 2);
+	my $srotidx = 0;
+	my $nowstr  = strftime('%Y%m%d', localtime());
+
+	my(@existing_frozen_sessions) = qx{ ls -t $FRIDGE_DIR/$sname*[0-9] 2> /dev/null };
+	my $most_recent_frozen_session = @existing_frozen_sessions && $existing_frozen_sessions[0];
+
+	if ($most_recent_frozen_session) {
+		$srotidx = (( split(/\./, $most_recent_frozen_session) ))[-1];
+		$srotidx++;
+	}
+	else {
+		$srotidx = 1;
+	}
+
+	my $session_fridge_name = sprintf("$sname-$nowstr.%05d", $srotidx % $MAX_ROTATION);
+	my $cmdline = "$SCREENCTL freeze --sty=$screen_id --frozen-session='$session_fridge_name' --thawed-session='$sname'";
+	$self->whingef('system("%s")', [ [$cmdline] ], 'NOTIFY!');
+
+	my @output = qx{$cmdline};
+	foreach my $line (@output) {
+		$self->whingef('> %s', [ [$line] ], 'DEBUG!');
+	}
+	$self->whingef('@Todo("Should check if new frozen session is diff -r as prior, and if so delete the new one.")', [], 'NOTIFY!');
+}
+
+## $self->whingef('\$self->rtparams => %s', [ { 'dump' => +{( $self->rtparams )}   } ], 'Notify!');
+$self->whingef('%%ENV => %s',  [ { 'dump' =>  [ \%ENV ]  } ], 'Notify!');
+
+## slurpfile("/etc/passwd");
+
+exit;
+
+### Optional: File/CSV Slurping {{{
+sub slurpfile
+{
+	my $self = shift;
+	my $fn   = shift // shift(@ARGV) // '-';
+
+	my(@contents);
+	my $csv;
+
+	if ( $fn =~ /\.csv$/i ) {
+		my $TCSV = qw( Text::CSV_XS );
+		$TCSV->use
+			or $self->whingef("Failed to load %s: %s", [ $TCSV, $EVAL_ERROR ], 'DIE!');
+		$csv = $TCSV->new({ 'always_quote' => 1 });
+	}
+
+	my $ll = 0;
+	my $fp = FileHandle->new($fn)
+		or $self->whingef("Failed to open input file %s: %s", [ $fn, $OS_ERROR ], 'DIE!');
+
+	while ( my $line = $fp->gets ) { $ll++; chomp($line);
+		if ($csv) {
+			$csv->parse($line)
+				or $self->whingef("Failed to parse input line #%s: %s", [ $ll, $csv->error_input ], 0);
+			push @contents, [( $csv->fields )];
+		}
+		else {
+			push @contents, $line;
+		}
+	}
+
+	$fp->close;
+
+	return @contents if wantarray or $csv;
+	return join("\n", @contents);
+}
+### }}}
+
+
+__END__
+
+=head1 BUGS
+
+=over
+
+=item Ron "Quinn" Straight achieved with distinction; no bugs!
+
+=back
+
+=head1 SEE ALSO
+
+Ron "Quinn" Straight may not have achieved; point to related topics?
+
+
+=head1 AUTHOR
+
+Ron "Quinn" Straight E<lt>quinnfazigu@gmail.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2013 Ron "Quinn" Straight
+
+=cut
+
+## vim: foldmethod=marker
+
+
+

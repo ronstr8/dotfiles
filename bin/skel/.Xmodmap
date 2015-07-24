@@ -1,0 +1,30 @@
+!! Set MENU to mode switcher
+!keycode 117 = Mode_switch Mode_switch
+!keysym d = d NoSymbol degree        NoSymbol
+!keysym m = m NoSymbol emdash        mu
+!keysym n = n NoSymbol endash        NoSymbol
+!keysym 2 = 2 quotedbl twosuperior   NoSymbol
+!keysym 3 = 3 sterling threesuperior NoSymbol
+!keysym 4 = 4 dollar   EuroSign      NoSymbol
+!keysym space = space  NoSymbol      nobreakspace NoSymbol
+!keysym minus = minus  underscore    U2212        NoSymbol
+!keycode 34 = bracketleft  braceleft  leftsinglequotemark  leftdoublequotemark
+!keycode 35 = bracketright braceright rightsinglequotemark rightdoublequotemark
+!keysym KP_Subtract = KP_Subtract NoSymbol U2212    NoSymbol
+!keysym KP_Multiply = KP_Multiply NoSymbol multiply NoSymbol
+!keysym KP_Divide   = KP_Divide   NoSymbol division NoSymbol
+
+! Hard-code the keypad to numeric values as if numlock is always on 
+! since I never use it for anything else.
+keycode 79=7
+keycode 80=8
+keycode 81=9
+keycode 83=4
+keycode 84=5
+keycode 85=6
+keycode 87=1
+keycode 88=2
+keycode 89=3
+keycode 90=0
+keycode 91=period
+keycode 86=plus

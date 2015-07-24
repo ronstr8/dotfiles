@@ -1,0 +1,61 @@
+## Customizations to the appearance and behavior of shell prompts,
+## history, etc.
+
+## History
+
+export HISTTIMEFORMAT="[%Y-%m-%dT%H:%M:%S] "
+
+## Shell Options
+
+## [ -f $BASHDIR/hosts ] && export HOSTFILE="$BASHDIR/hosts"
+## shopt -s hostcomplete
+
+shopt -s histreedit
+
+set -o ignoreeof
+
+
+## Prompt
+
+## Setting this squishes leading dirs into /.../, but also means screenctl
+## fails to recognize them and plunk me back into my proper directory.
+#export PROMPT_DIRTRIM=3 ;
+
+bashprompt
+
+unset -f __dotBashPrompt ;
+function __dotBashPrompt() {
+
+	local windowHome="${WINDOW_HOME}" ;
+	[ "$windowHome" -a -d "$windowHome" ] || return ;
+
+	## TODO: Let ~/bin/workspace define this function so we don't have to make assumptions about file locations and such.
+	## TODO: If $WINDOW != `cat $windowNumberFile`, warn and do not write any workspace data.
+
+	[ "$WINDOW" ] && echo $WINDOW > "$windowHome/number" ;
+	[ "$PWD"    ] && echo $PWD    > "$windowHome/cwd" ;
+
+	## TODO: Only do this if $HISTFILE contains $WINDOW_HOME.
+	history -a ;
+}
+
+unset -f __updatePromptCommand ;
+function __updatePromptCommand() {
+	local customPromptCommand='__dotBashPrompt' ;
+	local newPromptCommand='' ;
+
+	if [ ! "$PROMPT_COMMAND" ] ; then
+		newPromptCommand="$customPromptCommand" ;
+	elif ( echo "$PROMPT_COMMAND" | grep --silent "$customPromptCommand" ) ; then
+		newPromptCommand="$PROMPT_COMMAND" ;
+	else 
+		newPromptCommand="$PROMPT_COMMAND ; $customPromptCommand"
+	fi
+
+	[ "$newPromptCommand" ] && export PROMPT_COMMAND="$newPromptCommand" ;
+}
+
+__updatePromptCommand ;
+
+# vim: ft=sh
+

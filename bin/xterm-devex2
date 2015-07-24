@@ -1,0 +1,9 @@
+#!/bin/bash
+
+eval $( ssh-agent )
+ssh-add
+
+x-terminal-emulator -e '/bin/bash' -l -c 'ssh devex2' &> /dev/null &
+
+## lxterm -e "/bin/bash" -l -c 'eval $( ssh-agent ) ; ssh-add ; ssh devex2'
+## rons@GA-E7AUM-DS2H$ lxterm -e '/bin/bash' -l -c 'cat /var/log/auth.log'

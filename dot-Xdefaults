@@ -1,0 +1,2 @@
+#include ".Xdefaults.d/xft"
+#include ".Xdefaults.d/x-terminal-emulator"

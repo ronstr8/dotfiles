@@ -1,0 +1,86 @@
+#!/bin/bash
+## imgsquish @options -- @input-files
+##
+##        --colors=i   number of colors in output file
+##        --depth=b    bit-depth of output file
+##        --quality=p  output file quality [95]
+##
+##        --format=s   output image file format, e.g. 'png' [same as input]
+##
+##        --tag=s      short tag to add before ext of output file [summary of squishing options]
+##        --no-tag     add no tag
+##
+##        --verbose    Whatever verbose usually means
+##        --dry-run    Ditto
+##        --help       This message
+## -- 
+## quinnfazigu@gmail.com
+
+GOX=`getopt -o vhncdfqt --long 'verbose,help,dry-run,colors:,depth:,format:,quality:,tag:,no-tag' --name "$0" -- "$@"`
+if [ $? != 0 ] ; then echo "Aborting..." >&2 ; exit 1 ; fi
+
+eval set -- "$GOX"
+
+verbose=""
+dry_run=""
+do_help=""
+imcolors="24"
+imdepth="8"
+imformat="png"
+imquality="95"
+tag="none"
+no_tag=""
+
+while true ; do
+    case "$1" in
+        -v|--verbose) 
+            verbose=1 ; shift ;;
+        -h|--help)
+            do_help=1 ; shift ;;
+        -n|--dry-run)
+            dry_run='--dry-run: ' ; shift ;;
+
+        -c|--colors) 
+            imcolors=$2  ; shift ; shift ;;
+        -d|--depth) 
+            imdepth=$2   ; shift ; shift ;;
+        -f|--format) 
+            imformat=$2  ; shift ; shift ;;
+        -q|--quality) 
+            imquality=$2 ; shift ; shift ;;
+
+        -t|--tag) 
+            tag=$2    ; shift ; shift ;;
+        --no-tag) 
+            no_tag=$1 ;         shift ;;
+
+        --)
+            shift ; break ;;
+    esac
+done
+
+if [ "$do_help" ] ; then awk  '/^## -- $/ { exit } !/^#!/ { gsub("^#+[[:space:]]?", "") ; print }' $0 >&2 ; exit ; fi
+
+if [ "$no_tag" ] ; then
+	tag=''
+elif [ "$tag" = 'none' ] ; then
+	tag="--c${imcolors}d${imdepth}q${imquality}"
+fi
+
+for srcfilename in "$@" ; do
+	srcextension="$( echo "$srcfilename" | egrep -o '\.[^.]+$' )"
+	outbasename="$( echo "$srcfilename" | sed "s/${srcextension}\$//"  )"
+	outfilename="${outbasename}${tag}.${imformat}"
+
+	cmdline="convert '$srcfilename' +dither -depth '$imdepth' -colors '$imcolors' -quality '${imquality}' '$outfilename'"
+
+	if [ "$srcfilename" = "$outfilename" ] ; then
+		printf 'Source file "%s" is same as output file "%s"; aborting!' "$srcfilename" "$outfilename" > /dev/stderr
+		exit 1
+	fi
+
+	[   "$dry_run" -o "$verbose" ] && echo "${dry_run}\$ $cmdline" > /dev/stderr
+	[ ! "$dry_run" ]               && eval "$cmdline"
+done
+
+

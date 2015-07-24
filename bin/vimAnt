@@ -1,0 +1,4 @@
+#!/bin/bash
+
+ant -Dbuild.compiler.emacs=true -quiet -find build.xml ${*:-compile} 2>&1 | fgrep '[javac]'
+

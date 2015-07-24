@@ -1,0 +1,2 @@
+$HOME/src/ffmpeg/ffmpeg -i "$1" -acodec libmp3lame -ar 22050 -ab 64000 "$2"
+

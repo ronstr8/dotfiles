@@ -1,0 +1,57 @@
+
+alias ll='ls -lF --color'
+alias cp='cp -i'
+alias rm='rm -i'
+alias mv='mv -i'
+
+alias pmd='/opt/pmd/bin/run.sh pmd'
+
+alias qcal='gcal -x -o -cdl15+'
+alias gr='java -jar /usr/local/Gallery_Remote/GalleryRemote.jar'
+alias wmls='wmctrl -lpGx'
+alias wmup='wmctrl -r :SELECT: -e 0,0,0,640,480'
+alias dict='dict --pager=-'
+
+#alias chrome='/opt/google/chrome/google-chrome'
+
+#alias mplayer-0x0='mplayer -geometry +0+0'
+#alias mplayer='DISPLAY=":1.0" mplayer'
+
+export HL_FORMAT='ansi' ; ## 'xterm256' has invisible colors on rons-VM.
+alias hldiff="highlight --syntax=diff --out-format=$HL_FORMAT"
+alias hlperl="highlight --syntax=perl --out-format=$HL_FORMAT"
+
+alias distclean='make realclean 2>&1 ; perl Makefile.PL && \rm -f MANIFEST *META.yml && make manifest'
+alias cleantest='make realclean ; perl Makefile.PL ; make test'
+
+#alias go-unicode='export LANG="en_US.UTF-8"'
+#alias man='LANG=C man' ## No longer needed due to change of LESSCHARSET in ./environment settings.
+
+# alias ack='ack-grep -a'
+if ( ! type ack &>/dev/null ) ; then
+	if ( type ack-grep &>/dev/null ) ; then
+		alias ack='ack-grep'
+	fi
+fi
+
+alias biosinfo='sudo dmidecode | head'
+alias pstop='ps axo pid,user,group,priority,nice,vsz,rsz,share,stat,pcpu,pmem,time,cmd' ## PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND
+alias psthr='ps axms'
+
+#alias psthr='ps -eLf'
+
+alias xdaliclock='xdaliclock -builtin3 -bg wheat -fg brown -noseconds -cycle -geometry +950+40'
+
+##alias screen-mrenv=". $HOME/.screen/var/mrenv.$STY" ## Not needed with "keychains" package.
+
+## Maybe run /this/ from screenctl?
+alias screen-keychain=$'screen -X at \# stuff \'eval `keychain --quiet --eval`\015\'' ;
+
+#alias vless="vim -R -c 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim' " ;
+
+
+#alias ssh-agent-reuse='eval `ssh-agent-attach`'
+#alias screendoor='source ~/.x-terminal-emulator/screendoor.sh'
+
+# vim: ft=sh
+

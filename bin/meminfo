@@ -1,0 +1,2 @@
+## How much RAM in my machine and where is it?
+sudo dmidecode --type=17 | egrep 'Size|Bank Locator:'

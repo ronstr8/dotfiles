@@ -1,0 +1,11 @@
+#!/bin/bash
+
+IDE_BIN="/usr/local/java/netbeans/bin/netbeans"
+MY_IDE_HOME="$HOME/src/java/netbeans"
+MY_IDE_LOG="$MY_IDE_HOME/netbeans-$( date +%Y%m%d ).log"
+
+if [ ! "$DISPLAY" ] ; then
+	export DISPLAY="localhost:10.0"
+fi
+
+nohup $IDE_BIN < /dev/null &>> $MY_IDE_LOG & disown

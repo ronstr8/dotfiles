@@ -1,0 +1,13 @@
+
+### Just read the system file.  Should probably make sure we haven't already,
+### or scan for various locations.
+
+EXT_BASH_COMPLETION="$HOME/.bash/completion.d"
+SYS_BASH_COMPLETION="/etc/bash_completion"
+#OPT_BASH_COMPLETION="/usr/share/bash-completion"
+
+for compfn in $SYS_BASH_COMPLETION $( find $EXT_BASH_COMPLETION/ -type f 2> /dev/null ) ; do
+	[ -f "$compfn" ] && . "$compfn"
+done
+
+## vim: ft=sh

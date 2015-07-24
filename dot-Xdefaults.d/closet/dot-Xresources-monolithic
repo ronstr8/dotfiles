@@ -1,0 +1,96 @@
+!!! Set CPATH=$HOME to search there for these files.
+!!! #include ".xrdb/xft.xrdb"
+!!! #include ".xrdb/xterm.xrdb"
+
+Xft.dpi:            96
+!Xft.dpi:                 100
+!Xft.dpi:                 112
+!Xft.antialias:           true
+!Xft.hinting:             true
+!Xft.hintstyle:           3
+
+XTerm*deleteIsDEL:  true
+XTerm*toolBar:      false
+XTerm*faceName:     Consolas
+XTerm*faceSize:     11
+XTerm*italicULMode: true
+
+!XTerm*faceName:Nimbus Mono L
+!XTerm*faceSize:  11
+
+XTerm.vt100.utf8: 1
+
+!UXTerm*deleteIsDEL:  true
+UXTerm*toolBar:      false
+!UXTerm*faceName: DejaVu Sans Mono
+!UXTerm*faceSize: 11
+UXTerm*italicULMode: true
+UXTerm.vt100.font: -misc-fixed-medium-r-normal--20-200-75-75-c-100-iso10646-1
+
+
+!! Are these supposed to be used by SHIFT-KP[+-]?
+XTerm*faceSize1: 1
+XTerm*faceSize2: 5
+XTerm*faceSize3: 7
+XTerm*faceSize4: 9
+XTerm*faceSize5: 14
+XTerm*faceSize6: 9
+
+Emacs.FontBackend:      xft
+!Emacs.font:             Bitstream Vera Sans Mono-14 
+Emacs.font:             Consolas-12
+
+*VT100*background:      black
+*VT100*foreground:      gray
+*vt100*geometry:        120x40
+
+*vt100*visualBell:      false
+*VT100*scrollBar:       false
+*vt100*scrollBar:       false
+
+*vt100*eightBitInput:   true
+*vt100*scrollTtyOutput: false
+*vt100*scrollKey:       false
+
+XTerm*saveLines:        9600
+UXTerm*saveLines:        9600
+
+XTerm*VT100*font:  -efont-fixed-medium-r-*-*-16-*-*-*-*-*-iso10646-*
+XTerm*VT100*font2: -efont-fixed-medium-r-*-*-10-*-*-*-*-*-iso10646-*
+XTerm*VT100*font3: -efont-fixed-medium-r-*-*-12-*-*-*-*-*-iso10646-*
+XTerm*VT100*font4: -efont-fixed-medium-r-*-*-14-*-*-*-*-*-iso10646-*
+XTerm*VT100*font5: -efont-fixed-medium-r-*-*-16-*-*-*-*-*-iso10646-*
+XTerm*VT100*font6: -efont-fixed-medium-r-*-*-24-*-*-*-*-*-iso10646-*
+
+
+*vt100*translations: #override \n\
+Shift <KeyPress> Prior:scroll-back(1, page) \n\
+ Shift <KeyPress> Next:scroll-forw(1, page)  \n\
+   Shift <KeyPress> Up:scroll-back(1, line)    \n\
+ Shift <KeyPress> Down:scroll-forw(1, line)  \n\
+ Shift <KeyPress> Home:scroll-back(1000, page) \n\
+  Shift <KeyPress> End:scroll-forw(1000, page)  \n\
+   Ctrl  <KeyPress> Up:string("0x10")            \n\
+ Ctrl  <KeyPress> Down:string("0x0E")          \n\
+ Ctrl  <KeyPress> Left:string("0x1B") string("B")       \n\
+Ctrl  <KeyPress> Right:string("0x1B") string("F") \n\
+       <KeyPress> Home:string("0x01") \n\
+        <KeyPress> End:string("0x05") \n\
+        <Key>BackSpace:    string(0x7F) \n\
+     Meta <KeyPress> V: insert-selection(CLIPBOARD) \n\
+     Meta <KeyPress> C: select-end(PRIMARY, CLIPBOARD) \n\
+     Meta <KeyPress> X: select-end(PRIMARY, CLIPBOARD, CUT_BUFFER0)\n\
+Shift<Btn4Down>,<Btn4Up>:scroll-back(1,line) \n\
+Shift<Btn5Down>,<Btn5Up>:scroll-forw(1,line) \n\
+Ctrl<Btn4Down>,<Btn4Down>:scroll-back(1,page) \n\
+Ctrl<Btn5Down>,<Btn5Up>:scroll-forw(1,page) \n\
+<Btn4Down>,<Btn4Up>:scroll-back(1,halfpage) \n\
+<Btn5Down>,<Btn5Up>:scroll-forw(1,halfpage) \n\
+Ctrl <KeyPress> Prior:string("0x1B") string("a") string("0x1B")\n
+
+XTerm*ttyModes:  erase 
+
+*on2Clicks: regex [[:alnum:]_./]+
+
+
+! vim: ft=xdefaults

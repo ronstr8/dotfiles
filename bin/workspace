@@ -1,0 +1,390 @@
+#!/bin/bash
+## workspace [options] @args
+##
+##	Create or resume a stateful named screen-type session
+##
+##
+##  --dry-run  Skip actually doing anything.  Safe, idempotent, verbose.
+##
+##  --verbose  Include more output at verbosity level 1.
+##  --debug    ... add 10 to the verbosity value.
+##  --trace    ... and 20 to the verbosity value.
+##
+##  --terse    Omit any unnecessary embellishment from output.
+##  --laconic  Even less output.
+#   --silent   Never print anything.
+##
+##  --help     Show this message.
+##
+## -- 
+## Ron "Quinn" Straight <quinnfazigu@gmail.com>
+
+getout="$( getopt -o hvn --long 'help,verbose,dry-run,debug,trace,terse,rename-window:' --name "$0" -- "$@" )" && eval set -- "$getout" || exit 1
+
+DRY_RUN=0
+VERBOSITY=0
+VERBOSISM=()
+NEW_WINDOW_NAME=""
+
+while true ; do case "$1" in
+	-h|--help )
+		awk  '/^## -- $/ { exit } !/^#!/ { gsub("^#+ ?", "") ; print }' $0 >&2 ; exit ;;
+	-v|--verbose )
+		VERBOSITY+=1 ; VERBOSISM[${#VERBOSISM[@]}]='verbose' ; shift ;;
+	-n|--dry-run )
+		DRY_RUN=1 ; VERBOSITY+=1 ; VERBOSISM[${#VERBOSISM[@]}]='dry-run' ; shift ;;
+	--debug )
+		VERBOSITY+=10 ; VERBOSISM[${#VERBOSISM[@]}]='debug' ; shift ;;
+	--trace )
+		TRACE='trace' ; VERBOSITY+=20 ; VERBOSISM[${#VERBOSISM[@]}]='trace' ; shift ;;
+	--terse )
+		TERSE='terse' ; shift ;;
+	--laconic )
+		LACONIC='laconic' ; VERBOSITY=$(( VERBOSITY-21 )) ; shift ;;
+	--silent )
+		SILENT='silent' ; VERBOSITY=$(( VERBOSITY-31 )) ; shift ;;
+	--rename-window )
+		shift ; NEW_WINDOW_NAME=$1 ; shift ;;
+	-- )
+		shift ; break ;;
+esac ; done
+
+function whinge() {
+	[ "$SILENT" ] && return 0
+	[ "$*"      ] || return 0
+
+	case "$1" in
+		--if-dry* )
+			[ $DRY_RUN   -gt  0 ] && shift || return 1 ;;
+		--if-trac* )
+			[ $VERBOSITY -ge 20 ] && shift || return 1 ;;
+		--if-debug* )
+			[ $VERBOSITY -ge 10 ] && shift || return 1 ;;
+		--if-verbos* )
+			[ $VERBOSITY -ge  1 ] && shift || return 1 ;;
+	esac
+
+	if [ ! "$WHINGE_MFMT" ] ; then
+		xIFS="$IFS"
+		IFS=","
+		[ "$TERSE"   ] || WHINGE_MFMT=" ${0##*/}<""$$>${VERBOSISM[@]:+«${VERBOSISM[@]}»}"
+		[ "$LACONIC" ] || WHINGE_MFMT="[%s]${WHINGE_MFMT} "
+		IFS="xIFS"
+		WHINGE_MFMT="${WHINGE_MFMT}%s"
+		WHINGE_DFMT="%Y-%m-%dT%H:%M:%S${TRACE:+".%N"}"
+	fi
+
+	printf "$WHINGE_MFMT\n" "$( date +"$WHINGE_DFMT" )" "$*" 1>&2
+}
+
+function croak() {
+	local exit_status=1
+
+	if echo "$1" | grep '^[0-9]\+$' ; then
+		exit_status="$1" ; shift
+	fi
+
+	whinge "$*" && exit $exit_status
+}
+
+cat <<COMMENTS > /dev/null
+
+If screen is started with a session-name via -S:
+:setenv SCREEN_SESSION "..."
+:setenv SCREEN_SESSION_HOME "~/.screen/sessions/${SCREEN_SESSION}/"
+:setenv HISTFILE="${SCREEN_SESSION_HOME}/.history" ## HISTTIMEFORMAT="[%Y-%m-%d %H:%M:%S] " bash
+## Pass any SSH_AGENT_PID, SSH_AUTH_SOCK
+2013-11-15 10:11:03 :: ~/bin
+ rons@fazigu$ ssh-add -l &> /dev/null ; case "$?" in 0) echo "Agent OK." ;; 2) eval $( ssh-agent ) && ssh-add ;; *) ssh-add ;; esac
+:hardcopydir $SCREEN_SESSION_HOME
+:chdir $SCREEN_SESSION_HOME
+:log on
+:idle 60 stuff "#" ## If at prompt??
+:startup_message off
+"ESC >" control sequence enters numeric keypad mode!
+:stuff "\033>"
+:msgwait 2
+:setsid off ## All windows in same process group as screen backend process.  "Breaks job control?"
+## Use :source <file> to run something like "subroutines" but I forget why I wanted that.  Maybe to attempt to loop over all windows...
+
+writebuf "%h[%n-%t]" ## hardstatus, window number, window title
+
+COMMENTS
+
+## whinge --if-trace "Starting $0 ..."
+## whinge --if-verbose 'Should be reading this if --verbose ...'
+## whinge --if-debug   'Should be reading this if --debug (or implied by --dry-run) ...'
+## whinge --if-dry-run '$ false && slippery-when-wet ## --dry-run' || whinge --if-verbose '$ slippery-when-wet ## "wet" run'
+
+function __buildWorkspaceHomeDirname() {
+	local workspaceName="$1" ;
+
+	echo "${HOME}/.screen/workspaces/${workspaceName}" ;
+}
+
+function __buildWorkspaceInitFilename() {
+	local workspaceName="$1" ;
+
+	echo "$( __buildWorkspaceHomeDirname $workspacename )/${workspaceName}/rc" ;
+}
+
+function __buildWindowHomeDirname() {
+	local workspaceName="$1" ;
+	local windowName="$2" ;
+
+	echo "$( __buildWorkspaceHomeDirname $workspaceName )/${windowName}" ;
+}
+
+function __buildWindowInitFilename() {
+	local workspaceName="$1" ;
+	local windowName="$2" ;
+
+	echo "$( __buildWindowHomeDirname  $workspaceName $windowName )/rc" ;
+}
+
+function __buildWindowHistFilename() {
+	local workspaceName="$1" ;
+	local windowName="$2" ;
+
+	echo "$( __buildWindowHomeDirname  $workspaceName $windowName )/history" ;
+}
+
+function __buildWindowLogFilename() {
+	local workspaceName="$1" ;
+	local windowName="$2" ;
+
+	echo "$( __buildWindowHomeDirname  $workspaceName $windowName )/logfile" ;
+}
+
+function __buildWindowCwdFilename() {
+	local workspaceName="$1" ;
+	local windowName="$2" ;
+
+	echo "$( __buildWindowHomeDirname  $workspaceName $windowName )/logfile" ;
+}
+
+
+function __ensureWorkspaceHome() {
+	local workspaceName="$1" ;
+	mkdir -p "$( __buildWorkspaceHomeDirname $workspaceName )" ;
+}
+
+function __ensureWindowHome() {
+	local workspaceName="$1" ;
+	local windowName="$2" ;
+
+	__ensureWorkspaceHome "$workspaceName" "$windowName" ;
+
+	mkdir -p "$( __buildWindowHomeDirname $workspaceName $windowName )" ;
+}
+
+function __windowNumbersAndNames() {
+	local workspaceName="${1}" ;
+	local workspaceHomeDirname="$( __buildWorkspaceHomeDirname $workspaceName )" ;
+	local windowNumberFilename='' ;
+	local windowNumber ;
+
+	for windowName in $( find "$workspaceHomeDirname" -type d -printf "%f\n" ) ; do
+		windowNumberFilename="${workspaceHomeDirname}/${windowName}/number" ;
+		if [ -e "$windowNumberFilename" ] ;  then
+			windowNumber=$( cat "$windowNumberFilename" ) ;
+			echo "$( cat $windowNumberFilename ) ${windowName}" ;
+		fi
+	done
+}
+
+function __buildWindowList() {
+	local workspaceName="${1}" ;
+
+	local workspaceHomeDirname="$( __buildWorkspaceHomeDirname $workspaceName )" ;
+	__ensureWorkspaceHome "$workspaceName" ; 
+
+## #	local windowNamesSorted='' ;
+## #	local windowNumber ;
+## #	for windowName in $( find "$( __buildWorkspaceHomeDirname $workspaceName )" -type d -printf "%f\n" ) ; do
+## 	for windowDir in $( ls $workspaceHomeDirname ) ; do
+## 		windowDir="$workspaceHomeDirname/$windowDir" ;
+## 		[ -d "$windowDir" ] || continue ; 
+## 		windowName="$( basename "$windowDir" )" ;
+## 
+## 		local windowNumber=$( cat "$windowDir/number" ) ;
+## 		local windowLine="$( echo -e "${windowNumber} ${windowDir}\n" )" ;
+## 		windowNamesSorted="${windowNamesSorted}${windowLine}"
+## #		windowList[${#windowList[@]}]="$windowName" ;
+## 	done
+## 
+## 	echo "$windowNamesSorted" ;
+
+	local windowList=() ;
+	local windowName ;
+
+	for windowName in $( __windowNumbersAndNames "$workspaceName" | sort -n | awk '{ print $2 }' ) ; do
+		windowList[${#windowList[@]}]="$windowName" ;
+	done
+
+	for windowName in ${windowList[@]} ; do
+		echo "source \"$( __buildWindowInitFilename $workspaceName $windowName )\"" ;
+	done
+}
+
+function __initWorkspace() {
+	local workspaceName="${1}" ;
+	local workspaceInitFilename="$( __buildWorkspaceInitFilename $workspaceName )" ;
+	local workspaceHomeDirname="$( __buildWorkspaceHomeDirname $workspaceName )" ;
+
+	__ensureWorkspaceHome "$workspaceName" ; 
+
+	cat <<-EORC > "${workspaceInitFilename}"
+## Generated by $0 @ $( date -Is ).
+
+source "$HOME/.screenrc"
+
+sessionname "$workspaceName"
+
+#setenv WORKSPACE_NAME "$workspaceName"
+#setenv WORKSPACE_HOME "$workspaceHomeDirname"
+
+hardcopydir "$workspaceHomeDirname"
+chdir       "$workspaceHomeDirname"
+
+startup_message off
+
+	EORC
+
+	__buildWindowList "$workspaceName" >> "$workspaceInitFilename" ;
+
+	echo >> "$workspaceInitFilename" ;
+
+}
+
+function __renameWindow() {
+	local workspaceName="$1" ;
+	local oldWindowName="$2" ;
+	local oldWindowHome="$( __buildWindowHomeDirname  $workspaceName $oldWindowName )" ;
+	local windowName="$3" ;
+	local windowHome="$( __buildWindowHomeDirname $workspaceName $windowName )" ;
+
+	if [ -d "$windowHome" ] ; then
+		croak "New window home directory «$windowHome» exists; please choose another name." ;
+	fi
+
+	mv "$oldWindowHome" "$windowHome" ;
+
+	__initWindow "$workspaceName" "$windowName" ;
+
+	local windowLogFilename="$( __buildWindowLogFilename $workspaceName $windowName )" ;
+	local windowHistFilename="$( __buildWindowHistFilename $workspaceName $windowName )" ;
+
+	screen -X title "$windowName" ;
+
+	## History first, or we fail to write the history after.  :)
+	screen -X stuff "export HISTFILE=$windowHistFilename\015" ;
+	screen -X stuff "export WINDOW_NAME=$windowName\015" ;
+	screen -X stuff "export WINDOW_HOME=$windowHome\015" ;
+	screen -X logfile "$windowLogFilename" ;
+}
+
+function __initWindow() {
+	local workspaceName="$1" ;
+	local windowName="$2" ;
+	local windowHome="$( __buildWindowHomeDirname  $workspaceName $windowName )" ;
+	local windowInitFilename="$( __buildWindowInitFilename $workspaceName $windowName )" ;
+	local windowLogFilename="$( __buildWindowLogFilename $workspaceName $windowName )" ;
+	local windowHistFilename="$( __buildWindowHistFilename $workspaceName $windowName )" ;
+
+	__ensureWindowHome "$workspaceName" "$windowName" ;
+
+	local reloadPrefix='' ;
+	[ "$HISTCMD" = '1' ] || reloadPrefix='history -d $(( --HISTCMD )) && ' ;
+
+	local reloadDirectives=() ;
+
+	local windowCwdFilename="$( __buildWindowCwdFilename $workspaceName $windowName )" ;
+	local windowCwd="$( cat "$windowCwdFilename" )" ;
+
+	if [ "$windowCwd" ] ; then
+		windowCwd="chdir $windowCwd" ; 
+	else
+		windowCwd='' ;
+	fi
+
+	reloadDirectives[${#reloadDirectives[@]}]="stuff \"[ -e '$windowLogFilename' ] && cat '${windowLogFilename}'\015\"" ;
+	reloadDirectives[${#reloadDirectives[@]}]="stuff \"[ -e '$windowLogFilename' ] && cat '${windowLogFilename}'\015\"" ;
+
+	[ -e "$windowHistFilename" ] || history -w "${windowHistFilename}" ; 
+
+	reloadDirectives[${#reloadDirectives[@]}]="stuff \"history -r '${windowHistFilename}'\015\"" ;
+
+	cat <<-EORC > "${windowInitFilename}"
+setenv WINDOW_NAME "$windowName"
+setenv WINDOW_HOME "$windowHome"
+setenv HISTFILE "${windowHistFilename}"
+
+screen -t "${windowName}"
+
+logfile "${windowLogFilename}"
+logfile flush 1
+#log on
+
+$windowCwd
+
+## Forces numlock on?
+#stuff "\033>"
+
+	EORC
+
+	local reloadDirective ;
+
+	echo "log off" >> "${windowInitFilename}" ;
+
+	for reloadDirective in "${reloadDirectives[@]}" ; do
+		echo "$reloadPrefix$reloadDirective" >> "${windowInitFilename}" ;
+	done
+
+	echo "log on" >> "${windowInitFilename}" ;
+}
+
+
+function __main() {
+	local windowName ;
+	local workspaceName ;
+	local workspaceInitFilename ;
+
+	local tempNameLabel="$( date +%m%d-%H%M%S )" ;
+
+	if [ "$STY" -a "$WORKSPACE_NAME" ] ; then
+		workspaceName="$WORKSPACE_NAME" ;
+
+		if [ "$NEW_WINDOW_NAME" ] ; then
+			__renameWindow "$workspaceName" "$WINDOW_NAME" "$NEW_WINDOW_NAME" ;
+		else
+			windowName="${1:-window-$tempNameLabel}" ;
+
+			__initWindow    "$workspaceName" "$windowName" ;
+			screen -X source $( __buildWindowInitFilename $workspaceName $windowName ) ;
+		fi
+
+#		screen -S "$workspaceName" -X "source $WINDOW_INIT"
+	elif [ ! "$STY" ]  ; then ## Creating a new workspace from outside screen.
+		workspaceName="${1:-workspace-$tempNameLabel}" ;
+		workspaceInitFilename="$( __buildWorkspaceInitFilename $workspaceName )" ;
+
+#		windowName="${2:-window-$tempNameLabel}" ;
+#		__initWindow    "$workspaceName" "$windowName" ;
+
+#	screen -S "$workspaceName" -p "$windowName" -X "stuff export SSH_AUTH_SOCK \"$SSH_AUTH_SOCK\"" ;
+#		[ -e "$workspaceInitFilename" ] || __initWorkspace "$workspaceName" ;
+		## Clobber the existing file, reload window init files.
+		__initWorkspace "$workspaceName" ;
+
+		screen -c "$workspaceInitFilename" ;
+	else
+		croak "Cannot start a new workspace from within a workspace." ;
+	fi
+}
+
+
+__main $@ ;
+
+## vim: ft=sh
+

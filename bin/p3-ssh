@@ -1,0 +1,77 @@
+#!/bin/bash
+## p3-ssh [user@]hostname
+##		Connect to a host at work.
+##
+##		--verbose	Whatever verbose usually means
+##		--help		This message
+##
+## -- 
+## quinnfazigu@gmail.com
+
+GOX=`getopt -o vhn --long 'verbose,help,dry-run' --name "$0" -- "$@"`
+if [ $? != 0 ] ; then echo "Aborting..." >&2 ; exit 1 ; fi
+
+eval set -- "$GOX"
+
+while true ; do
+    case "$1" in
+        -v|--verbose) 
+            verbose=1 ; shift ;;
+        -h|--help)
+            do_help=1 ; shift ;;
+        -n|--dry-run)
+            dry_run=1 ; shift ;;
+        --)
+            shift ; break ;;
+    esac
+done
+
+if [ $do_help ] ; then awk  '/^## -- $/ { exit } !/^#!/ { gsub("^#+[[:space:]]?", "") ; print }' $0 >&2 ; exit ; fi
+
+dest=$1 ; shift
+
+if [ ! "$dest" ] ; then
+	echo "missing required argument of destination host" > /dev/stderr
+	exit 1
+elif [[ ! $dest =~ '@' ]] ; then
+	dest="$USER@$dest"
+fi
+
+vpnc_cmdline='sudo vpnc-connect'
+ssh_user=$( echo $dest | awk -F@ '{ print $1 }' )
+ssh_host=$( echo $dest | awk -F@ '{ print $2 }' )
+
+if ( ! ping -c1 $ssh_host >& /dev/null ) ; then
+	echo "Cannot ping $ssh_host; are you connected to the VPN?" > /dev/stderr
+	echo -e "\tPress RETURN to exit." ; read
+
+	exit 1
+fi
+
+ssh_jumper_prefix='ssh rons@toolbox -t sudo'
+ssh_args="-X"
+ssh_cmdline=''
+#ssh_term='xterm-256color'
+
+if [[ $TERM =~ 'screen' ]] ; then
+##	ssh_term='screen-256color-bce'
+	ssh_term='screen-bce'
+elif [[ $TERM =~ 'xterm' ]] ; then
+	ssh_term='xterm-256color'
+else
+	ssh_term='linux'
+fi
+
+## export TERM=screen.xterm-xfree86
+## ssh rons@toolbox -t sudo ssh deploy-rons
+
+case "$ssh_host" in
+	deploy*)
+		ssh_cmdline="TERM=$ssh_term $ssh_jumper_prefix ssh deploy-rons" ;;
+	*)
+		ssh_cmdline="TERM=$ssh_term ssh $ssh_args $dest" ;;
+esac
+
+[ "$verbose" ] && echo "$ssh_cmdline" > /dev/stderr
+eval $ssh_cmdline
+

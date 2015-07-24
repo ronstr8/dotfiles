@@ -1,0 +1,13 @@
+
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Terminal=false
+Icon[C]=/home/rons/files/icons/icon-seevast.png
+Name[C]=rons@ads_99
+Comment[C]=Connect to Seevast ads_99 as rons
+Exec=x-terminal-emulator -name My-XTerm-Work -title ads_99@kanoodle -e /home/rons/bin/ssh-kanoodle.sh rons@ads_99
+Name=rons@ads_99
+Comment=Connect to Seevast ads_99 as rons
+Icon=/home/rons/files/icons/icon-seevast.png

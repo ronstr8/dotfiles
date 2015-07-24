@@ -1,0 +1,92 @@
+
+!XTerm*deleteIsDel:  true
+XTerm*toolBar:      false
+XTerm*faceName:     Consolas
+XTerm*faceSize:     9
+XTerm*italicULMode: true
+!XTerm*termName:		xterm-debian
+!XTerm*activeIcon:	false
+
+!XTerm*faceName:Nimbus Mono L
+!XTerm*faceSize:  11
+!XTerm*faceName:  DejaVu Sans Mono
+
+!UXTerm*faceSize: 14
+!UXTerm*italicULMode: true
+UXTerm.vt100.geometry: 80x30
+UXTerm.vt100.font: -misc-fixed-medium-r-normal--20-200-75-75-c-100-iso10646-1
+
+
+!*fontMenu*font1*Label:	Unreadable
+!*VT100*font1:		nil2
+!*IconFont:		nil2
+!*fontMenu*font2*Label:	Tiny
+!*VT100*font2:		5x7
+!*fontMenu*font3*Label:	Small
+!*VT100*font3:		6x10
+!*fontMenu*font4*Label:	Medium
+!*VT100*font4:		7x13
+!*fontMenu*font5*Label:	Large
+!*VT100*font5:		9x15
+!*fontMenu*font6*Label:	Huge
+!*VT100*font6:		10x20
+
+!! Are these supposed to be used buy SHIFT-KP[+-]?
+!XTerm*faceSize1: 1
+!XTerm*faceSize2: 5
+!XTerm*faceSize3: 7
+!XTerm*faceSize4: 9
+!XTerm*faceSize5: 14
+!XTerm*faceSize6: 9
+
+
+*VT100*background:      black
+*VT100*foreground:      gray
+!*vt100*font:            7x13
+*vt100*geometry:        120x40
+!*vt100*font:            9x15
+!*vt100*geometry:        80x40
+
+
+*vt100*visualBell:      false
+*VT100*scrollBar:       false
+*vt100*scrollBar:       false
+
+*vt100*eightBitInput:   true
+*vt100*scrollTtyOutput: false
+*vt100*scrollKey:       false
+
+XTerm*saveLines:        9600
+UXTerm*saveLines:        9600
+
+   *vt100*translations: #override \n\
+Shift <KeyPress> Prior:scroll-back(1, page) \n\
+ Shift <KeyPress> Next:scroll-forw(1, page)  \n\
+   Shift <KeyPress> Up:scroll-back(1, line)    \n\
+ Shift <KeyPress> Down:scroll-forw(1, line)  \n\
+ Shift <KeyPress> Home:scroll-back(1000, page) \n\
+  Shift <KeyPress> End:scroll-forw(1000, page)  \n\
+   Ctrl  <KeyPress> Up:string("0x10")            \n\
+ Ctrl  <KeyPress> Down:string("0x0E")          \n\
+ Ctrl  <KeyPress> Left:string("0x1B") string("B")       \n\
+Ctrl  <KeyPress> Right:string("0x1B") string("F") \n\
+       <KeyPress> Home:string("0x01") \n\
+        <KeyPress> End:string("0x05") \n\
+        <Key>BackSpace:    string(0x7F) \n\
+     Meta <KeyPress> V: insert-selection(CLIPBOARD) \n\
+     Meta <KeyPress> C: select-end(PRIMARY, CLIPBOARD) \n\
+     Meta <KeyPress> X: select-end(PRIMARY, CLIPBOARD, CUT_BUFFER0)\n\
+Shift<Btn4Down>,<Btn4Up>:scroll-back(1,line) \n\
+Shift<Btn5Down>,<Btn5Up>:scroll-forw(1,line) \n\
+Ctrl<Btn4Down>,<Btn4Down>:scroll-back(1,page) \n\
+Ctrl<Btn5Down>,<Btn5Up>:scroll-forw(1,page) \n\
+<Btn4Down>,<Btn4Up>:scroll-back(1,halfpage) \n\
+<Btn5Down>,<Btn5Up>:scroll-forw(1,halfpage) \n\
+Ctrl <KeyPress> Prior:string("0x1B") string("a") string("0x1B")\n
+
+XTerm*ttyModes:  erase 
+
+! vim: ft=xdefaults
+
+*on2Clicks: regex [[:alnum:]_./]+
+

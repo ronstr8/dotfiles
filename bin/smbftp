@@ -1,0 +1,10 @@
+#!/bin/bash
+## smbftp '\\fileserver\rons$\'
+
+netuser=${VPN_USER:-USER}
+netpath_raw=${1:-\\\\fileserver\\IT}
+netpath=${netpath_raw//fileserver/192.168.226.10}
+netdom='CORP'
+
+echo "Attempting to connect to $netpath as $netdom\\$netuser ..." > /dev/stderr
+smbclient --user=$netuser --workgroup=$netdom $netpath

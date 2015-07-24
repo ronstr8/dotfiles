@@ -1,0 +1,30 @@
+
+## These directives are questionable.  Might want to be nice and not
+## clobber existing settings (e.g. -merge with xrdb and something more
+## complex with xmodmap) if we've already been initialized.
+
+unset -f __initX11 ;
+function __initX11() {
+	which xrdb    &> /dev/null && [ -e $HOME/.Xdefaults ] && xrdb    $HOME/.Xdefaults
+	which xmodmap &> /dev/null && [ -e $HOME/.Xmodmap   ] && xmodmap $HOME/.Xmodmap
+
+#	stty erase ^H
+
+	## Xterm sequence to force Application keypad off.
+	## @see http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+	echo -e "\033>"
+}
+
+if ! tty --silent ; then
+    ## Do nothing if not connected to a TTY.
+    false ;
+elif [ "$STY" ] ; then
+    ## Do nothing if inside a screen session.
+    false ;
+elif [ "$DISPLAY" ] ; then
+    __initX11 ;
+fi
+
+unset -f __initX11 ;
+
+# vim: ft=sh

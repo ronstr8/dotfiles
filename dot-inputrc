@@ -1,0 +1,51 @@
+# re-read-init-file (C-x C-r)
+#"\e[1~": beginning-of-line
+#"\e[4~": end-of-line
+#"\e[3~": delete-char
+$include /etc/inputrc
+#Home: beginning-of-line
+#End: end-of-line
+#DEL: delete-char
+
+## Mappings for Ctrl-left-arrow and Ctrl-right-arrow for word moving.
+## These conflict with vim mappings, so only implement them if Bash.
+## @see http://askubuntu.com/questions/53556/strange-characters-appearing-when-i-use-the-ctrl-and-arrow-keys-to-navigate
+
+$if Bash
+    "\e[1;5C": forward-word
+    "\e[5C":   forward-word
+    "\e\e[C":  forward-word
+
+    "\e[1;5D": backward-word
+    "\e[5D":   backward-word
+    "\e\e[D":  backward-word
+$endif
+
+#$if Vim
+##"\e[1;5C": ":bnext\n"
+##"\e[5C":   ":bnext\n"
+##"\e\e[C":  ":bnext\n"
+##
+##"\e[1;5D": ":bprev\n"
+##"\e[5D":   ":bprev\n"
+##"\e\e[D":  ":bprev\n"
+#
+#"\e[1;5C":
+#"\e[5C":
+#"\e\e[C":
+#
+#"\e[1;5D":
+#"\e[5D":
+#"\e\e[D":
+#$endif
+
+#C-W: backword-kill-word
+
+set horizontal-scroll-mode off
+
+# @see http://consttype.blogspot.com/2007/08/mysql-command-line-tricks.html
+#$if Mysql
+#    set keymap vi
+#    set editing-mode vi
+#$endif
+

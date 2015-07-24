@@ -1,0 +1,85 @@
+## http://dotfiles.org/.screenrc
+
+defscrollback   9999
+vbell           off
+nethack         on
+
+defwrap on
+
+hardstatus on
+hardstatus alwayslastline
+hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
+
+#escape                 "^xx"
+#bindkey -d kb stuff "^[[3~"
+#bindkey -k kb stuff "\177"
+#bindkey -k kb stuff ^H
+#termcapinfo xterm* 'bc@:bs@'
+#termcapinfo xterm* OL=10000
+#termcapinfo xterm*|xs|rxvt ti@:te@
+## No idea what below was for.
+##bindkey -d -k kb stuff "\010"
+
+bindkey -d -a -k f0 stuff 0
+bindkey -d -a -k f1 stuff 1
+bindkey -d -a -k f2 stuff 2
+bindkey -d -a -k f3 stuff 3
+bindkey -d -a -k f4 stuff 4
+bindkey -d -a -k f5 stuff 5
+bindkey -d -a -k f6 stuff 6
+bindkey -d -a -k f7 stuff 7
+bindkey -d -a -k f8 stuff 8
+bindkey -d -a -k f9 stuff 9
+bindkey -d -a -k f+ stuff +
+bindkey -d -a -k f- stuff -
+bindkey -d -a -k f* stuff *
+bindkey -d -a -k f/ stuff /
+bindkey -d -a -k fq stuff =
+bindkey -d -a -k f. stuff .
+bindkey -d -a -k f, stuff ,
+bindkey -d -a -k fe stuff ^M
+
+bindkey -d    -k f0 stuff 0
+bindkey -d    -k f1 stuff 1
+bindkey -d    -k f2 stuff 2
+bindkey -d    -k f3 stuff 3
+bindkey -d    -k f4 stuff 4
+bindkey -d    -k f5 stuff 5
+bindkey -d    -k f6 stuff 6
+bindkey -d    -k f7 stuff 7
+bindkey -d    -k f8 stuff 8
+bindkey -d    -k f9 stuff 9
+bindkey -d    -k f+ stuff +
+bindkey -d    -k f- stuff -
+bindkey -d    -k f* stuff *
+bindkey -d    -k f/ stuff /
+bindkey -d    -k fq stuff =
+bindkey -d    -k f. stuff .
+bindkey -d    -k f, stuff ,
+bindkey -d    -k fe stuff ^M
+
+defflow off
+
+# terminfo and termcap for nice 256 color terminal
+# allow bold colors - necessary for some reason
+attrcolor b ".I"
+# tell screen how to set colors. AB = background, AF=foreground
+termcapinfo xterm* 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+# erase background with current bg color
+defbce "on" 
+#2009-11-13 09:12:35 :: /usr/share/terminfo/s
+# rons@ga-e7aum-ds2h$ sudo ln -s screen-256color-bce-s screen-256-bce-s
+#2011-11-11 14:22:03 :: /lib/terminfo/s
+# rons@GA-E7AUM-DS2H$ sudo ln -s screen-256color-bce-s screen-256-bce-s
+#2011-11-11 14:27:02 :: /lib/terminfo/s
+# rons@GA-E7AUM-DS2H$ sudo ln -sf screen-256color-bce screen-256-bce-s 
+##term 'screen-256-bce'
+term 'screen-256color-bce'
+defutf8 "on"
+#utf8    "on" "on"  ## Use -U instead?
+
+msgwait 2
+startup_message off
+
+
+

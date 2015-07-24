@@ -1,0 +1,284 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+mp3inform - Sets MP3 id3 tags based on filename and user-supplied defaults.
+
+=head1 SYNOPSIS
+
+mp3inform [options] @filenames
+
+  --year=s
+  --artist=s
+  --album=s
+  --tracknum=s
+  --title=s
+  --genre=s
+  --comment=s
+
+  --force-overwrite-existing
+  --prefix-title-with-tracknum
+
+  --help        show this message
+  --man         show full perldoc
+  --verbose     output additional info to stderr
+
+Ron "Quinn" Straight may not have achieved; add further usage notes?
+
+=head1 DESCRIPTION
+
+Ron "Quinn" Straight did not achieve; needs to write a description.
+
+=cut
+
+use strict;
+use warnings;
+use English qw( -no_match_vars );
+
+### Compact Bootstrapper Told You He Was Hardcore {{{
+BEGIN
+{
+	use Getopt::Long qw( GetOptionsFromArray :config passthrough );
+	use Data::Dumper; local $Data::Dumper::Terse = 1; local $Data::Dumper::Indent = 0;
+
+	my %rtparams;
+
+	sub rtparams { shift; die 'rtparams() takes no args.' if @ARG; wantarray ? (( %rtparams )) : \%rtparams }
+	sub rtparam { my $self = shift; my $name = shift;
+		$rtparams{$name} = shift if @ARG;
+		return unless exists $rtparams{$name};
+		return $rtparams{$name}; }
+	sub verbosity { $rtparams{'verbosity'} || 0 } ## $rtparams{'debug'} ? 11 : ( $rtparams{'verbose'} || 0 ) }
+	sub verbose   {   shift->verbosity }
+	sub debug     { ( shift->verbosity > 10 ) ? 1 : 0 }
+
+	GetOptionsFromArray(\@ARGV, \%rtparams, qw( db=s debug! trace! verbose+ quiet! ));
+	$rtparams{'verbosity'}++    if defined $rtparams{'verbose'};
+	$rtparams{'verbosity'} = 11 if defined $rtparams{'debug'};
+
+	my($TRACE, $HOME) = ( $rtparams{'trace'}, $ENV{'HOME'} );
+
+	my(@alts) = grep { -d } map { (glob("$HOME/$_")) }
+		qw( checkouts/prod/lib checkouts/cpan/*/lib perl/lib MyRoot/lib/perl/*/ MyRoot/lib/perl/*/auto );
+	for (@alts) { unshift(@INC, $_); $TRACE && warn "\t ... \@INC += $_\n" }
+
+	my $shiftr = sub { @_ && $_[0] && ((ref($_[0]) || $_[0]) eq __PACKAGE__) };
+	my $whargs = sub { my $dp = shift; my $ap = $_[-1] || '';
+		return ( @_, (@_ == 1) ? [] : (), ($ap =~ /$dp/i) ? () : "\U$dp!" ); };
+	my $maybem = sub { my($ee) = @_; return if not($TRACE) or not($ee);
+		$ee =~ s/^(Can't locate \S+ in \S+).+$/$1/ms; warn "$ee\n"; };
+
+	my(%optsub) = (
+		'whinger'   => 'use Devel::Whinger; my $w = Devel::Whinger->new( "whinging_for" => __PACKAGE__ ); sub { $w->whingef(@_); };',
+		'colorizer' => 'use Term::ANSIColor qw(); sub { Term::ANSIColor::color(shift) };',
+	);
+	for (( keys(%optsub) )) { $optsub{$ARG} = eval $optsub{$ARG}; $maybem->("$EVAL_ERROR"); };
+
+	my(%inj);
+
+	$inj{'color'} = sub { shift(@_) if $shiftr->(@_);
+		return $optsub{'colorizer'} ? $optsub{'colorizer'}->(@_) : ''; };
+
+	$inj{'whingef'} = sub { shift(@_) if $shiftr->(@_);
+		return $optsub{'whinger'}->(@_) if $optsub{'whinger'};
+		my($f, $ar, $w) = @_;
+		my(@fargs) = map { my $ae = $_; my $rt = ref($ae) || '';
+			if (not($rt)) { $ae }
+			elsif ( $rt eq 'HASH' ) { no warnings; my(@kk) = keys(%{ $rt });
+				eval { (@kk == 1) && ($rt->{$kk[0]} =~ /^[a-z]+$/) && Dumper(\$rt->{$kk[0]}) } || Dumper($rt);
+			}
+			elsif ( $rt eq 'ARRAY' ) { no warnings; my(@vv) = (@{ $ae });
+				eval { (@vv == 2) && ($vv[0] =~ /^[a-z]+$/) && Dumper(\$vv[1]) } || Dumper($ae);
+			}
+			else { Dumper($ae); }
+		} @{ $ar };
+		my $m = ( sprintf($f, @fargs) // '' ) . "\n";
+		( $w && ( $w =~ /^DIE/i ) ) ? die($m) : warn($m); };
+
+	$inj{'dirgef'} = sub { shift(@_) if $shiftr->(@_);
+		eval q{ print STDERR $inj{'color'}->('bold red'); };
+		$inj{'whingef'}->(( $whargs->('die', @_) ));
+	};
+
+	$inj{'debugf'} = sub { shift(@_) if $shiftr->(@_);
+		eval q{ print STDERR $inj{'color'}->('yellow'); STDERR->flush; };
+		eval  { $inj{'whingef'}->(( $whargs->('debug', @_) )) };
+		eval q{ print STDERR $inj{'color'}->('reset'); STDERR->flush; };
+	};
+
+	$inj{'tracef'} = sub { return unless $TRACE; shift(@_) if $shiftr->(@_);
+		eval q{ print STDERR $inj{'color'}->('red'); STDERR->flush; };
+		eval  { $inj{'whingef'}->(( $whargs->('notify', @_) )) };
+		eval q{ print STDERR $inj{'color'}->('reset'); STDERR->flush; };
+	};
+
+
+	{ no strict 'refs'; *{'main' . '::' . $_} = $inj{$_} for keys %inj; };
+}
+### }}}
+
+use File::Spec qw();
+use MP3::Info  qw( get_mp3tag set_mp3tag );
+
+### Options and Run-Time Parameters {{{
+{
+
+## According to the --opt:s documentation in Getopt::Long, parameters that
+## accept an optional value which are given on the command line but do not
+## include a value will be assigned EMPTY STRING or ZERO according to their
+## underlying types.
+
+	my $rtparams_hr = __PACKAGE__->rtparams();
+	my %getopt = (
+#yy		'single-string=s' => { 'default' => 'GET' },
+#		'multi-string=s@' => { 'default' => +[] },
+
+		'year=s'     => {},
+		'artist=s'   => {},
+		'album=s'    => {},
+		'tracknum=s' => {},
+		'title=s'    => {},
+		'genre=s'    => {},
+		'comment=s'  => {},
+
+		'force-overwrite-existing!'   => {},
+		'prefix-title-with-tracknum!' => {},
+
+		'dry-run|n!'      => {},
+
+		'verbose+'        => { 'default' =>  0 },
+		'debug!'          => { 'default' =>  0 },
+
+		'man!'            => {},
+	);
+	$getopt{$ARG} = {} for qw(  );
+
+
+	use Getopt::Long; use Pod::Usage;
+	my $getopt = new Getopt::Long::Parser 'config' => [qw/auto_help/];
+	   $getopt->configure( qw/auto_help/ );
+	   $getopt->getoptions($rtparams_hr, keys %getopt) or die "Failed to parse all options!\n";
+	Pod::Usage::pod2usage({-verbose => 2}) if $rtparams_hr->{'man'};
+
+	while (my($opt, $conf_hr) = each(%getopt)) { next unless $conf_hr;
+		$opt =~ s/^(--)?([a-z_0-9-]+)(\W.*)?$/$2/gi;
+		my $val = $rtparams_hr->{$opt} //= $conf_hr->{'default'} // '';
+		next if $val ne ''; next unless my $rmsg = $conf_hr->{'required'};
+		die sprintf("Missing parameter --%s: %s\n", $opt, $rmsg || 'Required!');
+	}
+}
+### }}}
+
+my $self = __PACKAGE__;
+
+## $self->whingef('NOTIFY:    %%rtparams', [\%main::rtparams], 'NOTIFY!');
+## $self->whingef('--verbose: %%rtparams', [\%main::rtparams]);
+## $self->debugf( '--debug:   %%rtparams', [\%main::rtparams]);
+## $self->tracef( '--trace:   %%rtparams', [\%main::rtparams]);
+## $self->dirgef( 'DIRGEF:    %%rtparams', [\%main::rtparams]);
+
+my(@infos) = qw( YEAR ARTIST ALBUM TRACKNUM TITLE GENRE COMMENT );
+
+my $is_dry_run      = $self->rtparam('dry-run');
+my $force_overwrite = $self->rtparam('force-overwrite-existing');
+my $prefix_title    = $self->rtparam('prefix-title-with-tracknum');
+
+foreach my $filespec (@ARGV) {
+	my($vol, $path, $fn) = File::Spec->splitpath($filespec);
+	next unless $fn =~ /\.mp3/i;
+
+	my $oldFileInfo  = get_mp3tag($fn) || {};
+	my $fileDefaults = derive_mp3info_defaults_from_filename($fn);
+
+	my(%newFileInfo);
+
+	$self->whingef("Processing file «$fn» ...");
+
+	foreach my $infoKey (@infos) {
+		my $userInfo     = $self->rtparam(lc($infoKey));
+		my $derivedInfo  = $fileDefaults->{$infoKey};
+		my $existingInfo = $oldFileInfo->{$infoKey};
+
+		if ($userInfo) {
+			$newFileInfo{$infoKey} = $userInfo;
+			$self->debugf("... $infoKey will be set to «%s» %s.",
+				[ $newFileInfo{$infoKey}, "from user default --\L$infoKey" ]);
+		}
+		elsif ($derivedInfo and (!$existingInfo or $force_overwrite)) {
+			$newFileInfo{$infoKey} = $derivedInfo;
+			$self->debugf("... $infoKey will be set to «%s» %s.",
+				[ $newFileInfo{$infoKey}, "derived from its filename" ]);
+		}
+		elsif ($existingInfo) {
+			$newFileInfo{$infoKey} = $existingInfo;
+			$self->debugf("... $infoKey of «%s» exists and will be preserved.",
+				[ $newFileInfo{$infoKey} ]);
+		}
+		else {
+			$self->debugf("... $infoKey unchanged - failed to get a value.");
+		}
+	}
+
+	my $title = $newFileInfo{'TITLE'};
+	my $track = $newFileInfo{'TRACKNUM'};
+
+	if ($prefix_title and $track and ($title !~ /\<$track\>/)) {
+		$newFileInfo{'TITLE'} = sprintf('%03d - %s', $track, $title);
+		$self->debugf("... re-writing title to «%s» as per --prefix-title-with-tracknum.",
+			[ $newFileInfo{'TITLE'} ]);
+	}
+
+	$self->whingef("File «%s» info will be set to: %s", [$fn, { 'dump' => \%newFileInfo }], 'NOTIFY');
+	set_mp3tag($fn, \%newFileInfo) unless $is_dry_run;
+
+	my $nowFileInfo = get_mp3tag($fn);
+	$self->debugf("File «%s» info is now: %s", [$fn, { 'dump' => $nowFileInfo }]);
+}
+
+sub derive_mp3info_defaults_from_filename {
+	my($fn) = @ARG;
+
+	my(%fileDefaults);
+
+	return \%fileDefaults
+		unless ( $fn =~ /^((Episode|Chapter)\s*)(?<TRACKNUM>\d+)\s*-\s*(?<TITLE>.+)$/ );
+
+	$fileDefaults{$ARG} = $+{$ARG} for qw( TRACKNUM TITLE );
+
+	$fileDefaults{'TITLE'} =~ s/\.mp3$//i;
+	$fileDefaults{'TRACKNUM'} = int($fileDefaults{'TRACKNUM'});
+
+	$self->debugf("File «%s» seems to contain track #%s entitled «%s».",
+		[$fn, (( map { $fileDefaults{$ARG} } qw( TRACKNUM TITLE ) ))]);
+
+	return \%fileDefaults;
+}
+
+__END__
+
+=head1 BUGS
+
+=over
+
+=item Ron "Quinn" Straight achieved with distinction; no bugs!
+
+=back
+
+=head1 SEE ALSO
+
+Ron "Quinn" Straight may not have achieved; point to related topics?
+
+
+=head1 AUTHOR
+
+Ron "Quinn" Straight E<lt>quinnfazigu@gmail.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014 (Freelance Hacker)
+
+=cut
+
+## vim: foldmethod=marker
+
+

@@ -1,0 +1,135 @@
+#!/bin/bash
+## mooctl start|stop --world=<world-config-file>
+##	Start the MOO server with parameters in the given file.
+##
+## -- 
+## quinnfazigu@gmail.com
+
+GOX=`getopt -o vhw: --long 'verbose,help,world:' --name "$0" -- "$@"`
+if [ $? != 0 ] ; then echo "Aborting..." >&2 ; exit 1 ; fi
+
+eval set -- "$GOX"
+
+while true ; do
+    case "$1" in
+        -v|--verbose) 
+            verbose=1 ; shift ;;
+        -h|--help)
+            do_help=1 ; shift ;;
+        -w|--world)
+			shift
+            world_nick=$1 ; shift ;; 
+        --)
+            shift ; break ;;
+    esac
+done
+
+if [ $do_help ] ; then awk  '/^## -- $/ { exit } !/^#!/ { gsub("^#+[ \t]?", "") ; print }' $0 >&2 ; exit ; fi
+
+LAMBDAMOO="/usr/local/bin/moo"
+WORLD_DIR="$HOME/src/MUD/MOO/worlds"
+COMPRESS="/bin/bzip2"
+COMPRESS_SUFFIX="bz2"
+
+if [ $# -lt 1 -o $# -gt 1 ]; then
+	echo "Usage: $0 start|stop --world=<world>" > /dev/stderr
+	exit 1
+elif [ ! "$world_nick" ] ; then
+	echo "Missing required parameter --world" > /dev/stderr
+	exit 1
+fi
+
+world_action=$1
+
+
+#world_nick=$1
+world_home="$WORLD_DIR/$world_nick"
+world_conf="$world_home/world.conf"
+
+if [ ! -r $world_conf ] ; then
+	echo "Failed to open config for world $world_nick at $world_conf" > /dev/stderr
+	exit 1
+fi
+
+source $world_conf
+
+## TODO :: Verify that all required variables are found
+## port
+
+world_port="${port:=7000}"
+world_db="$world_home/world.db"
+world_log="$world_home/world.log"
+world_pid="$world_home/world.pid"
+
+[ "$verbose" ] && ( echo "Cd to $world_home ... " > /dev/stderr )
+
+cd $world_home || ( echo "cannot chdir to world home $world_home" > /dev/stderr ; exit 1 )
+
+dbfile_old="${world_db}-$(date -Is)"
+dbfile_now="${world_db}"
+dbfile_new="${world_db}.new"
+dbfile_zip="$dbfile_old.$COMPRESS_SUFFIX"
+
+logfile_old="${world_log}-$(date -Is)"
+logfile_now="${world_log}"
+
+pidfile_now="${world_pid}"
+
+if [ "$world_action" = "kill" ] ; then
+	if [ -r "$pidfile_now" ] ; then
+		world_pid="$( cat $pidfile_now )"
+		echo "Killing world $world_nick with KILL, process-id $world_pid ..." > /dev/stderr
+		kill -9 $world_pid
+		rm $pidfile_now
+		exit $?
+	else
+		echo "No pid file $pidfile_now for world $world_nick; aborting" > /dev/stderr
+		exit 1
+	fi
+elif [ "$world_action" = "stop" ] ; then
+	if [ -r "$pidfile_now" ] ; then
+		world_pid="$( cat $pidfile_now )"
+		echo "Killing world $world_nick with QUIT, process-id $world_pid ..." > /dev/stderr
+		kill $world_pid
+		rm $pidfile_now
+		exit $?
+	else
+		echo "No pid file $pidfile_now for world $world_nick; aborting" > /dev/stderr
+		exit 1
+	fi
+elif [ "$world_action" != "start" ] ; then
+	echo "Unknown action $world_action; use start or stop" > /dev/stderr
+	exit 1
+fi
+
+if [ -r "$pidfile_now" ] ; then
+	world_pid="$( cat $pidfile_now )"
+	if ( ps --pid=$world_pid > /dev/null ) ; then
+		echo "World $world_nick already running with process-id $world_pid; aborting" > /dev/stderr
+		exit 1
+	else
+		echo "World $world_nick identified with process-id $world_pid, which appears stale; removing it..." > /dev/stderr
+		rm $pidfile_now
+	fi
+fi
+
+if [ ! -r $dbfile_now ]; then
+	echo "Unknown database: ${dbfile_now}"
+	exit 1
+fi
+
+if [ -r $dbfile_new ]; then
+	mv $dbfile_now $dbfile_old
+	mv $dbfile_new $dbfile_now
+	$COMPRESS $dbfile_old
+fi
+
+if [ -r $logfile_now ]; then
+	mv $logfile_now $logfile_old
+fi
+
+[ "$verbose" ] && ( echo "Starting world $world_nick on port $world_port ... " > /dev/stderr )
+echo "$( date ): RESTARTED" >> $db_prefix.log
+nohup $LAMBDAMOO $dbfile_now $dbfile_new $world_port >> $logfile_now 2>&1 &
+echo "$!" > $pidfile_now
+

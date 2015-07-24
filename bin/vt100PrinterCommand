@@ -1,0 +1,9 @@
+#!/bin/bash
+
+unset -f __main ; function __main() {
+    local tmpFile="/tmp/vt100PrintOut-$$-$UID-$( date +%s ).dat" ;
+    # trap "rm -f '$tmpFile'" EXIT ;
+    cat > "$tmpFile" ;
+    rvim -b -R -c 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim' "$tmpFile" ;
+    rm -f "$tmpFile" ;
+} ; __main $* ; unset -f __main ;

@@ -1,0 +1,83 @@
+#!/bin/bash
+## turboprint-print-any --copies=n <file> <-- @tpprint-args>
+##
+##		--verbose	Whatever verbose usually means
+##		--dry-run   Ditto
+##		--help		This message
+## -- 
+## quinnfazigu@gmail.com
+
+GOX=`getopt -o vhnc --long 'verbose,help,dry-run,copies' --name "$0" -- "$@"`
+if [ $? != 0 ] ; then echo "Aborting..." >&2 ; exit 1 ; fi
+
+eval set -- "$GOX"
+
+verbose=""
+do_help=""
+dry_run=""
+copies="1"
+infile=""
+outfile=""
+
+while true ; do
+    case "$1" in
+        -v|--verbose) 
+            verbose=1 ; shift ;;
+        -h|--help)
+            do_help=1 ; shift ;;
+        -n|--dry-run)
+            dry_run=1 ; shift ;;
+        -c|--copies) 
+            copies="$1" ; shift ;;
+        --)
+            shift ; break ;;
+        *) 
+            infile="$1" ; shift ;;
+    esac
+done
+
+if [ $do_help ] ; then awk  '/^## -- $/ { exit } !/^#!/ { gsub("^#+[[:space:]]?", "") ; print }' $0 >&2 ; exit ; fi
+
+infile="$1" ; shift
+
+if [ ! "$infile" ] ; then
+	echo "missing required argument of input filename" > /dev/stderr
+	exit 1
+elif [ ! -r "$infile" ] ; then
+	echo "failed to read infile «$infile»" > /dev/stderr
+	exit 1
+fi
+
+outfile=$( basename "$infile" )
+outfile="/tmp/{$outfile}.pbm"
+
+if [ -e "$outfile" ] ; then
+	echo "outfile «$outfile» already exists!" > /dev/stderr
+	exit 1
+fi
+
+convert_cmdline=$( printf 'convert "%s" "%s"' "$infile" "$outfile" )
+
+[ "$verbose" ] && echo "running «$convert_cmdline» ... " > /dev/stderr
+eval $convert_cmdline
+
+if [ ! -r "$outfile" ] ; then
+	echo "failed to read converted outfile «$outfile»" > /dev/stderr
+	exit 1
+else
+	[ "$verbose" ] && printf "converted «$infile» to «$outfile» ... " > /dev/stderr
+fi
+
+tpcfg="$( tpconfig --getcommandline )"
+tp_cmdline=$( printf 'tpprint %s %s "%s"', "$tpcfg" "$*" "$outfile" )
+
+if [ "$dry_run" ] ; then
+	[ "$verbose" ] && echo "would have run «$tp_cmdline» ... " > /dev/stderr
+else
+	[ "$verbose" ] && echo "running «$tp_cmdline» ... " > /dev/stderr
+	eval $tp_cmdline
+fi
+
+echo "failed to read converted outfile «$outfile»" > /dev/stderr
+rm -f "$outfile"
+

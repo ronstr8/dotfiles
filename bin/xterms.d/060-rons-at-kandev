@@ -1,0 +1,18 @@
+[Desktop Entry]
+Encoding=UTF-8
+TryExec=gnome-terminal
+Icon=gnome-terminal
+Type=Application
+X-GNOME-DocPath=gnome-terminal/index.html
+X-GNOME-Bugzilla-Bugzilla=GNOME
+X-GNOME-Bugzilla-Product=gnome-terminal
+X-GNOME-Bugzilla-Component=BugBuddyBugs
+X-GNOME-Bugzilla-Version=2.22.3
+Categories=GNOME;GTK;Utility;TerminalEmulator;
+Icon[C]=/home/rons/files/icons/icon-seevast.png
+Terminal=false
+Name=rons@kandev
+Name[C]=rons@kandev
+Comment=Connect to kandev (Seevast)
+Comment[C]=Connect to kandev (Seevast)
+Exec=x-terminal-emulator -title 'kandev' -e /home/rons/bin/p3-ssh rons@kandev

@@ -1,0 +1,259 @@
+#!/bin/bash
+## screen-ls [options] @args
+##
+##	List all running screen sessions and their windows
+##
+##  --keep-staging-files Do not delete intermediate staging files when finished.
+##
+##  --dry-run  Skip doing anything destructive.  Safe, idempotent, verbose.
+##
+##  --verbose  Include more output at verbosity level 1.
+##  --debug    ... add 10 to the verbosity value.
+##  --trace    ... and 20 to the verbosity value.
+##
+##  --terse    Omit any unnecessary embellishment from output.
+##  --laconic  Even less output.
+##  --silent   Never print anything.
+##
+##  --help     Show this message.
+##
+## -- 
+## Ron "Quinn" Straight <quinnfazigu@gmail.com>
+
+OPTIONS_SHORT='hvn'
+OPTIONS_LONG='help,verbose,dry-run,debug,trace,terse,laconic,silent,keep-staging-files'
+GETOPT_OUTPUT="$( getopt -o "$OPTIONS_SHORT" --long "$OPTIONS_LONG" --name "$0" -- "$@" )"
+
+[ "$GETOPT_OUTPUT" ] && eval set -- "$GETOPT_OUTPUT" || exit 1
+
+DRY_RUN=0
+VERBOSITY=0
+VERBOSISM=()
+KEEP_STAGING_FILES=""
+
+while true ; do case "$1" in
+	-h|--help )
+		awk  '/^## -- $/ { exit } !/^#!/ { gsub("^#+ ?", "") ; print }' $0 >&2 ; exit ;;
+	-v|--verbose )
+		VERBOSITY+=1 ; VERBOSISM[${#VERBOSISM[@]}]='verbose' ; shift ;;
+	-n|--dry-run )
+		DRY_RUN=1 ; VERBOSITY+=1 ; VERBOSISM[${#VERBOSISM[@]}]='dry-run' ; shift ;;
+	--debug )
+		VERBOSITY+=10 ; VERBOSISM[${#VERBOSISM[@]}]='debug' ; shift ;;
+	--trace )
+		TRACE='trace' ; VERBOSITY+=20 ; VERBOSISM[${#VERBOSISM[@]}]='trace' ; shift ;;
+	--terse )
+		TERSE='terse' ; shift ;;
+	--laconic )
+		LACONIC='laconic' ; VERBOSITY=$(( VERBOSITY-21 )) ; shift ;;
+	--silent )
+		SILENT='silent' ; VERBOSITY=$(( VERBOSITY-31 )) ; shift ;;
+	--keep-staging-files )
+		KEEP_STAGING_FILES='keep' ; shift ;;
+	-- )
+		shift ; break ;;
+esac ; done
+
+function whinge() {
+	[ "$SILENT" ] && return 0
+	[ "$*"      ] || return 0
+
+	case "$1" in
+		--if-dry* )
+			[ $DRY_RUN   -gt  0 ] && shift || return 1 ;;
+		--if-trac* )
+			[ $VERBOSITY -ge 20 ] && shift || return 1 ;;
+		--if-debug* )
+			[ $VERBOSITY -ge 10 ] && shift || return 1 ;;
+		--if-verbos* )
+			[ $VERBOSITY -ge  1 ] && shift || return 1 ;;
+	esac
+
+	if [ ! "$WHINGE_FMT" ] ; then
+		[ "$TERSE"   ] || WHINGE_FMT=" ${0##*/}<""$$>${VERBOSISM[@]:+« ${VERBOSISM[@]}»}"
+		[ "$LACONIC" ] || WHINGE_FMT="[%s]${WHINGE_FMT} "
+		WHINGE_FMT="${WHINGE_FMT}%s"
+		WHINGE_DATE_FMT="%Y-%m-%dT%H:%M:%S${TRACE:+".%N"}"
+	fi
+
+	printf "$WHINGE_FMT\n" "$( date +"$WHINGE_DATE_FMT" )" "$*" 1>&2
+}
+
+function oneManLeave() {
+	if [ ! "$KEEP_STAGING_FILES" -a -d "$STAGING_DIR" ] ; then
+		rm -rfd "$STAGING_DIR"
+	fi
+
+	if [ "$XTERM_PROCESS_ID" ] ; then
+		## I think this killing (with screen -D avoiding a fork) may have been
+		## destroying the screen sessions to which the xterm was attaching!
+		kill "$XTERM_PROCESS_ID" 2> /dev/null
+	fi
+
+	cd "$STARTING_DIR"
+}
+
+function croak() {
+	local exit_status=1
+
+	if [[ "$1" =~ '^[0-9]\+$' ]] ; then
+		exit_status=$1 ; shift
+	fi
+
+	whinge "$*"
+
+	oneManLeave
+
+	exit $exit_status
+}
+
+## whinge --if-trace "Starting $0 ..."
+## whinge --if-verbose 'Should be reading this if --verbose ...'
+## whinge --if-debug   'Should be reading this if --debug ...'
+## whinge --if-dry-run '$ false && slippery-when-wet ## --dry-run' || whinge --if-verbose '$ slippery-when-wet ## "wet" run'
+
+STARTING_DIR="$PWD"
+STAGING_DIR=""
+WINDOWLIST_STRING='screenWindows[%n]=%t'
+WINDOWLIST_RE='screenWindows\[[0-9]+\]=[[:print:]]+'
+SESSIONLIST_RE='^\s+[0-9]\S+.*tached' ## For awk '/.../ { print $1 }' or egrep -o '...' | cut -f2
+
+#SCREEN_COMMAND_FMT="screen -d -r '%s' %s -X eval '%s'"
+SCREEN_COMMAND_FMT="screen -d -r '%s' %s -X %s"
+
+XTERM_PROCESS_ID=""
+XTERM_LOG_GLOB="Xterm*og.*"
+XTERM_LOG_MOCK_FILE="XtermMockedLog.$$.txt"
+XTERM_LOG_MOCK_CONTENTS="$( echo -ne "\n\tscreenWindows[0]=WindowZero\n\tscreenWindows[1]=WindowOne\n\n" )"
+
+SESSION_SUBDIR_FMT='%s'
+#SESSION_HARDCOPY_FMT='%d.hardcopy'
+#SESSION_WINDOW_TITLE_FMT='%s/%d.title'
+
+function oneManEnter() {
+	STAGING_DIR="$( mktemp --directory '/tmp/windowlicker-XXXXXX' )"
+
+	cd "$STAGING_DIR" || croak "Failed to cd to «$STAGING_DIR».  Cleanup and die."
+}
+
+function pushScreenCommands() {
+	local screenSession="$1" ; shift
+	local windowRef="$1"  ; shift
+
+	local screenCommand=""
+	local shellCommand=""
+	local windowSelectorArg=""
+
+	[ "$windowRef" ] && windowSelectorArg="-p '$windowRef'"
+
+	for screenCommand in "$@" ; do
+		shellCommand="$( printf "$SCREEN_COMMAND_FMT" "$screenSession" "${windowSelectorArg}" "$screenCommand" )"
+
+		whinge --if-debug "\$ $shellCommand ..."
+		[ $DRY_RUN -eq 0 ] && eval "$shellCommand"
+	done
+}
+
+function writeSessionState() {
+	local screenSession="$1"
+##	local screenSession="$1"
+	local screenCommand="xterm -l -e screen -x -d -r $screenSession &" # \; exit & ## Or -x?
+
+	whinge --if-verbose "\$ $screenCommand ..."
+
+	local xtermLogFile=""
+
+	if [ $DRY_RUN -eq 0 ] ; then
+		eval "$screenCommand" || croak "Failed to spawn scraping xterm."
+		XTERM_PROCESS_ID="$!"
+	else
+		whinge --verbose "Mocking an Xterm log file to «$XTERM_LOG_MOCK_FILE» ..."
+		echo "$XTERM_LOG_MOCK_CONTENTS" > $XTERM_LOG_MOCK_FILE
+	fi
+
+	local maxWaitAttempts=10
+
+	while (( maxWaitAttempts-- )) ; do
+		whinge --if-verbose "Sleeping before next of $maxWaitAttempts attempts to find «$XTERM_LOG_GLOB» ..."
+		sleep 1
+
+		xtermLogFile="$( find "$STAGING_DIR" -name "$XTERM_LOG_GLOB" )"
+
+		if test -e "$xtermLogFile" ; then
+			whinge --if-verbose  "Found «$xtermLogFile»."
+			break
+		fi
+	done
+
+##	[ -e "$xtermLogFile" ] && echo "$xtermLogFile" || croak "Failed to find file matching «$XTERM_LOG_GLOB»."
+##	local xtermLogFile="$( generateScrapedLogFile "$screenSession" )"
+	[ -e "$xtermLogFile" ] || croak "Failed to find file matching «$XTERM_LOG_GLOB»."
+
+	pushScreenCommands "$screenSession" '' "windowlist string \"$WINDOWLIST_STRING\"" 'windowlist' 'detach'
+
+	local screenWindowGrepperCommand="egrep -o '$WINDOWLIST_RE' '$xtermLogFile' | cut -f1"
+	local screenWindowGrepperOutput="$( eval "$screenWindowGrepperCommand" )"
+
+	whinge --if-debug "\$ $screenWindowGrepperCommand => «$screenWindowGrepperOutput»"
+
+	local screenWindows=()
+	local screenWindowSetEnv
+
+	for screenWindowSetEnv in $screenWindowGrepperOutput ; do
+		whinge --if-debug "\$ $screenWindowSetEnv ..."
+		eval "$screenWindowSetEnv"
+	done
+
+	local windowCount=${#screenWindows[@]}
+	whinge --if-debug "${screenSession} [$windowCount window(s)] => «${screenWindows[*]}»"
+
+	if [ $windowCount -lt 1 ] ; then
+		whinge "No windows found for session «$screenSession»."
+		return
+	fi
+
+	local sessionDir="$STAGING_DIR/$screenSession"
+	mkdir "$sessionDir" || croak "Failed to create session subdirectory «$sessionDir»."
+
+	local windowNumber=0
+	local windowRef=0
+	local windowTitle=""
+	local windowHardcopyFile=""
+	local windowTitleFile=""
+
+	pushScreenCommands "$screenSession" '-' 'at \# wrap off' ## "hardcopydir $sessionDir"
+
+	for windowRef in ${screenWindows[@]} ; do
+		windowTitle="${screenWindows[$windowNumber]}"
+		windowTitleFile="$sessionDir/title.$windowNumber"
+		echo "$windowTitle" > "$windowTitleFile"
+
+		windowHardcopyFile="$sessionDir/hardcopy.$windowNumber"
+		pushScreenCommands "$screenSession" "$windowRef" "hardcopy -h $windowHardcopyFile"
+
+		perl -ni -e 'print if $ok ||= ( $_ =~ m{^.+$} );' "$windowHardcopyFile"
+		let windowNumber++
+	done
+
+	pushScreenCommands "$screenSession" '-' 'at \# wrap on'
+}
+
+
+trap croak HUP ABRT INT QUIT KILL STOP TERM
+
+screenSessions="$( screen -ls | awk "/$SESSIONLIST_RE/ { print \$1 }" )"
+[ "$screenSessions" ] || croak "Failed to find any active screen sessions."
+
+oneManEnter
+
+for screenSession in $screenSessions ; do
+	whinge --if-verbose "Scraping screen session «$screenSession» ..."
+	writeSessionState "$screenSession"
+	break ## Just one until we get this shit right.
+done
+
+oneManLeave
+
+
+## vim: ft=sh
+

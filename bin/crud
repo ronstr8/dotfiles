@@ -1,0 +1,600 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+crud - Create, Read, Update, Delete a resource
+
+=head1 SYNOPSIS
+
+crud [options] <endpoint-uri>
+
+  --method=s           GET, POST, DELETE, etc.
+  --representation=s   JSON entity to send with the request
+
+  --header="Hdr: Val"  Add arbitrary headers.
+
+  --lifecycle          Create a resource, read it, update it, then delete it.
+  --keep               As above, but do not delete.
+
+  --POST=s
+  --GET=s
+  --PUT=s
+  --PATCH=s
+  --DELETE=s           
+                       rep entities for each named method (useful for a --lifecycle run)
+
+  --with-headers       show response headers in output
+  --decode-content     show prettier decoded response, rather than raw squished JSON
+  --trim-stack         attempt to identify and trim Java stacktraces returned by the server
+
+  --verbose            show what is being done
+  --debug              turn --verbose all the way up to 11
+
+  --help               show this message
+  --man                show full perldoc
+
+=head1 DESCRIPTION
+
+Hit a REST service endpoint and show the results.
+
+=cut
+
+use 5.010;
+
+use strict;
+use warnings;
+
+use English qw( -no_match_vars );
+
+### Compact Bootstrapper Told You He Was Hardcore {{{
+BEGIN
+{
+	use Getopt::Long qw( GetOptionsFromArray :config passthrough );
+	use Sys::Hostname;
+	use UNIVERSAL::require;
+
+	my %rtparams;
+
+	sub rtparams { shift; die 'rtparams() takes no args.' if @ARG; wantarray ? (( %rtparams )) : \%rtparams }
+	sub rtparam { my $self = shift; my $name = shift;
+		$rtparams{$name} = shift if @ARG;
+		return unless exists $rtparams{$name};
+		return $rtparams{$name}; }
+	sub verbosity { $rtparams{'verbosity'} || 0 } ## $rtparams{'debug'} ? 11 : ( $rtparams{'verbose'} || 0 ) }
+	sub verbose   {   shift->verbosity }
+	sub debug     { ( shift->verbosity > 10 ) ? 1 : 0 }
+
+	GetOptionsFromArray(\@ARGV, \%rtparams, qw( db=s debug! verbose+ quiet! ));
+	$rtparams{'verbosity'} = 11 if defined $rtparams{'debug'};
+
+	my($DEBUG, $DEV_QR, $HOME, $HOST) = ( $rtparams{'debug'}, qr{\bdev}, $ENV{'HOME'}, hostname() );
+	my $VERBOSE = $DEBUG ? 11 : ( $rtparams{'verbose'} || 0 );
+
+	my($CDW) = qw( Comm::Devel::Whinger );
+	my $IS_DEV = $HOST =~ $DEV_QR;
+
+	my(@xtra) = ( $CDW );
+
+	my(@alts) = grep { -d } map { (glob("$HOME/$_")) }
+		qw( checkouts/prod/lib checkouts/cpan/*/lib perl/lib );
+	for (@alts) { unshift(@INC, $_); $DEBUG && 0 && warn "\t ... \@INC += $_\n" }
+	for (@xtra) { ($_->use || $@) && $DEBUG && 0 && warn sprintf(
+		"\t... use %s: %s\n", $_, $@ || eval("\$${_}::VERSION") || 'N/A') }
+
+	my $shiftr  = sub { @_ && $_[0] && ((ref($_[0]) || $_[0]) eq __PACKAGE__) };
+	my $whinger = eval { $CDW->new( 'whinging_for' => __PACKAGE__ ) };
+
+	my(%inj);
+	$inj{'whingef'} = sub { shift(@_) if $shiftr->(@_);
+		return $whinger->whingef(@_) if $whinger;
+		my($f, $ar, $w) = @_;
+		my(@fargs) = map { my $ae = $_; my $rt = ref($ae) || '';
+			($rt eq 'HASH')  ? ( (values(%{ $ae }))[0] ) :
+			($rt eq 'ARRAY') ? ( ( @{ $ae } )[0] ) : $ae;
+		} @{ $ar };
+		my $m = ( sprintf($f, @fargs) // '' ) . "\n";
+		( $w && ( $w =~ /^DIE/i ) ) ? die($m) : warn($m); };
+
+	$inj{'dirgef'} = sub { shift(@_) if $shiftr->(@_);
+		eval q{ use Term::ANSIColor; print STDERR color('bold red'); };
+
+		my(@whargs) = (( @_ ));
+		push @whargs, [] if @_ == 1;
+		push @whargs, 'DIE!' unless $_[-1] =~ /die/i;
+
+		$inj{'whingef'}->(@whargs);
+	};
+
+	$inj{'debugf'} = sub { shift(@_) if $shiftr->(@_);
+		eval q{ use Term::ANSIColor; print STDERR color('yellow'); };
+
+		my(@whargs) = (( @_ ));
+		push @whargs, [] if @_ == 1;
+		push @whargs, 'DEBUG!' unless $_[-1] =~ /debug/i;
+
+		$inj{'whingef'}->(@whargs);
+		eval q{ use Term::ANSIColor; print STDERR color('reset'); };
+	};
+
+	$inj{'wrequest'} = sub { shift(@_) if $shiftr->(@_);
+		eval q{ use Term::ANSIColor; print STDERR color('underline faint green'); };
+
+		my(@whargs) = (( @_ ));
+		push @whargs, [] if @_ == 1;
+		push @whargs, 'NOTIFY!' unless $_[-1] =~ /notify/i;
+##		$whargs[0] = "»»» " . $whargs[0];
+		$whargs[0] = "‽‽‽ " . $whargs[0];
+
+		$inj{'whingef'}->(@whargs);
+		eval q{ use Term::ANSIColor; print STDERR color('reset'); };
+	};
+
+	$inj{'wresponse'} = sub { shift(@_) if $shiftr->(@_);
+		eval q{ use Term::ANSIColor; print STDERR color('underline bold green'); };
+
+		my(@whargs) = (( @_ ));
+		push @whargs, [] if @_ == 1;
+		push @whargs, 'NOTIFY!' unless $_[-1] =~ /notify/i;
+		$whargs[0] = "««« " . $whargs[0];
+
+		$inj{'whingef'}->(@whargs);
+		eval q{ use Term::ANSIColor; print STDERR color('reset'); };
+	};
+
+	{ no strict 'refs'; *{'main' . '::' . $_} = $inj{$_} for keys %inj; };
+}
+### }}}
+
+### Options and Run-Time Parameters {{{
+{
+
+## According to the --opt:s documentation in Getopt::Long, parameters that
+## accept an optional value which are given on the command line but do not
+## include a value will be assigned EMPTY STRING or ZERO according to their
+## underlying types.
+
+	my $rtparams_hr = __PACKAGE__->rtparams();
+	my %getopt = (
+		'with-headers!'    => {},
+		'trim-stack!'      => {},
+		'decode-content!'  => {},
+		'lifecycle!'       => {},
+		'keep!'            => {},
+
+		'method=s'         => { 'default' => 'GET' },
+		'representation=s' => {},
+
+		'header=s@' => { 'default' => +[] },
+
+		'POST=s'   => {},
+		'GET=s'    => {},
+		'PUT=s'    => {},
+		'PATCH=s'  => {},
+		'DELETE=s' => {},
+
+		'content-type=s'   => { 'default' => 'application/json' },
+
+		'dry-run|n!'      => {},
+		'verbose+'        => { 'default' =>  0 },
+		'debug!'          => { 'default' =>  0 },
+		'man!'            => {},
+	);
+	$getopt{$ARG} = {} for qw(  );
+
+
+	use Getopt::Long; use Pod::Usage;
+	my $getopt = new Getopt::Long::Parser 'config' => [qw/auto_help/];
+	   $getopt->configure( qw/auto_help/ );
+	   $getopt->getoptions($rtparams_hr, keys %getopt) or die "Failed to parse all options!\n";
+	Pod::Usage::pod2usage({-verbose => 2}) if $rtparams_hr->{'man'};
+
+	while (my($opt, $conf_hr) = each(%getopt)) { next unless $conf_hr;
+		$opt =~ s/^(--)?([a-z_0-9-]+)(\W.*)?$/$2/gi;
+		my $val = $rtparams_hr->{$opt} //= $conf_hr->{'default'} // '';
+		next if $val ne ''; next unless my $rmsg = $conf_hr->{'required'};
+		die sprintf("Missing parameter --%s: %s\n", $opt, $rmsg || 'Required!');
+	}
+}
+### }}}
+
+use Data::Dumper;
+## local $Data::Dumper::Indent = 3;
+local $Data::Dumper::Terse  = 1;
+use IO::Uncompress::Gunzip qw( gunzip $GunzipError );
+use JSON::XS;
+use LWP;
+use HTTP::Cookies;
+use HTTP::Request::Common;
+use HTTP::Status qw( :constants :is status_message );
+use URI;
+use URI::QueryParam;
+
+## Just in case this turns into an object someday.
+my $self = __PACKAGE__;
+
+my $resource = shift @ARGV
+	or $self->dirgef('Missing required argument of base endpoint URI.');
+
+$self->rtparam('transcoder' => JSON::XS->new->ascii->pretty->allow_nonref);
+$self->rtparam('user-agent' => LWP::UserAgent->new);
+
+my $doing_a_lifecycle     = $self->rtparam('lifecycle') ? 1 : 0;
+my $default_rep_entity    = $self->rtparam('representation') || '';
+
+foreach my $mrkey (qw( GET POST PUT PATCH DELETE )) {
+	my $mrval = $self->rtparam($mrkey);
+
+	if ($doing_a_lifecycle) {
+		## Special case for defaults, and don't interpret any params
+		## as a specific method to be performed.
+		if ($mrval) {
+			$self->rtparam($mrkey => $mrval);
+			$doing_a_lifecycle++;
+		}
+	}
+	else {
+		$self->rtparam($mrkey => $default_rep_entity) unless $mrval;
+	}
+}
+
+if ($doing_a_lifecycle) {
+	$self->run_lifecycle($resource);
+}
+else {
+	$self->follow_single_endpoint($resource);
+}
+
+exit;
+
+sub run_lifecycle
+{
+	my($self, $original_resource) = @ARG;
+
+	my($request, $response, $response_body_decoded);
+	my $resource = $original_resource;
+
+	if ($doing_a_lifecycle == 1) {
+		## No custom rep entities given, so use the builtins.
+		my $POST = <<EOT;
+			{
+				"name": "Ronald E. Straight",
+				"dob": "1971-02-23T11:38:00-0500",
+				"age": 42,
+				"offspring": [ "Annika" ],
+				"hometown": "Fairmont, WV",
+				"location": "Buffalo, NY"
+			}
+EOT
+		my $PUT = $POST;
+		$PUT =~ s/Annika" ],/Annika", "Celyn" ],/;
+
+		$self->rtparam('POST' => $POST);
+		$self->rtparam('PUT'  => $PUT);
+	}
+
+## 	my($girl1, $girl2) = qw( Annika Celyn );
+## 	my %requested_post_rep = (
+## 		'name'      =>  'Ronald E. Straight',
+## 		'dob'       =>  '1971-02-23T11:38:00-0500',
+## 		'age'       =>   42,
+## 		'offspring' =>  [ $girl1 ],
+## 		'hometown'  =>  'Fairmont, WV',
+## 		'location'  =>  'Buffalo, NY'
+## 	);
+
+	## POST (Create) and followed GET (Read)
+	$self->rtparam('method' => 'POST');
+##	$self->rtparam('representation' => \%requested_post_rep);
+	($request, $response, $response_body_decoded) = $self->hit_single_endpoint($resource);
+	$resource = $response->header('Location');
+	$self->dirgef("Failed to POST/create; aborting.") unless $response->is_success;
+
+	## GET (Read) the POST-ed content.
+	print "\n";
+	$self->rtparam('method' => 'GET');
+	($request, $response, $response_body_decoded) = $self->hit_single_endpoint($resource);
+	$self->dirgef("Failed to GET/read; aborting.") unless $response->is_success;
+
+	## PUT (Update)
+	print "\n";
+##	push @{ $requested_post_rep{'offspring'} }, $girl2;
+	$self->rtparam('method' => 'PUT');
+	($request, $response, $response_body_decoded) = $self->hit_single_endpoint($resource);
+	$self->dirgef("Failed to PUT/update; aborting.") unless $response->is_success;
+
+## 	$self->debugf('%s was not added to the offspring! $response_body_decoded => %s',
+## 		[ $girl2, { 'dump' => $response_body_decoded } ])
+## 	unless $girl2 ~~  $response_body_decoded->{'offspring'};
+
+	## GET (Read) the PUT content.
+	print "\n";
+	$self->rtparam('method' => 'GET');
+	($request, $response, $response_body_decoded) = $self->hit_single_endpoint($resource);
+	$self->dirgef("Failed to GET/read; aborting.") unless $response->is_success;
+
+	## DELETE (Delete)
+	unless ( $self->rtparam('keep') ) {
+		print "\n";
+		$self->rtparam('method' => 'DELETE');
+		($request, $response, $response_body_decoded) = $self->hit_single_endpoint($resource);
+		$self->dirgef("Failed to DELETE.  We failed.") unless $response->is_success;
+	}
+}
+
+sub hit_single_endpoint
+{
+	my $self = shift;
+	$self->follow_single_endpoint(@ARG, 'redirects' => 0);
+}
+
+sub follow_single_endpoint
+{
+	my($self, $resource, %params) = @ARG;
+	$params{'redirects'} //= 10;
+
+	my($request, $response, $response_body_decoded);
+
+	while ( $resource ) {
+		($request, $response, $response_body_decoded)
+			= $self->create_and_attempt_request($resource);
+
+
+		my $redirects_remaining = $params{'redirects'}--;
+		last if $redirects_remaining <= 0;
+
+		## If we received a Location header, follow it.  Reset the resource
+		## and set the request method to GET it.
+		my $followable_resource = eval { $response->header('Location') };
+		if ($followable_resource) {
+			$resource = $followable_resource;
+			$self->rtparam('method' => 'GET');
+		}
+		else {
+			$resource = "";
+		}
+	}
+
+	return ( $request, $response, $response_body_decoded );
+}
+
+sub transcode_json
+{
+	my $self  = shift;
+	my $which = shift;
+	   $which = lc($which);
+	my $value = shift;
+
+	$self->dirgef(q{transcode() will "encode" or "decode" -- not "$which".})
+		unless $which =~ /^(encode|decode)$/;
+
+	my $got_a_value = defined($value) ? (($value eq "") ? 0 : 1) : 0;
+	my $transcoder  = $self->rtparam('transcoder');
+	my $transcoded  = '';
+
+	if ($which eq 'encode') {
+		## Maybe return an empty JSON {} instead?
+		return '' unless $got_a_value;
+
+		## In my usage, I always send an array or object ref, so this
+		## naive check works fine.  If one wanted to send a string rep,
+		## it's gonna fail by sending an empty.
+		return '' unless ref($value);
+
+		$transcoded = $transcoder->encode($value);
+	}
+	else {
+		## Again, should this return {}?
+		return '' unless $got_a_value;
+
+		$transcoded = $transcoder->decode($value);
+	}
+
+	return $transcoded;
+}
+
+sub create_and_attempt_request
+{
+	my($self, $resource) = @ARG;
+
+	my($request) = $self->create_request($resource);
+	my($response, $response_body_decoded) = $self->attempt_request($request);
+
+	return ( $request, $response, $response_body_decoded );
+}
+
+sub create_request
+{
+	my($self, $resource) = @ARG;
+
+	my $method = $self->rtparam('method');
+	my $rep    = $self->rtparam($method); ## $self->rtparam('representation');
+
+	my $media_type = $self->rtparam('content-type');
+	   $media_type = 'application/json' if $rep;
+
+	my $uri     = URI->new($resource);
+	my $request = HTTP::Request->new;
+
+	my @request_headers;
+
+	push @request_headers, [ 'Accept' => $media_type ] if $media_type;
+
+	if (my $header_ar = $self->rtparam('header')) {
+		my(@headers) = map { [(( split(/:/, $ARG, 2) ))] } @{ $header_ar };
+		push @request_headers, @headers;
+	}
+
+	my $request_body   = $rep;
+	my %request_params = ();
+
+	while (my($key, $val) = each(%request_params)) {
+		$uri->query_param_append($key => $val);
+	}
+
+	$request->method($method);
+	$request->uri($uri);
+	$request->protocol("HTTP/1.1");
+
+	foreach my $header_pair (@request_headers) {
+		$request->push_header(@{ $header_pair });
+	}
+
+	my $request_body_encoded = '';
+	if ($request_body) {
+		$request->push_header('Content-Type' => $media_type);
+		$request_body_encoded
+##			= eval { $self->transcode_json('encode' => $request_body) };
+			= $request_body;
+		$request->content($request_body_encoded);
+	}
+
+## 	$self->wrequest('%s %s ', [ uc($method), "$uri" ], 'NOTIFY!');
+## 	my $headers = $request->headers;
+## 	foreach my $header_fieldname (( $headers->header_field_names )) {
+## 		$self->wrequest('%s: %s', $ARG, 'DEBUG!') for 
+## 	}
+## 	$self->wrequest('%s', [ $ARG ], 'DEBUG!') for (( q{}, (( split(/[\r\n]/ms, $request_body_encoded) )), q{} ));
+
+	$self->emit_http_message_details($request);
+
+	return $request;
+}
+
+sub emit_http_message_details
+{
+	my($self, $http) = @ARG;
+
+	select(STDERR); $OUTPUT_AUTOFLUSH = 1;
+
+	my $is_request    = ( ref($http) =~ /Request/ ) ? 1 : 0;
+	my $is_debugging  = $self->debug;
+	my $debug_sub     = sub { $is_request ? $self->wrequest(@ARG) : $self->wresponse(@ARG) };
+
+	my $raw_uri       = $is_request ? $http->uri : $http->request->uri;
+	my $canonical_uri = $raw_uri->canonical;
+	my $relative_uri  = $canonical_uri; ## $canonical_uri->rel($canonical_uri); $relative_uri =~ s{^\.}{};
+	$relative_uri =~ s{^[^:]+://[^/]+}{};
+
+	if ($is_request) {
+		$debug_sub->('%s %s %s', [ uc($http->method), "$relative_uri", $http->protocol ], 'NOTIFY!');
+	}
+	else {
+		$debug_sub->('%s %s', [ $http->status_line, $http->protocol ], 'NOTIFY!');
+	}
+
+	if ($self->rtparam('with-headers')) {
+		my $headers = $http->headers;
+
+		foreach my $header_fieldname (( $headers->header_field_names )) {
+			foreach my $header_value (( $headers->header($header_fieldname) )) {
+				$debug_sub->('%s: %s', [ $header_fieldname, $header_value ], 'NOTIFY!');
+			}
+		}
+	}
+
+	my $content   = $self->rtparam('decode-content') ? $http->decoded_content : '';
+	   $content ||= $http->content;
+
+	my $trim_the_stack = $self->rtparam('trim-stack');
+
+	if ($is_debugging) {
+		$content =~ s/\\n/\n/g;
+		$content =~ s/\\t/\t/g;
+		$content =~ s{\\/}{/}g;
+
+		my(@content)  = split(/[\r\n]/ms, $content);
+
+		print STDERR "\n";
+
+		foreach my $cline (@content) {
+			if ($trim_the_stack) {
+				$cline =~ s/^.+\((?<filename>[^\)]+\.java):(?<lineno>\d+)\)$/\t ... $+{filename}:$+{lineno}/;
+			}
+			print STDERR "$cline\n";
+		}
+	}
+
+	print STDERR "\n";
+}
+
+sub attempt_request
+{
+	my($self, $request) = @ARG;
+
+	my $user_agent = $self->rtparam('user-agent');
+
+	my $response = eval { $user_agent->request($request) };
+	if (my $EE = $EVAL_ERROR) {
+		## Happens rarely, if ever.
+		$self->dirgef('User-agent request died: %s', [ $EE ]) if $EE;
+	}
+	elsif ( my $internal_error = $response && $response->header('Client-Warning') ) {
+		## If UA failed to make the request.
+		$self->dirgef('User-agent request failed: [%s] %s', [ $internal_error, $response->message ]);
+	}
+
+	$self->emit_http_message_details($response);
+
+	## TODO :: Support media types besides application/json.
+	my $response_media_type = $response->header('Content-Type');
+
+	my $response_body_encoded = $response->content;
+
+	my $content_encoding = $response->header('Content-Encoding') || '';
+	if ($content_encoding =~ /gzip|gunzip/i) {
+		my $response_body_encoded_and_compressed
+			= "$response_body_encoded";
+
+		gunzip( $response_body_encoded_and_compressed => \$response_body_encoded )
+			or $self->dirgef('Error decoding compressed response body: %s', [ $GunzipError ]);
+	}
+
+	my $response_body_decoded;
+
+	if ($response_media_type =~ /json/) {
+		$response_body_decoded = eval { $self->transcode_json('decode' => $response_body_encoded) };
+
+		if (my $EE = $EVAL_ERROR) {
+			chomp($EE);
+			$self->dirgef('Error decoding response body [%s]; encoded body: %s', [
+				$EE,
+				($response_body_encoded =~ /[^[:print:]]/) ? "<unprintable>" : $response_body_encoded,
+			]);
+		}
+	}
+	else {
+		$self->debugf('Decoding for media-type "%s" is not supported; using encoded value.',
+			[ $response_media_type ]);
+		$response_body_decoded = $response_body_encoded;
+	}
+
+	return ( $response, $response_body_decoded );
+}
+
+
+__END__
+
+=head1 BUGS
+
+=over
+
+=item Ron "Quinn" Straight achieved with distinction; no bugs!
+
+=back
+
+=head1 SEE ALSO
+
+Ron "Quinn" Straight may not have achieved; point to related topics?
+
+
+=head1 AUTHOR
+
+Ron "Quinn" Straight E<lt>quinnfazigu@gmail.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2013 Ron "Quinn" Straight
+
+=cut
+
+## vim: foldmethod=marker

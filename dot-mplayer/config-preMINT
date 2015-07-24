@@ -1,0 +1,229 @@
+# Write your default config options here!
+
+stop-xscreensaver=1
+xineramascreen=1
+msgcolor=1
+fs=1
+
+#osdlevel=3
+#subfont-osd-scale=2
+#subfont-text-scale=6
+#subpos=85
+
+## 2014-09-13 21:59:55 <rons> This would seem to force all sound through the RCA optical.
+ao='pulse'
+## 'alsa:device=hw=0.1'
+
+subfont-autoscale=3
+osdlevel=3
+subfont-osd-scale=2
+#subfont-text-scale=4
+#subalign=2
+#subpos=96
+
+#monitoraspect=16:9
+#vc=ffh264vdpau,ffmpeg12vdpau,ffvc1vdpau,ffwmv3vdpau,
+
+vf=screenshot
+##vo=vdpau:fps=60
+vo=vdpau:deint=2
+### ac=hwac3,
+##ao='alsa:device=hdmi'
+##  for fn in /proc/asound/card0/eld* ; do echo "===== $fn ===== " ; cat $fn ; done
+## Look for the one with the most stuffs, adn choose its eld#X.Y for hw=X.Y below.
+## OK, fuck that.  `aplay -l'
+##  alsa:device=hw=0.7
+
+### cat >> /etc/modprobe.d/local-sound.conf <<EOT
+### alias snd-card-1 snd-emu10k1
+### alias sound-slot-1 snd-emu10k1
+### 
+### alias snd-card-1 snd-emu10k1
+### alias sound-slot-1 snd-emu10k1
+### options snd-hda-intel probe_mask=0x102
+### EOT
+
+#####  2012-10-13 17:43:27 :: /staging/bt/seeding/Star.Wars.Episode.V.The.Empire.Strikes.Back.1980.1080p.BluRay.DTS.x264-DON
+#####   rons@GA-E7AUM-DS2H$ aplay -l
+#####  **** List of PLAYBACK Hardware Devices ****
+#####  card 0: NVidia [HDA NVidia], device 3: HDMI 0 [HDMI 0]
+#####    Subdevices: 1/1
+#####    Subdevice #0: subdevice #0
+#####  card 0: NVidia [HDA NVidia], device 7: HDMI 0 [HDMI 0]
+#####    Subdevices: 1/1
+#####    Subdevice #0: subdevice #0
+#####  card 0: NVidia [HDA NVidia], device 8: HDMI 0 [HDMI 0]
+#####    Subdevices: 1/1
+#####    Subdevice #0: subdevice #0
+#####  card 0: NVidia [HDA NVidia], device 9: HDMI 0 [HDMI 0]
+#####    Subdevices: 1/1
+#####    Subdevice #0: subdevice #0
+## Try them all.  7 worked for me.  Why? I DO NOT FUCKING KNOW.
+################ao='alsa:device=hw=1.7'
+## Jiggle cord?  sudo modprobe snd-hda-codec-hdmi?  WHO THE FUCK KNOWS?!
+## 509 sudo modprobe snd-hda-intel
+## 510 sudo modprobe snd-ac97-codec
+
+
+### 2014-08-09 09:16:44 :: ~
+### rons@fazigu$ aplay -l
+### **** List of PLAYBACK Hardware Devices ****
+### card 0: NVidia [HDA NVidia], device 0: ALC889A Analog [ALC889A Analog]
+### Subdevices: 1/1
+### Subdevice #0: subdevice #0
+### card 0: NVidia [HDA NVidia], device 1: ALC889A Digital [ALC889A Digital]
+### Subdevices: 0/1
+### Subdevice #0: subdevice #0
+### card 0: NVidia [HDA NVidia], device 3: HDMI 0 [HDMI 0]
+### Subdevices: 1/1
+### Subdevice #0: subdevice #0
+### card 1: NVidia_1 [HDA NVidia], device 3: HDMI 0 [HDMI 0]
+### Subdevices: 1/1
+### Subdevice #0: subdevice #0
+### card 1: NVidia_1 [HDA NVidia], device 7: HDMI 0 [HDMI 0]
+### Subdevices: 1/1
+### Subdevice #0: subdevice #0
+### card 1: NVidia_1 [HDA NVidia], device 8: HDMI 0 [HDMI 0]
+### Subdevices: 1/1
+### Subdevice #0: subdevice #0
+### card 1: NVidia_1 [HDA NVidia], device 9: HDMI 0 [HDMI 0]
+### Subdevices: 1/1
+### Subdevice #0: subdevice #0
+
+[music]
+profile-desc="Audio file playback through stereo front speakers"
+#ao='alsa:device=sysdefault'
+autosync=0
+cache=1024
+#gapless-audio=1
+vo=null
+
+[dts-cd]
+profile-desc="DTS-CD audio playback through receiver"
+ac=hwdts,
+rawaudio="format=0x2001"
+#cdrom-device=/dev/sr0
+#cdda="generic-dev=/dev/sr0"
+cache=2048
+cache-min=80
+vo=null
+
+[stereo]
+profile-desc="Porn playback through front speakers"
+####################ao='alsa:device=sysdefault'
+#ao='pulse'
+vo=null
+
+### iec958:CARD=NVidia,DEV=0
+### HDA NVidia, ALC889A Digital
+### IEC958 (S/PDIF) Digital Audio Output
+
+# iec958:CARD=NVidia,DEV=0
+# HDA NVidia, ALC889A Digital
+# IEC958 (S/PDIF) Digital Audio Output
+
+## 2014-08-30 09:54:35 :: .../albums/Lorde/Lorde - Pure Heroine (2013) [MP3 V0]
+##  rons@fazigu$ aplay -l
+## **** List of PLAYBACK Hardware Devices ****
+## card 0: NVidia [HDA NVidia], device 0: ALC889A Analog [ALC889A Analog]
+##   Subdevices: 1/1
+##   Subdevice #0: subdevice #0
+## card 0: NVidia [HDA NVidia], device 1: ALC889A Digital [ALC889A Digital]
+##   Subdevices: 0/1
+##   Subdevice #0: subdevice #0
+## card 0: NVidia [HDA NVidia], device 3: HDMI 0 [HDMI 0]
+##   Subdevices: 1/1
+##   Subdevice #0: subdevice #0
+## card 1: NVidia_1 [HDA NVidia], device 3: HDMI 0 [HDMI 0]
+##   Subdevices: 1/1
+##   Subdevice #0: subdevice #0
+## card 1: NVidia_1 [HDA NVidia], device 7: HDMI 0 [HDMI 0]
+##   Subdevices: 1/1
+##   Subdevice #0: subdevice #0
+## card 1: NVidia_1 [HDA NVidia], device 8: HDMI 0 [HDMI 0]
+##   Subdevices: 1/1
+##   Subdevice #0: subdevice #0
+## card 1: NVidia_1 [HDA NVidia], device 9: HDMI 0 [HDMI 0]
+##   Subdevices: 1/1
+##   Subdevice #0: subdevice #0
+
+## iec958:CARD=NVidia,DEV=0
+##     HDA NVidia, ALC889A Digital
+##     IEC958 (S/PDIF) Digital Audio Output
+
+[extension.mp3]
+profile-desc="Audio file playback through stereo front speakers"
+#ao='alsa:device=sysdefault'
+#ao='alsa:device=spdif=0.0'
+#ao='alsa:device=iec958=0.0'
+#ao='alsa:device=hw=0.3' ## Builtin HDMI out?
+#ao='alsa:device=iec958=0.3'
+#ao='alsa:device=spdif=0.3'
+#ao='alsa:device=hw=0.3'
+#ao=pulse ## WHAT THE FUCK??
+autosync=0
+cache=1024
+#gapless-audio=1
+vo=null
+
+## # sudo lspci -v
+## 00:08.0 Audio device: NVIDIA Corporation MCP79 High Definition Audio (rev b1)
+##         Subsystem: Gigabyte Technology Co., Ltd Device a102
+##         Flags: bus master, 66MHz, fast devsel, latency 0, IRQ 21
+##         Memory at efff0000 (32-bit, non-prefetchable) [size=16K]
+##         Capabilities: [44] Power Management version 2
+##         Kernel driver in use: snd_hda_intel
+## 
+## 02:00.1 Audio device: NVIDIA Corporation GF116 High Definition Audio Controller (rev a1)
+##         Subsystem: Device 196e:089c
+##         Flags: bus master, fast devsel, latency 0, IRQ 16
+##         Memory at ebffc000 (32-bit, non-prefetchable) [size=16K]
+##         Capabilities: [60] Power Management version 3
+##         Capabilities: [68] MSI: Enable- Count=1/1 Maskable- 64bit+
+##         Capabilities: [78] Express Endpoint, MSI 00
+##         Kernel driver in use: snd_hda_intel
+
+## # aplay -l
+##  rons@fazigu$ cat /proc/asound/cards
+##  0 [NVidia         ]: HDA-Intel - HDA NVidia
+##                       HDA NVidia at 0xefff0000 irq 21
+##  1 [NVidia_1       ]: HDA-Intel - HDA NVidia
+##                       HDA NVidia at 0xebffc000 irq 16
+##  2 [Loopback       ]: Loopback - Loopback
+##                       Loopback 1
+##  3 [VirMIDI        ]: VirMIDI - VirMIDI
+##                       Virtual MIDI Card 1
+##  4 [Dummy          ]: Dummy - Dummy
+##                       Dummy 1
+##  5 [pcsp           ]: PC-Speaker - pcsp
+##                       Internal PC-Speaker at port 0x61
+## # So ... my builtin card is Device 0, MCP79, and it seems to be using snd_hda_intel.
+
+[extension.m4a]
+profile-desc="Audio file playback through stereo front speakers"
+################ao='alsa:device=sysdefault'
+#ao='alsa:device=spdif=0.0'
+autosync=0
+cache=1024
+vo=null
+
+#[extension.avi]
+#ac=hwac3,
+#ao='alsa:device=hdmi'
+#
+[extension.mkv]
+#ac=hwac3,
+#ao='alsa:device=hdmi'
+#
+#[extension.wmv]
+#ac=hwac3,
+#ao='alsa:device=hdmi'
+#
+[extension.mp4]
+ac=hwac3,
+#ao='alsa:device=hdmi'
+#
+#[extension.f4v]
+#ac=hwac3,
+#ao='alsa:device=hdmi'
+

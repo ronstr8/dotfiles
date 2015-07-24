@@ -1,0 +1,12 @@
+cat << 'EOT'
+
+	Why don't you just use the `help' builtin?
+
+EOT
+
+exit
+
+## Less says it fails to find pattern, but works fine on cmdline.
+MANLESS="-G -p '[[:space:]]{3,}$1'"
+## Fuck it; we'll do it live.
+man bash-builtins | less -G -p "[[:space:]]{3,}$1"

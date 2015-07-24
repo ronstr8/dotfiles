@@ -1,0 +1,13 @@
+#!/bin/bash
+
+## Std completion seems too eager to complete on directories for many actions,
+## causing me to have to backspace half the time, defeating the porpoise.
+
+#complete -r perl
+complete -f ls cp mv mplayer
+complete -d rmdir cd
+
+#complete -r cvs
+
+
+## vim: ft=sh

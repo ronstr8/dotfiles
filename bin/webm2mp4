@@ -1,0 +1,21 @@
+#!/bin/bash
+## avconv -fflags +genpts -r 24 -i 2015-03-28-190246.webm -vcodec libx264 -qscale 0 -threads 2 -strict experimental 2015-03-28-190246.mp4
+
+OUTEXT='mp4' ;
+AVCONV='avconv' ;
+PREOPT=' -fflags +genpts -r 24 ' ;
+MIDOPT=' -vcodec libx264 -qscale 0 -threads 2 -strict experimental ' ;
+
+unset -f __main ;
+function __main() {
+	local iFn="${1:?missing input filename}" ;
+	local oFn="${2:?missing output filename}" ;
+#	local ext="${iFn/.*\./}" ;
+#	local oFn="$( basename "$iFn" $ext )" ;
+
+	local cmdline="$AVCONV $PREOPT -i '$iFn' $MIDOPT '$oFn'" ;
+	echo "$cmdline" ;
+}
+
+__main $@
+

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+SCREEN_TITLE='adblade-one'
+SCREEN_HOME="$HOME/.screen"
+SCREEN_STY="$( screen -ls | egrep -o "\S*$SCREEN_TITLE\S*" )"
+
+if [ ! "$SCREEN_STY" ] ; then
+	echo "No screen «$SCREEN_TITLE» to resume; aborting ..." > /dev/stderr
+	exit 1
+fi
+
+SCREEN_MRENV="$SCREEN_HOME/var/mrenv.$SCREEN_STY"
+
+XTITLE_CMD='title-for-xterm'
+EXVAR_GREP='grep SSH\|DISPLAY'
+
+
+$XTITLE_CMD "$SCREEN_TITLE" 2>/dev/null
+
+export | $EXVAR_GREP > $SCREEN_MRENV
+
+#screen -T "$TERM" -r "$SCREEN_TITLE"
+screen -r "$SCREEN_TITLE"
+

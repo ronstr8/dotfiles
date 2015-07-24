@@ -1,0 +1,928 @@
+#!/usr/bin/env perl
+
+BEGIN
+{
+	use English qw( -no_match_vars );
+	use version;
+
+	if ($] < version->parse("v5.10")) {
+		my $perl510 = '/prod/perl5.10/bin/perl';
+		my $cmdline = "$perl510 $PROGRAM_NAME @ARGV";
+		warn "perl version $PERL_VERSION lt 5.10; trying $cmdline ...\n";
+		exec($cmdline);
+	}
+}
+
+=head1 NAME
+
+screenctl - Gather info on all screens
+
+=head1 SYNOPSIS
+
+screenctl command [options] 
+
+  active        list active screen session(s)
+  frozen        list frozen screen session(s)
+
+  freeze        freeze the state of a screen session
+  thaw          invoke a frozen screen session
+
+  --self        only scan the current screen (from $ENV{STY})
+  --sty=s       only scan screens matching this ID
+
+  --thawed-session=s   session name to assign the frozen session when thawed [default same as screen's sessioname]
+  --frozen-session=s   frozen screen session name to restore (for thaw command, basename for freeze command)
+
+  --ssh-agent thaws are wrapped with ssh-agent by default; use this to disable
+
+  --hlines=n    how many lines from each windows scrollback/history to dump [default all]
+
+  --help        show this message
+  --man         show full perldoc
+  --verbose     output additional info to stderr
+
+=head1 DESCRIPTION
+
+Ron "Quinn" Straight did not achieve; needs to write a description.
+
+=cut
+
+use strict;
+use warnings;
+use English qw( -no_match_vars );
+
+### Special environment and --db arg handling {{{
+
+### Note this must come BEFORE use-ing any development/checkouts packages you
+### want to load!
+
+BEGIN
+{
+	use UNIVERSAL::require;
+
+	foreach my $dev_includer (qw( autoinc all Test::Environment::CheckoutAll )) {
+		my $got_one = $dev_includer->use;
+		last if $got_one;
+
+##		warn "failed to include $dev_includer: $!";
+	}
+}
+
+### }}}
+
+use DirHandle;
+use FileHandle;
+use File::Copy;
+use File::Slurp;
+use File::Spec;
+use POSIX qw( strftime );
+use Sys::Hostname;
+
+use Quack qw( quack );
+
+my(@OPTIONS) = qw(
+	verbose+
+	debug
+	man
+
+	self
+	sty=s
+
+	frozen-session=s
+	thawed-session=s
+
+	ssh-agent!
+
+	hlines=n
+	windowlicker-cmd=s
+);
+#push @OPTIONS, qw/dry-run/;
+
+### Getopt Boilerplate {{{
+
+use Getopt::Long; use Pod::Usage;
+my $getopt = Getopt::Long::Parser->new;
+$getopt->configure( qw/auto_help/ );
+$getopt->getoptions(\my %opts, @OPTIONS) or die "failed to parse all options\n";
+Pod::Usage::pod2usage({-verbose => 2}) if $opts{'man'};
+
+### }}}
+
+my $WINDOWLIST_LINE_FMT = "%s\@%s#%%n=%%t";
+my $WINDOWLIST_RE_FMT   = qr/%s\@(?<scraped_session>[^#]+)#(?<windex>\d+)=(?<wname>[[:print:]]*)/;
+
+my $verbose = $opts{'verbose'} || 0;
+my $debug   = $opts{'debug'} || 0;
+#my $dry_run = $opts{'dry-run'};
+
+my %COMMAND_DISPATCH = (
+	'active' => { 'cmd_cr' => \&cmd_list,    'needs_fetch'  => 1, },
+	'frozen' => { 'cmd_cr' => \&cmd_frozen,  'needs_census' => 0, },
+	'freeze' => { 'cmd_cr' => \&cmd_freeze,  'needs_census' => 1, },
+	'thaw'   => { 'cmd_cr' => \&cmd_thaw,    'needs_census' => 0, },
+	'mru'    => { 'cmd_cr' => \&cmd_mru,     'needs_census' => 0, },
+
+	'info'   => { 'cmd_cr' => \&cmd_info,    'needs_census' => 1, },
+);
+
+my $command = shift @ARGV or die "missing required argument of command to perform\n";
+   $command = lc($command);
+
+$command = 'active' if $command =~ /^(ls|list)$/;
+if ($command eq 'active' && $opts{'long'}) {
+	$command = 'info';
+}
+
+my $cmd_info_hr  = $COMMAND_DISPATCH{$command};
+if (not $cmd_info_hr) {
+	my $valid_commands = join(", ", keys %COMMAND_DISPATCH);
+	die qq{unrecognized command "$command"; valid commands are $valid_commands\n};
+}
+
+if ((not $opts{'frozen-session'}) and ($command eq 'thaw')) {
+	die qq{command "$command" requires a --frozen-session to thaw\n};
+}
+
+$ENV{'COLUMNS'} = 255;
+
+my $SCRAPER_TMP           = '/tmp';
+my $SCRAPER_PREFIX        = 'windowlicker';
+my @FRIDGE_PATH_ELEMENTS  = ( ( split('/', $ENV{'HOME'} ) ), qw( .screen fridge ) );
+my $FRIDGE_PATH           = File::Spec->catdir(@FRIDGE_PATH_ELEMENTS);
+
+## The following are user-specific.  If you change them, just be sure the first
+## sets cwd and the second sets user, and host in $+.
+my $PROMPT_CWD_RE       = qr{^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} :: (?<cwd>.+)$};
+my $PROMPT_USER_HOST_RE = q{^\s+(?<user>[^@]+)\@(?<host>[^$#]+)[$#]};
+my $PROMPT_USER_HOST_QR = qr{$PROMPT_USER_HOST_RE}smix; ## qr{^ \s*[^A-Z]+(?<user>\w+)\@(?<host>[-A-Z0-9_.]+):?\s?\w*\s?\$\s+ }msi;
+
+my $hardcopy_lines = $opts{'hlines'} // -1;
+
+my %ssargs = (
+	'verbose'        => $verbose,
+	'debug'          => $debug,
+	'hardcopy_lines' => $hardcopy_lines,
+);
+$ssargs{'windowlicker_cmd'} = $opts{'windowlicker-cmd'} if $opts{'windowlicker-cmd'};
+
+my %before_tmp_files = init_scraper_tmp();
+
+my($scraper_session, $scraper_log_file, $scraper_conf_file) = spawn_scraper_screen(%ssargs);
+$ssargs{'scraper_session'}   = $scraper_session;
+$ssargs{'scraper_log_file'}  = $scraper_log_file;
+$ssargs{'scraper_conf_file'} = $scraper_conf_file;
+
+if ($opts{'self'}) {
+	$ssargs{'sty'} = $ENV{'STY'}
+		or die "parameter --self was given but no \$STY was found\n";
+}
+elsif ($opts{'sty'}) {
+	$ssargs{'sty'} = $opts{'sty'};
+}
+
+quack { \%ssargs} if $verbose;
+
+my $needs_census = $cmd_info_hr->{'needs_census'};
+my $needs_fetch  = $needs_census || $cmd_info_hr->{'needs_fetch'};
+
+my %screens;
+   %screens = fetch_screens( \%ssargs, \%screens, \%opts) if $needs_fetch;
+   %screens = scrape_screens(\%ssargs, \%screens, \%opts) if $needs_census;
+
+$cmd_info_hr->{'cmd_cr'}->(\%ssargs, \%screens, \%opts);
+
+quit_scraper_screen(%ssargs);
+delete $ssargs{'scraper_session'};  ## So END{} doesn't do it again.
+
+exit;
+
+##### Support routines
+
+sub cmd_list
+{
+	my($ssargs_hr, $screens_hr, $opts_hr) = @ARG;
+
+	my %screens      = %{ $screens_hr };
+	my @screens      = sort { $a->{'sty'} <=> $b->{'sty'} } values %screens;
+#	my $longest_name = List::Util::max(( map { length($ARG->{'name'}) } @screens ));
+
+	foreach my $screen_hr (@screens) {
+		printf("%-5.5s %s [%s]\n",
+			$screen_hr->{'sty'}, $screen_hr->{'sessionname'}, $screen_hr->{'state'});
+
+		my @windows = sort { $a->{'windex'} <=> $b->{'windex'} }
+			values %{ $screen_hr->{'windows'} };
+
+		foreach my $window_hr (@windows) {
+			printf("%3.3s - %s\n", $window_hr->{'windex'}, $window_hr->{'name'});
+		}
+	}
+
+#	quack { $screens_hr };
+}
+
+sub cmd_info
+{
+	my($ssargs_hr, $screens_hr, $opts_hr) = @ARG;
+	quack { $screens_hr };
+}
+
+sub cmd_freeze
+{
+	my($ssargs_hr, $screens_hr, $opts_hr) = @ARG;
+
+	my %ssargs  = %{ $ssargs_hr  };
+	my %screens = %{ $screens_hr };
+
+	foreach my $screen_info_hr (values %screens) {
+		local $ssargs{'screen'} = $screen_info_hr;
+		my($config_fn, $config_text) = freeze_screen_config(\%ssargs, $screens_hr, $opts_hr);
+		print "Wrote $config_fn ...\n";
+	}
+}
+
+sub fetch_matching_frozen_sessions {
+	my($re) = @ARG;
+	my $qr = $re ? qr{$re} : qr{.}; ## Inefficient
+
+	my @frozen;
+	my $fridge_dir = File::Spec->catfile(@FRIDGE_PATH_ELEMENTS);
+
+	my $dh = DirHandle->new($fridge_dir)
+		or die "failed to open fridge directory $fridge_dir: $OS_ERROR";
+
+	while (my $base_fn = $dh->read) {
+		my $fn = File::Spec->catfile($fridge_dir, $base_fn);
+		next if -d $fn;
+
+		next unless $base_fn =~ $re;
+
+		my($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size,
+			$atime, $mtime, $ctime, $blksize, $blocks) = stat($fn);
+
+		my($nickname, $pid) = ( $base_fn =~ m{^(.+)-20\d{6}\.(\d+)$} );
+
+		my %fdata = (
+			'dirname'     => $fridge_dir,
+			'basename'    => $base_fn,
+			'filename'    => $fn,
+			'nickname'    => $nickname || '',
+			'timestamp'   => $ctime || $mtime || $atime || 0,
+
+		);
+
+		push @frozen, \%fdata;
+	}
+
+	$dh->close;
+
+	return @frozen;
+}
+
+sub cmd_frozen
+{
+	my($ssargs_hr, $screens_hr, $opts_hr) = @ARG;
+
+	my @frozen = sort { $a->{'timestamp'} <=> $b->{'timestamp'} }
+		(( fetch_matching_frozen_sessions() ));
+
+	foreach my $info_hr (@frozen) {
+		my($nn, $bn, $fn, $ts) = map {
+			$info_hr->{$ARG}
+		} qw( nickname basename filename timestamp );
+
+		printf("\t%s\t%s\t%s\t%s\n", $nn, $bn, $fn, strftime('%FT%T', localtime($ts)));
+	}
+
+##	print "\t$ARG\n" for @frozen;
+}
+
+sub cmd_mru
+{
+	my($ssargs_hr, $screens_hr, $opts_hr) = @ARG;
+
+	my(@frozen) = sort {
+		$b->{'timestamp'} <=> $a->{'timestamp'}
+	} (( fetch_matching_frozen_sessions() ));
+
+	$opts_hr->{'frozen-session'} = $frozen[0]->{'filename'};
+	cmd_thaw(@ARG);
+}
+
+
+sub cmd_thaw
+{
+	my($ssargs_hr, $screens_hr, $opts_hr) = @ARG;
+
+	die "missing required parameter of --frozen-session name to restore\n"
+		unless my $sessionname = $opts_hr->{'frozen-session'};
+
+	my $frozen_session_fn;
+
+	if ($sessionname =~ m{^/}) {
+		$frozen_session_fn = $sessionname;
+	}
+	else {
+		my(@frozen) = sort {
+			$b->{'timestamp'} <=> $a->{'timestamp'}
+		} (( fetch_matching_frozen_sessions($sessionname) ));
+
+		$frozen_session_fn = $frozen[0]->{'filename'} if @frozen;
+	}
+
+	die "failed to find any session matching $sessionname"
+		unless $frozen_session_fn;
+
+	die "erroneously found missing file $frozen_session_fn: $OS_ERROR"
+		unless -e $frozen_session_fn;
+
+	die "failed to read $frozen_session_fn: $OS_ERROR"
+		unless -r $frozen_session_fn;
+
+	my $cmd_prefix = "ssh-agent " if $opts_hr->{'ssh-agent'};
+
+	system("${cmd_prefix}screen -c $frozen_session_fn");
+}
+
+sub verwarn { warn scalar(localtime) . ' ' . shift }
+
+sub stuffable_string
+{
+	my $s = shift;
+	my $c = join('', map { /^([^[:print:]])$/ ? sprintf("\\%#03o", ord($_)) : $ARG } (split(//, $s)));
+
+	## TODO :: Allow a nohistignore arg?
+	return 'history -d $(( --HISTCMD )) && ' . $c;
+}
+
+sub spawn_scraper_screen
+{
+	my(%params) = @ARG;
+
+	my $scraper_session   = sprintf('%s-%s',       $SCRAPER_PREFIX, $$);
+	my $scraper_conf_file = sprintf('%s/%s.cnf',   $SCRAPER_TMP, $scraper_session);
+	my $scraper_log_file  = sprintf('%s/%s.log',   $SCRAPER_TMP, $scraper_session);
+	my $windowlicker_cmd  = $params{'windowlicker_cmd'} || '';
+
+	my @log_commands = (
+		"logfile $scraper_log_file",  ## Where to log all our s-within-s activity
+		"logfile flush 1", ## Flush it REAL GOOD
+		"log on",          ## And start 'er up
+	);
+	my @config = (
+		'escape ^Ss',      ## Alternative escape so we can send commands to the screen inside the screen
+		'hardstatus off',  ## No status line of our own
+		 @log_commands,
+		"wrap off",        ## Try to avoid hardcopy truncating lines?
+		"width 255",       ## Ditto on the truncation
+		'stuff "stty col 255\015"',
+		"",                ## Blank line at the end
+	);
+
+	write_file($scraper_conf_file, (map { "$ARG\n" } @config));
+
+	my $cmdline;
+	
+#	$cmdline = "stty columns 255"; ## Max out columns so hardcopy dump works right
+#	verwarn("\$ $cmdline") if $verbose;
+#	system($cmdline) == 0
+#		or warn "failed to set column width: $CHILD_ERROR";
+
+	$cmdline = "COLUMNS=255 screen -c $scraper_conf_file -dmS $scraper_session $windowlicker_cmd";
+	verwarn("\$ $cmdline") if $verbose;
+	system($cmdline) == 0
+		or die "failed to spawn scraper-screen $scraper_session: $CHILD_ERROR";
+
+	sleep(1);
+
+	qx{ screen -ls | fgrep $scraper_session }
+		or die "failed to find supposedly spawned scraper-screen $scraper_session";
+
+
+	foreach my $scmd (@log_commands) {
+		$cmdline = "screen -S $scraper_session -p 0 -X $scmd";
+		verwarn("\$ $cmdline") if $verbose;
+		system($cmdline) == 0
+			or die "failed to force logging on for scraper-screen $scraper_session: $CHILD_ERROR";
+	}
+
+	return ( $scraper_session, $scraper_log_file, $scraper_conf_file );
+}
+
+sub write_screen_window_hardcopy
+{
+	my(%params) = @ARG;
+
+	my $hardcopy_lines  = $params{'hardcopy_lines'};
+	return unless $hardcopy_lines;
+
+	my $scraped_session = $params{'scraped_session'};
+	my $verbose         = $params{'verbose'};
+
+	my $windex          = $params{'windex'};
+	my $hardcopy_temp   = sprintf('%s/%s-%s.tmp.hc', $SCRAPER_TMP, $SCRAPER_PREFIX, $scraped_session);
+	my $hardcopy_file   = $params{'hardcopy_file'}
+		|| sprintf('%s/%s-%s.%d.hc', $SCRAPER_TMP, $SCRAPER_PREFIX, $scraped_session, $windex);
+
+	my $BASE_SCRAPED_EVAL_CMD = "screen -S $scraped_session -p $windex -X eval ";
+
+	my @xcommands = (
+###		"logfile $scraper_log_file",  ## Where to log all our s-within-s activity
+###		"logfile flush 1", ## Flush it REAL GOOD
+###		"log on",          ## And start 'er up
+		qq{select $windex},
+		"wrap off",        ## Try to avoid hardcopy truncating lines?
+		"width -w 255",       ## Ditto on the truncation
+		sprintf('stuff "%s"', "stty columns 255"),
+		qq{hardcopy -h $hardcopy_temp},
+		qq{other},  ## This and the noop_blank_select ensure we end where we started.
+	);
+
+	unshift(@xcommands, 'select -') if $params{'noop_blank_select'};
+
+	foreach my $xcommand (@xcommands) {
+		my $cmdline = sprintf(q{%s '%s'}, $BASE_SCRAPED_EVAL_CMD, $xcommand);
+		verwarn("\$ $cmdline") if $verbose;
+		system($cmdline) == 0
+			or warn "failed to dump hardcopy of window $windex in session $scraped_session: $CHILD_ERROR";
+		_usleep(0.50);
+	}
+
+	if ($hardcopy_lines > 0) {
+		system("tail -$hardcopy_lines $hardcopy_temp > $hardcopy_file") == 0
+			or warn "failed to tail $hardcopy_lines lines of $hardcopy_temp for window $windex in session $scraped_session: $CHILD_ERROR";
+		_unlink_windowlicker_files($hardcopy_temp);
+	}
+	else {
+		move($hardcopy_temp, $hardcopy_file)
+			or warn "failed to rename $hardcopy_temp to $hardcopy_file: $OS_ERROR";
+	}
+
+	return $hardcopy_file if -e $hardcopy_file;
+	return;
+}
+
+sub write_screen_window_history
+{
+	my(%params) = @ARG;
+
+	my $scraped_session = $params{'scraped_session'};
+	my $verbose         = $params{'verbose'};
+
+	my $windex         = $params{'windex'};
+	my $winfo_hr       = $params{'window'};
+	my $history_file   = $params{'history_file'}
+		|| sprintf('%s/%s-%s.%d.history', $SCRAPER_TMP, $SCRAPER_PREFIX, $scraped_session, $windex);
+
+	my $BASE_SCRAPED_EVAL_CMD = "screen -S $scraped_session -p $windex -X eval ";
+
+	my $at_prompt       = $winfo_hr->{'at_prompt'};
+	my $need_to_suspend = $at_prompt ? 0 : 1;
+	my $need_to_ctrlc   = $at_prompt ? 1 : 0;
+
+	quack { $windex, $at_prompt } if $verbose;
+
+	my   @xcommands;
+	push @xcommands, qq{select $windex},
+###		"logfile $scraper_log_file",  ## Where to log all our s-within-s activity
+###		"logfile flush 1", ## Flush it REAL GOOD
+###		"log on",          ## And start 'er up
+	;
+	push @xcommands, qq{stuff "^Z"}   if $need_to_suspend;
+	push @xcommands, qq{stuff "^C"}   if $need_to_ctrlc;
+	push @xcommands, sprintf('stuff "%s"', stuffable_string("history -w $history_file^M"));
+	push @xcommands, sprintf('stuff "%s"', stuffable_string("fg^M")) if $need_to_suspend;
+	push @xcommands, qq{other};  ## This and the noop_blank_select ensure we end where we started.
+
+	unshift(@xcommands, 'select -') if $params{'noop_blank_select'};
+
+	foreach my $xcommand (@xcommands) {
+		my $cmdline = sprintf(q{%s '%s'}, $BASE_SCRAPED_EVAL_CMD, $xcommand);
+		verwarn("\$ $cmdline") if $verbose;
+		system($cmdline) == 0
+			or warn "failed to dump history of window $windex in session $scraped_session: $CHILD_ERROR";
+		_usleep(0.50);
+	}
+
+	return $history_file if -e $history_file;
+	return;
+}
+
+sub scrape_single_screen_windowlist
+{
+	my(%params) = @ARG;
+
+	my $scraper_session = $params{'scraper_session'};
+	my $scraped_session = $params{'scraped_session'};
+	my $verbose         = $params{'verbose'};
+
+	my $windowlist_line_fmt   = sprintf($WINDOWLIST_LINE_FMT, $scraper_session, $scraped_session);
+
+	my @stuffable = (
+		[ qq{screen -p 0 -S $scraper_session -X eval}, qq{screen -p - -xr $scraped_session\cM} ],
+		[ qq{screen -S $scraped_session -X eval 'windowlist string "$windowlist_line_fmt"'} ],
+		[ qq{screen -S $scraped_session -X eval 'windowlist -b'} ],
+		[ qq{screen -S $scraped_session -X eval 'detach'} ],    ## Detach from the screen
+	);
+
+	foreach my $stuff_ar (@stuffable) {
+		my($base_scraper_cmd, $stuffable_string) = @{ $stuff_ar };
+		my $cmdline = $stuffable_string
+			? sprintf(q{%s 'stuff "%s"'}, $base_scraper_cmd, stuffable_string($stuffable_string))
+			: sprintf(q{%s             }, $base_scraper_cmd);
+		verwarn("\$ $cmdline") if $verbose;
+		system($cmdline) == 0
+			or warn "failed to stuff into screen $scraped_session via screen $scraper_session: $CHILD_ERROR";
+		_usleep(0.50);
+	}
+}
+
+sub analyze_screen_window_prompt
+{
+	my(%params) = @ARG;
+
+	my $window_hr     = $params{'window'};
+	my $hardcopy_file = $window_hr->{'hardcopy_file'};
+	return unless $hardcopy_file;
+
+	my $fh = FileHandle->new($hardcopy_file, 'r');
+	if (not $fh) {
+		warn "failed to open $hardcopy_file: $OS_ERROR";
+		return;
+	}
+
+	my %gleaned;
+	my $last_history_line_read;
+	my $last_prompt_line_read;
+
+	while ( my $line = $fh->gets ) {
+		if ( $line =~ $PROMPT_CWD_RE ) {
+			$gleaned{$ARG} = $+{$ARG} for qw( cwd );
+		}
+		elsif ( $line =~ $PROMPT_USER_HOST_RE ) {
+			$gleaned{$ARG} = $+{$ARG} for qw( user host );
+		}
+
+		$last_history_line_read = $line;
+	}
+
+	$fh->close;
+
+	chomp($last_history_line_read);
+	use Quack; quack { $last_history_line_read } if $verbose;
+
+	if ($last_history_line_read =~ $PROMPT_USER_HOST_RE) {
+		$gleaned{'at_prompt'} = 1;
+	}
+	else {
+		$gleaned{'at_prompt'} = 0;
+		warn "scraped history line «$last_history_line_read» does not match regex «$PROMPT_USER_HOST_RE»\n"
+			if $verbose;
+	}
+
+	return %gleaned;
+}
+
+sub fetch_screens
+{
+	my $ssargs_hr  = shift or die 'missing required argument of screen scraper arguments';
+	my %params     = %{ $ssargs_hr };
+
+	my $scraper_session  = $params{'scraper_session'};
+	my $verbose          = $params{'verbose'};
+	my $debug            = $params{'debug'};
+	my $scraper_log_file = $params{'scraper_log_file'};
+	my @only_these       = split(/,/, $params{'sty'} || '');
+
+	my %screens;
+	my @output = split(/$/m, qx{ screen -ls });
+		
+	my $screen_ls_re = '^\s+(?<sty>\d+)\.(?<sessionname>\S+)\s+(?<when>\([^\)]+\)\s+)?\((?<state>\w+)\)';
+	my $screen_ls_qr = qr{$screen_ls_re};
+
+	foreach my $line (@output) {
+		next if $line =~ /$SCRAPER_PREFIX/;  ## Omit any scrapers
+
+		my $want_this_one = @only_these ? grep { $line =~ m{$ARG} } @only_these : 1;
+		next unless $want_this_one;
+
+		$line =~ s/^[\r\n]+//xms;
+		next unless $line and $line =~ /^\s+/;
+
+		my $matched = $line =~ $screen_ls_qr;
+		if (not $matched) {
+			warn "screen -ls line «$line» does not match regex «$screen_ls_qr»\n";
+			next;
+		}
+
+		my %screen = map { $ARG => $+{$ARG} } qw( sty sessionname state );
+		$screens{ $screen{'sty'} } = \%screen;
+	}
+
+	quack { \%screens } if $verbose;
+
+	while (my($scraped_session, $sinfo_hr) = each(%screens)) {
+		scrape_single_screen_windowlist(%params, 'scraped_session' => $scraped_session);
+	}
+
+
+	my $windowlist_re = sprintf($WINDOWLIST_RE_FMT, $scraper_session);
+	my $windowlist_qr = qr{$windowlist_re};
+
+	foreach my $line ((read_file($scraper_log_file))) {
+		if ($debug) {
+			my $sane_line =  $line;
+##			   $sane_line =~ s/([^[:print:]])/sprintf('\\x%#4.4x', ord($1))/ge;
+			   $sane_line =~ s/([^[:print:]])/ /g;
+			warn "$scraper_log_file: $sane_line";
+		}
+
+		my $matched = ( $line =~ $windowlist_qr );
+		if (not $matched) {
+			warn "scraped windowlist line «$line» does not match regex «$windowlist_qr»\n"
+				if $verbose;
+			next;
+		}
+
+		my($scraped_session, $windex, $wname) =
+			map { $+{$ARG} } qw( scraped_session windex wname );
+
+		$windex =  int($windex);
+		$wname  =~ s/^\s+//g;
+		$wname  =~ s/\s+$//g;
+
+		my %winfo = (
+			'windex' => $windex,
+			'name'   => $wname,
+		);
+		$screens{$scraped_session}{'windows'}{$windex} = \%winfo;
+	}
+
+	return %screens;
+}
+
+sub scrape_screens
+{
+	my $ssargs_hr  = shift or die 'missing required argument of screen scraper arguments';
+	my %ssargs     = %{ $ssargs_hr };
+	my $screens_hr = shift or die 'missing required argument of base screen census';
+	my %screens    = %{ $screens_hr };
+	
+	quack { \%screens } if $verbose;
+
+	while (my($scraped_session, $sinfo_hr) = each(%screens)) {
+		my @windows = values %{ $sinfo_hr->{'windows'} };
+		my $noop_blank_select = 1;
+
+		use Quack; quack { \@windows } if $verbose;
+
+		foreach my $winfo_hr (@windows) {
+			my $windex = $winfo_hr->{'windex'};
+
+			my $hardcopy_file = write_screen_window_hardcopy(%ssargs,
+				'scraped_session'   => $scraped_session,
+				'windex'            => $windex,
+				'noop_blank_select' => $noop_blank_select,
+			);
+			$winfo_hr->{'hardcopy_file'} = $hardcopy_file;
+
+			my %gleaned = analyze_screen_window_prompt(%ssargs,
+				'window' => $winfo_hr,
+			);
+			while (my($key, $val) = each(%gleaned)) {
+				$winfo_hr->{$key} = $val;
+			}
+
+			my $history_file = write_screen_window_history(%ssargs,
+				'scraped_session'   => $scraped_session,
+				'windex'            => $windex,
+				'window'            => $winfo_hr,
+				'noop_blank_select' => $noop_blank_select,
+			);
+			$winfo_hr->{'history_file'} = $history_file;
+
+			$noop_blank_select = 0;
+		}
+	}
+
+	return %screens;
+}
+
+
+sub freeze_screen_config
+{
+	my($ssargs_hr, $screens_hr, $opts_hr) = @ARG;
+
+	my $verbose        = $opts_hr->{'verbose'};
+	my $screen_info_hr = $ssargs_hr->{'screen'};
+	my $windows_hr     = $screen_info_hr->{'windows'};
+	my $sessionname    = $screen_info_hr->{'sessionname'};
+
+	my $frozen_sessionname = $opts_hr->{'frozen-session'}
+		|| strftime("${sessionname}-%Y%m%d.%H%M", localtime);
+
+	use Quack; quack { \$opts_hr, $frozen_sessionname } if $verbose;
+
+	my $config_file = $ssargs_hr->{'frozen_config_file'};
+	if (not $config_file) {
+		$config_file = File::Spec->catfile(@FRIDGE_PATH_ELEMENTS, $frozen_sessionname);
+		make_path(@FRIDGE_PATH_ELEMENTS);
+	}
+
+	my $fridge_path = $ssargs_hr->{'frozen_config_fridge'};
+	if (not $fridge_path) {
+		$fridge_path = File::Spec->catdir(@FRIDGE_PATH_ELEMENTS, "${frozen_sessionname}-data");
+		make_path($fridge_path);
+	}
+
+	if ( ! -d $fridge_path ) {
+		warn "failed to find or create a frozen data directory $fridge_path";
+		return;
+	}
+	
+	use Quack; quack { $config_file, $fridge_path } if $verbose;
+
+	my %windows = %{ $windows_hr };
+
+
+	my $thawed_sessionname = $opts_hr->{'thawed-session'} || $sessionname;
+
+	my $config;
+	   $config .= "source \$HOME/.screenrc\n";
+	   $config .= "sessionname $thawed_sessionname\n";
+	   $config .= "\n";
+
+	my($first_windex);
+	my @windexes = sort { $a <=> $b } keys %windows;
+
+	foreach my $windex (@windexes) {
+		my %window = %{ $windows{$windex} };
+
+		my $name = $window{'name'};
+
+		$config .= "\n";
+
+		if (my $cwd = $window{'cwd'}) {
+			$cwd    =~ s/~/\$HOME/;
+			$config .= "chdir $cwd\n";
+		}
+
+		$config .= "screen -t $name $windex\n";
+
+		if (my $hardcopy_file = $window{'hardcopy_file'}) {
+			my $frozen_hardcopy = File::Spec->catfile($fridge_path, "window-$windex.hc");
+			move($hardcopy_file, $frozen_hardcopy);
+
+			if ( -e $frozen_hardcopy ) {
+				$config .= sprintf(qq{stuff "%s"\n}, stuffable_string("cat $frozen_hardcopy\cM"));
+			}
+			else {
+				warn "failed to move $hardcopy_file to $frozen_hardcopy: $OS_ERROR";
+			}
+		}
+		
+		if (my $history_file = $window{'history_file'}) {
+			my $frozen_history = File::Spec->catfile($fridge_path, "window-$windex.history");
+			move($history_file, $frozen_history);
+
+			if ( -e $frozen_history ) {
+				$config .= sprintf(qq{stuff "%s"\n}, stuffable_string("history -r $frozen_history\cM"));
+			}
+			else {
+				warn "failed to move $history_file to $frozen_history: $OS_ERROR";
+			}
+		}
+
+		$config .= "wrap on\n"; ## Hardcoded personal preference.
+
+		if (my $ssh = _maybe_generate_ssh_cmdline(\%window)) {
+			$config .= sprintf(qq{stuff "%s"\n}, stuffable_string("$ssh\cM"));
+		}
+
+		$first_windex //= $windex;
+	}
+
+	die "failed to fetch any windows for $sessionname!" unless defined $first_windex;
+
+	$config .= "\n";
+	$config .= "select $first_windex\n";
+##	$config .= qq{wall "Frozen screen session thawed and restored."\nlastmsg\n};
+
+	write_file($config_file, $config)
+		or warn "failed to write $config_file: $OS_ERROR";
+
+	return ($config_file, $config);
+}
+
+sub _maybe_generate_ssh_cmdline {
+	return; ## No.  This is unreliable and too tightly coupled to the prompt format.
+
+	my($window_hr) = @ARG;
+
+	return unless my $user =  $window_hr->{'user'};
+	return if        $user eq $ENV{'USER'};
+
+	return unless my $host = $window_hr->{'host'};
+	return if        $host eq hostname();
+
+	return sprintf('# ssh %s@%s', $user, $host);
+}
+
+sub _usleep
+{
+	my $seconds = shift;
+	select(undef, undef, undef, $seconds);
+}
+
+sub init_scraper_tmp
+{
+	my %before_tmp_files;
+
+	my $before_d = DirHandle->new($SCRAPER_TMP);
+	while (defined(my $fn = $before_d->read)) { $before_tmp_files{$fn}++ }
+	$before_d->close;
+
+	return %before_tmp_files;
+}
+
+
+sub cleanup_scraper_tmp
+{
+	my(%before_tmp_files) = @ARG;
+
+	my $after_d = DirHandle->new($SCRAPER_TMP);
+
+	while (defined(my $fn = $after_d->read)) {
+		next if      $before_tmp_files{$fn}++;
+		next unless  $fn =~ $SCRAPER_PREFIX;
+
+		_unlink_windowlicker_files("$SCRAPER_TMP/$fn");
+	}
+
+	$after_d->close;
+}
+
+sub quit_scraper_screen
+{
+	my(%params) = @ARG;
+
+	my($scraper_session, $scraper_log_file, $scraper_conf_file)
+		= map { $params{"scraper_$ARG"} } qw( session log_file conf_file );
+
+	return unless $scraper_session;
+
+	if ($scraper_session) {
+		system("screen -S $scraper_session -X quit") == 0
+			or warn "failed to quit screen $scraper_session: $CHILD_ERROR";
+	}
+	_unlink_windowlicker_files($scraper_log_file)  if $scraper_log_file;
+	_unlink_windowlicker_files($scraper_conf_file) if $scraper_conf_file;
+
+	return;
+}
+
+sub _unlink_windowlicker_files
+{
+	unlink($ARG) for @ARG;
+}
+
+sub make_path
+{
+	my $path = join('/', @ARG);
+	qx{ mkdir -p $path };
+}
+
+END
+{
+#	cleanup_scraper_tmp(%before_tmp_files);
+	quit_scraper_screen(%ssargs);
+}
+
+__END__
+
+=head1 BUGS
+
+=over
+
+=item Ron "Quinn" Straight achieved with distinction; no bugs!
+
+=back
+
+=head1 SEE ALSO
+
+Ron "Quinn" Straight may not have achieved; point to related topics?
+
+
+=head1 AUTHOR
+
+Ron "Quinn" Straight E<lt>rons@seevast.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2011 Seevast, Inc.
+
+=cut
+
+## vim: foldmethod=marker
+
+

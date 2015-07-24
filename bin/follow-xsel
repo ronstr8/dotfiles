@@ -1,0 +1,40 @@
+#!/bin/bash
+## follow-xsel
+##		Grab the X selection, show it if different from the last
+##		grab, sleep for five seconds, repeat.
+## -- 
+
+if [ ! "$DISPLAY" ] ; then
+	echo 'No $DISPLAY variable set; nothing we can do.' >&2
+	exit 1
+elif ( ! which xsel >& /dev/null ) ; then
+	echo "xsel is not in your path" >&2
+	exit 1
+fi
+
+sel_switches=(
+	--primary
+	--secondary
+	--clipboard
+)
+sel_previous=()
+
+padlen=$( echo ${sel_switches[*]} | awk -vRS='[[:space:]]' '{ length>bb && bb=length } END { print bb }' )
+
+while true ; do
+	ii=0
+	for sel_switch in ${sel_switches[*]} ; do
+		sel_switch=${sel_switches[$ii]}
+		sel_current=$( xsel $sel_switch )
+
+		if [ "$sel_current" != "${sel_previous[$ii]}" ] ; then
+			printf "\n\n%-*.*s @ $( date -Is )\n\n$sel_current\n\n" $padlen $padlen $sel_switch
+		fi
+
+		sel_previous[$(( ii++ ))]=$sel_current
+	done
+
+	sleep 5
+done
+
+## vi: ft=sh

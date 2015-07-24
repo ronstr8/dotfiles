@@ -1,0 +1,27 @@
+
+unset -f whinge ;
+function whinge() {
+    local fmtMsg="$1" ; shift ;
+
+    if [ "$*" ] ; then
+        fmtMsg=$( printf "$fmtMsg" $* ) ;
+    fi
+
+    ## Prefix shell comment markers before all whinging so as not to interfere with --eval.
+    echo "# [$( date -Is )] $msg" 1>&2 ;
+}
+
+unset -f croak ;
+function croak() {
+    __whinge $@ ;
+    return `false` ;
+}
+
+for fn in $HOME/.bash/lib/*.bash ; do
+	if [ -x "$fn" ] ; then
+		. "$fn"
+	fi
+done
+
+# vim: ft=sh
+

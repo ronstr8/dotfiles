@@ -1,0 +1,76 @@
+#!/bin/bash
+
+cat <<EOT > /dev/null
+2014-03-18 18:38:47 :: /data/src/java
+ rons@fazigu$ find -L netty -path '*/src/main'
+ netty/buffer/src/main
+ netty/transport-udt/src/main
+ netty/codec/src/main
+ netty/transport-native-epoll/src/main
+ netty/codec-http/src/main
+ netty/common/src/main
+ netty/example/src/main
+ netty/codec-socks/src/main
+ netty/handler/src/main
+ netty/transport/src/main
+ netty/transport-rxtx/src/main
+ netty/transport-sctp/src/main
+EOT
+
+SRC_HOME_DIR="/data/src/java"
+TAGS_HOME_DIR="$HOME/.vim/tags"
+SOURCES=(
+	java-7-oracle/src
+	adiant-valuescore/common.redis/src
+	adiant-valuescore/rtbx/src
+	adiant-valuescore/common/src
+	adiant-valuescore/adserv/src
+	adiant-valuescore/adserv.templates/src
+	adiant-valuescore/dmp/src/test
+	adiant-valuescore/dmp/src/main
+	adiant-valuescore/externals/opencsv/src
+	adiant-valuescore/externals/murmur/src
+	adiant-valuescore/vs/src
+	netty/buffer/src/main
+	netty/transport-udt/src/main
+	netty/codec/src/main
+	netty/transport-native-epoll/src/main
+	netty/codec-http/src/main
+	netty/common/src/main
+	netty/example/src/main
+	netty/codec-socks/src/main
+	netty/handler/src/main
+	netty/transport/src/main
+	netty/transport-rxtx/src/main
+	netty/transport-sctp/src/main
+)
+LANGUAGES=( java )
+
+mkdir -p "$TAGS_HOME_DIR"
+
+for srcDirName in ${SOURCES[*]} ; do
+	srcDirName="$SRC_HOME_DIR/$srcDirName"
+	for lang in ${LANGUAGES[*]} ; do
+		printf "Processing top-level source folder '%s' for '%s' language files ...\n" "$srcDirName" "$lang" 1>&2
+		ctags -f "$TAGS_HOME_DIR/$lang" -h ".$lang" --append -R --totals=yes --language-force="$lang" $srcDirName # --tag-relative=yes
+	done
+done
+
+cat <<EOT
+	Add the following to your ~/.vimrc:
+
+set complete=.,w,b,u,t,i
+EOT
+
+for lang in ${LANGUAGES[*]} ; do
+	printf "autocmd Filetype %-4s set tags=%s/%s\n" "$lang" "$TAGS_HOME_DIR" "$lang"
+done
+
+
+cat <<EOT
+
+	Use c-] to open a buffer at the definition of the under-cursor tag.
+	Use c-N to auto-complete the word under the cursor.
+EOT
+
+

@@ -1,0 +1,31 @@
+## ln -s ~/.bash/rc ~/.bashrc
+##		User specific aliases and functions.  Invoked for all shells.
+
+[ -f /etc/bashrc ] && . /etc/bashrc ;
+
+BASHDIR="$HOME/.bash" ;
+RCFILES=(
+	stdlib
+	environment
+	aliases
+	completion
+	path
+	term
+	shopts
+	x11
+	agents
+	secret
+) ;
+
+for rcFile in ${RCFILES[@]} ; do
+	[ -f "$BASHDIR/$rcFile" ] && . "$BASHDIR/$rcFile" ;
+done
+
+#ssh-agent-sync
+
+## This `local' call source should always be last, allowing override of
+## everything set above.
+
+[ -f $BASHDIR/local ] && source $BASHDIR/local ;
+
+# vim: ft=sh

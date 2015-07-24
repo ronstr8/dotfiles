@@ -1,0 +1,8 @@
+#!/bin/sh
+## http://www.depesz.com/index.php/2007/10/19/grantall/
+
+priv=$1
+db=$2
+role=$3
+query="SELECT 'GRANT $priv ON public.' || t.relname || ' TO $role;' from pg_class t, pg_namespace s WHERE t.relkind IN ('r', 'v', 'S') AND t.relnamespace=s.oid AND s.nspname='public';"
+psql -t -c "$query" $db | psql $db

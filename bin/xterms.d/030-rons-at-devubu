@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Terminal=false
+Icon[C]=/home/rons/files/icons/icon-seevast.png
+Name[C]=rons@devweb
+Name=rons@devweb
+Icon=/home/rons/files/icons/icon-seevast.png
+Comment=Connect to dev-ubu (Seevast)
+Comment[C]=Connect to dev-ubu (Seevast)
+Exec=x-terminal-emulator -title 'dev-ubu' -e /home/rons/bin/p3-ssh rons@dev-ubu
