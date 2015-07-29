@@ -103,7 +103,3 @@ hi Visual gui=reverse cterm=reverse guifg=OliveDrab ctermfg=OliveDrab guibg=khak
 hi WarningMsg gui=NONE cterm=NONE guifg=salmon ctermfg=salmon guibg=NONE ctermbg=NONE
 "WildMenu
 
-
-"" I'm guessing below needs a number between 0-255 for cterm, thus the fail.
-"" sed -e "$( for REPLY in $( grep -E -o '[fb]g=[a-zA-Z]\w+' ~/.vim/colors/fazigu-gui.vim  | sort | uniq | cut -c4- ) ; do rgb="$( grep -E ">\\s+$REPLY\\s+<" ~/.vim/colors/rgb.txt.html | cut -f2 )" ; [[ -n "$rgb" ]] && echo -n "s/=$REPLY\\b/=#$rgb/g; " ; done )" ~/.vim/colors/fazigu-gui.vim > ~/.vim/colors/fazigu-gui-rgb.vim
-
