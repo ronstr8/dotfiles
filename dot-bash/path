@@ -1,5 +1,5 @@
 
-MYROOT="$HOME/usr"
+MYROOT="$HOME/.local"
 MYWORK="$HOME/work/adblade"
 
 for dn in $( ls -d $HOME/src/perl/*/lib $MYROOT/{lib,share,}/perl/5.[0123456789]*/{,auto} $MYROOT/perl5 $MYROOT/site_perl 2> /dev/null ) ; do

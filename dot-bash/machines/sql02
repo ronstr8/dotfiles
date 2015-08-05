@@ -1,0 +1,5 @@
+# Probably an older version of an SSL library on sql02.
+# @see https://gist.github.com/byplayer/1599267
+export GIT_SSL_NO_VERIFY=true
+alias python=python26
+
