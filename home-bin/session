@@ -61,6 +61,16 @@ DO_HARDCOPY_DUMP='' ;
 
 MV_CMD='mv' ;
 
+declare -a SESSION_VARS=(
+    SESSION_NAME
+    SESSION_HOME
+    WINDOW
+    WINDOW_NUMBER
+    WINDOW_HOME
+    WINDOW_TITLE
+    HISTFILE
+) ;
+
 FRIDGE_DIR="$HOME/.screen/sessions" ;
 CHDIR_BASENAME='chdir' ;
 TITLE_BASENAME='title' ;
@@ -89,12 +99,10 @@ WINDOWLOGIN_BASENAME='window_login' ; ## Source after screen is created.
 # 
 # declare -A RTPARAMS ;
 
-unset -f __rtparam ;
 function __rtparam() {
     return ;
-}
+} ;
 
-unset -f __getOptions ;
 function __getOptions() {
     local allOptions=(
         debug
@@ -167,37 +175,31 @@ function __getOptions() {
     if [ ! "$OPT_SESSION" -a $# -eq 1 -a "$pristineArgs" = "$*" ] ; then
         OPT_SESSION="$1" ; shift ;
     fi
-}
+} ;
 
-unset -f __whinge ;
 function __whinge() {
     ## Prefix shell comment markers before all whinging so as not to interfere with --eval.
     echo "# [$( date -Is )] $*" 1>&2 ;
-}
+} ;
 
-unset -f __croak ;
 function __croak() {
     __whinge $@ ;
     return $ERR ;
-}
+} ;
 
-unset -f __buildWindowDir ;
 function __buildWindowDir() {
     local sessionDir="${1}" ;
     local windowNum="${2}" ;
 
     printf '%s/window-%02d' "$sessionDir" "$windowNum" ;
-}
+} ;
 
-unset -f __parseWindowDir ;
 function __parseWindowDir() {
     local windowDir="${1}" ;
 
     echo "$windowDir" | sed -e 's/^.\+-0\?\([0-9]\+\)$/\1/;'
-}
+} ;
 
-
-unset -f __echoScreenRc ;
 function __echoScreenRc() {
     local sessionName="${1}" ;
     local sessionDir="${2}" ;
@@ -324,15 +326,13 @@ EOT
     echo ;
     echo "## vim: ft=screen" ;
     echo ;
-}
+} ;
 
-unset -f __evalCommented ;
 function __evalCommented() {
     __whinge "\$ $*" ;
     eval $* 1>&2 | sed -e 's/^/# /g;' ;
-}
+} ;
 
-unset -f __changeWindowNumber ;
 function __changeWindowNumber() {
     local sessionDir="$1" ;
     local currWindowNumber="$2" ;
@@ -342,8 +342,8 @@ function __changeWindowNumber() {
     [ "$currWindowNumber" ] || __croak "__changeWindowNumber needs a currWindowNumber." || return $ERR ;
     [ "$destWindowNumber" ] || __croak "__changeWindowNumber needs a destWindowNumber." || return $ERR ;
 
-    local currWindowDir="$( __buildWindowDir "$SESSION_HOME" "${currWindowNumber}" )";
-    local destWindowDir="$( __buildWindowDir "$SESSION_HOME" "${destWindowNumber}" )";
+    local currWindowDir="$( __buildWindowDir "$sessionDir" "${currWindowNumber}" )";
+    local destWindowDir="$( __buildWindowDir "$sessionDir" "${destWindowNumber}" )";
 
     local movedWindowNumber="$currWindowNumber" ;
     local movedWindowHistoryFile="$currWindowDir/$HISTORY_BASENAME" ;
@@ -381,9 +381,8 @@ function __changeWindowNumber() {
     WINDOW_HOME="$destWindowDir" ;
 
     return $OK ;
-}
+} ;
 
-unset -f __commitSessionToVcs ;
 function __commitSessionToVcs() {
     local sessionDir="$1" ;
 
@@ -403,9 +402,8 @@ function __commitSessionToVcs() {
     __evalCommented git $gitXargs add "'$sessionDir'"
     __evalCommented git $gitXargs commit --message="'$commitMsg'" "'$sessionDir'"
 
-}
+} ;
 
-unset -f __echoBashEnv ;
 function __echoBashEnv() {
     local winDir="${1:-$WINDOW_HOME}" ;
 #    local winLogFile="$winDir/$SCREENLOG_BASENAME" ;
@@ -429,9 +427,8 @@ function __echoBashEnv() {
     unset BASH_ENV ;
 
 EOT
-}
+} ;
 
-unset -f __echoExport ;
 function __echoExport() {
     local varName="$1" ;
     local varValue="$2" ;
@@ -439,9 +436,8 @@ function __echoExport() {
     echo "export ${varName}='${varValue}' ; " ;
 #    [ "$varValue" ] && echo -n "${varName}='${varValue}' ; " ;
 #    echo "export $varName ; " ;
-}
+} ;
 
-unset -f __echoExports ;
 function __echoExports() {
 #   echo -e "\n\n" ;
 
@@ -458,25 +454,8 @@ function __echoExports() {
     __echoExport 'WINDOW_NUMBER' "$WINDOW_NUMBER" ; 
     __echoExport 'WINDOW_TITLE'  "$WINDOW_TITLE" ; 
     __echoExport 'HISTFILE'      "${WINDOW_HISTORY_FILE:-$HISTFILE}" ;
-}
+} ;
 
-
-unset -f __validateSessionState ;
-function __validateSessionState() {
-    if [ "$OPT_SESSION" ] ; then
-        SESSION_NAME="$OPT_SESSION" ;
-    elif [ "$SESSION_NAME" ] ; then
-        true ;
-    elif [[ "$STY" =~ ^[0-9]+\..+ ]] ; then
-        SESSION_NAME=$( echo "$STY" | cut -d. -f2- ) ; 
-    else
-        __croak 'Cannot continue without $SESSION_NAME, $STY indicating a name, or --session=s.' || return $ERR ;
-    fi
-
-    SESSION_HOME="$FRIDGE_DIR/$SESSION_NAME" ;
-}
-
-unset -f __maybeVivifySessionDir ; 
 function __maybeVivifySessionDir() {
     if [ -d "$SESSION_HOME" ] ; then
         return ;
@@ -486,9 +465,8 @@ function __maybeVivifySessionDir() {
         __croak "Cannot continue if $SESSION_HOME does not exist and no --vivify." || return $ERR ;
         return $ERR ;
     fi
-}
+} ;
 
-unset -f __isWindowAlive ;
 function __isWindowAlive() {
     local windowNumber="$1" ;
     local touchFile="/tmp/session-window-check-$RANDOM" ;
@@ -506,9 +484,22 @@ function __isWindowAlive() {
     rm -f $touchFile ;
 
     return $windowIsAlive ;
-}
+} ;
 
-unset -f __validateWindowState ;
+function __validateSessionState() {
+    if [ "$OPT_SESSION" ] ; then
+        SESSION_NAME="$OPT_SESSION" ;
+    elif [ "$SESSION_NAME" ] ; then
+        true ;
+    elif [[ "$STY" =~ ^[0-9]+\..+ ]] ; then
+        SESSION_NAME=$( echo "$STY" | cut -d. -f2- ) ; 
+    else
+        __croak 'Cannot continue without $SESSION_NAME, $STY indicating a name, or --session=s.' || return $ERR ;
+    fi
+
+    SESSION_HOME="$FRIDGE_DIR/$SESSION_NAME" ;
+} ;
+
 function __validateWindowState() {
     ## TODO $WINDOW was when it launched-- maybe not now.  Warn when used?
     if [ ! "$WINDOW_NUMBER" ] ; then
@@ -525,9 +516,8 @@ function __validateWindowState() {
 
     WINDOW_HOME="$( __buildWindowDir "$SESSION_HOME" "$WINDOW_NUMBER" )" ;
     return $OK ;
-}
+} ;
 
-unset -f __maybeRenumberWindow ;
 function __maybeRenumberWindow() {
     if [ ! "$RENUMBER_TO" ] ; then
         return $OK ;
@@ -539,9 +529,8 @@ function __maybeRenumberWindow() {
     __changeWindowNumber "$SESSION_HOME" "$WINDOW_NUMBER" "$RENUMBER_TO" || return $ERR ;
 
     return $OK ;
-}
+} ;
 
-unset -f __maybeRetitleWindow ;
 function __maybeRetitleWindow() {
     if [ ! "$RETITLE_TO" ] ; then
         return $OK ;
@@ -551,9 +540,8 @@ function __maybeRetitleWindow() {
     export WINDOW_TITLE="$RETITLE_TO" ;
 
     return $OK ;
-}
+} ;
 
-unset -f __dumpWindowHardcopy ;
 function __dumpWindowHardcopy() {
     ## This just ensures our default hardcopy directory is set.
     screen -X hardcopydir "$WINDOW_HOME" ;
@@ -572,9 +560,8 @@ function __dumpWindowHardcopy() {
     fi
 
     screen -X hardcopy -h "$hcFile" ;
-}
+} ;
 
-unset -f __saveWindowState ;
 function __saveWindowState() {
     ## XXX The semicolons are imperative for `eval'!
     [ "$EVAL" ] && echo "history -a \"${WINDOW_HISTORY_FILE:-$HISTFILE}\" ;" ;
@@ -590,9 +577,8 @@ function __saveWindowState() {
     [ "$WRITE_SCREENRC" ] && __echoScreenRc "$SESSION_NAME" "$SESSION_HOME" "$WINDOW_NUMBER" > "$SESSION_HOME/screenrc" ;
     [ "$COMMIT_SESSION" ] && __commitSessionToVcs "$SESSION_HOME" ;
     [ "$EVAL" ] && __echoExports ;
-}
+} ;
 
-unset -f __loadWindowState ;
 function __loadWindowState() {
     local sessionName="${1}" ;
     local sessionDir="${2}" ;
@@ -618,9 +604,8 @@ function __loadWindowState() {
     [ -e "$winHistoryFile" ] && history -r "$winHistoryFile" ;
 
     return $OK ;
-}
+} ;
 
-unset -f __readyForCheckpoint ;
 function __readyForCheckpoint() {
     local staleSeconds=${1:-1800} ;
     local refFile="$WINDOW_HOME/$HISTORY_BASENAME" ;
@@ -650,9 +635,8 @@ function __readyForCheckpoint() {
 #   __whinge "EVAL='$EVAL' ; VIVIFY='$VIVIFY' ; WRITE_SCREENRC='$WRITE_SCREENRC'" ;
 
     return $OK ;
-}
+} ;
 
-unset -f __echoStatus ;
 function __echoStatus() {
     local winDir subDir histFile histTime hcFile cwdFile cwd titleFile title statusLine ;
     local wtf='‽‽‽' ;
@@ -674,21 +658,24 @@ function __echoStatus() {
         titleFile="$winDir/$TITLE_BASENAME" ;
         title=$( cat "$titleFile" ) ;
 
-        # __whinge "${subDir}: Saved ${histTime:-$wtf} from ${cwd:-$wtf} w/title «${title:-$wtf}»." ;
-        statusLine=$( printf "%s AKA %-12s %s from %s." "$subDir" "${title:-$wtf}" "${histTime:-$wtf}" "${cwd:-$wtf}" ) ;
+        statusLine=$( printf "%s AKA %-12s %s   %s" "$subDir" "${title:-$wtf}" "${histTime:-$wtf}" "${cwd:-$wtf}" ) ;
         __whinge "$statusLine" ;
     done
 
     __whinge ;
 
-    export | grep 'WINDOW\|STY\|HISTFILE\|SESSION' | while read envLine ; do
-        __whinge "$envLine" ;
+    declare exportables='declare -x' varName='' ;
+
+    for varName in "${SESSION_VARS[@]}" ; do
+        exportables+=" $varName='${!varName}'" ;
     done
 
-    return $OK ;
-}
+    __whinge "$exportables ;" ;
+#   __whinge $( export | grep -E 'WINDOW|STY|HISTFILE|SESSION|SCREEN' | xargs | sed -e 's/ declare -x \(\w\+\)='?\(\)'?/ /g;' ) ;
 
-unset -f __main ;
+    return $OK ;
+} ;
+
 function __main() {
     __validateSessionState  || return $ERR ;
     __maybeVivifySessionDir || return $ERR ;
@@ -733,9 +720,8 @@ function __main() {
     WINDOW_ENV_FILE="$WINDOW_HOME/$ENV_BASENAME" ;
 
     export HISTFILE="$WINDOW_HISTORY_FILE" ;
-    export SESSION_NAME ;
-    export WINDOW_NUMBER ;
-    export WINDOW_TITLE ;
+    export SESSION_HOME SESSION_NAME  ;
+    export WINDOW_HOME WINDOW_NUMBER WINDOW_TITLE ;
 
     if [ "$DO_STATUS" ] ; then
         __echoStatus ;
@@ -752,7 +738,7 @@ function __main() {
     fi
 
     __saveWindowState || return $ERR ;
-}
+} ;
 
 __getOptions $* && __main $* ;
 
