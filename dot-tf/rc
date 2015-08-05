@@ -23,7 +23,7 @@
 /load simpleedit.tf
 /load local-edit.tf
 
-/def WORLDFILE	= ~/.tf/world.tf
+/def WORLDFILE	= ~/.tf/worlds.tf
 /def BINDFILE	= ~/.tf/bind.tf
 
 /loadworld
