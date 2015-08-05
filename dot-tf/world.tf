@@ -12,6 +12,8 @@
 /test addworld("codepoint", "tiny.moo", "codepoint.the-b.org",    7777, "Nniuq", "nniuq-forgot-his-password")
 /test addworld("nunavut", "tiny.moo", "localhost",    6666, "Quinn", "quinn")
 /test addworld("gilmoo", "tiny.moo", "hell.game-host.org",    7777, "Quinn", "omEhE")
+/test addworld("hellmoo", "tiny.moo", "hellmoo.org",    7777, "Quinn", "omEhE")
+/test addworld("evennia", "tiny.moo", "176.58.89.89",    4444, "Quinn", "omEhE")
 /test addworld("nv", "tiny.moo", "moo.netsville.com",    6969, "Quinn", "qq@ZZ333!")
 
 ;; /addworld "gw" -Ttiny.moo    moo.ghostmoo.org        6969   God    "&abbaT/0"
