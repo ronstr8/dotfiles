@@ -17,68 +17,44 @@
 [[ -z "${__xMAXINT}" ]] && declare -r -i __xMAXINT=$(( 2 ** 62 )) ;
 [[ -z "${__xMININT}" ]] && declare -r -i __xMININT=$(( xMAXINT * -1 )) ;
 
-unset -f __numMap ; function __numMap() {
-    declare    mapper="$1" ; shift ;
-    declare -x answer='' arg='' ;
-
-#   printf "\$#=$#;\$[]=%s\n" "$@" ;
-
-    (
-        declare funcName="__numMapperFunction$$$RANDOM" ;
-
-        eval "function $funcName() { declare answer=\$1 arg=\$2 ; $mapper ; } ;" ;
-
-        trap "unset -f $funcName" 'EXIT' ;
-
-        if [ $# -lt 1 -o "$1" = '-' ] ; then
-            while read arg  ; do answer=$( $funcName "$answer" "$arg" ) ; done
-        else
-            for arg in "$@" ; do answer=$( $funcName "$answer" "$arg" ) ; done
-        fi
-
-        unset -f "$funcName" ;
-    ) ;
-
-    echo "$answer" ;
-} ;
-
 unset -f numSum ; function numSum() {
-    __numMap 'echo $(( ${answer:-0}+arg ))' "$@" ;
-#    declare -i answer='' ;
-#    
-#    while read ; do
-#        answer=$(( ${answer:-0} + $REPLY )) ;
-#    done ;
-#
-#    echo $answer ;
+    declare -i answer=0 arg=0 ;
+    declare    mapper='answer+=$arg' ;
+
+    if [ $# -lt 1 ] || [ $# -eq 1 -a "$1" = '-' ] ; then
+        while read arg  ; do eval $mapper ; done # answer+=$arg ; done
+    else
+        for arg in "$@" ; do eval $mapper ; done # answer+=$arg ; done
+    fi
+
+    echo $answer ; 
 } ;
 
 unset -f numMax ; function numMax() {
-    __numMap '(( arg >= ${answer:-xMININT} )) && echo $answer' "$@" ;
-#    declare -i answer='' ;
-#    
-#    while read ; do
-#        if (( REPLY >= ${answer:-0} )) ; then
-#            answer=$REPLY ;
-#        fi
-#    done ;
-#
-#    echo $answer ;
+    declare answer='' arg=0 ;
+    declare mapper='(( arg >= ${answer:-$__xMININT} )) && answer=$arg' ;
+
+    if [ $# -lt 1 ] || [ $# -eq 1 -a "$1" = '-' ] ; then
+        while read arg  ; do eval $mapper ; done # answer+=$arg ; done
+    else
+        for arg in "$@" ; do eval $mapper ; done # answer+=$arg ; done
+    fi
+
+    echo $answer ; 
 } ;
 
 unset -f numMin ; function numMin() {
-    __numMap '(( arg <= ${answer:-xMAXINT} )) && echo $answer' "$@" ;
-#    declare -i answer='' ;
-#    
-#    while read ; do
-#        if (( REPLY <= ${answer:-0} )) ; then
-#            answer=$REPLY ;
-#        fi
-#    done ;
-#
-#    echo $answer ;
-} ;
+    declare answer='' arg=0 ;
+    declare mapper='(( arg <= ${answer:-$__xMAXINT} )) && answer=$arg' ;
 
+    if [ $# -lt 1 ] || [ $# -eq 1 -a "$1" = '-' ] ; then
+        while read arg  ; do eval $mapper ; done # answer+=$arg ; done
+    else
+        for arg in "$@" ; do eval $mapper ; done # answer+=$arg ; done
+    fi
+
+    echo $answer ; 
+} ;
 
 unset -f numBytes ; function numBytes() {
     declare    unitLabel='' unitScale='' blockSize=1 ;
