@@ -13,10 +13,75 @@
 ## 	echo $* | awk -vRS='[[:space:]]' 'BEGIN { bb=99999 } { length<bb && bb=length } END { print bb }' 
 ## }
 
-unset -f toBytes ; function toBytes() {
-    declare -i bytes=0 ; while read ; do bytes+=$REPLY ; done ;
+[[ -z "${__xSCALE}"  ]] && declare -r -i __xSCALE=12 ;
+[[ -z "${__xMAXINT}" ]] && declare -r -i __xMAXINT=$(( 2 ** 62 )) ;
+[[ -z "${__xMININT}" ]] && declare -r -i __xMININT=$(( xMAXINT * -1 )) ;
 
-    declare    unitSpec='' unitScale='2' blockSize=1 ;
+unset -f __numMap ; function __numMap() {
+    declare    mapper="$1" ; shift ;
+    declare -x answer='' arg='' ;
+
+#   printf "\$#=$#;\$[]=%s\n" "$@" ;
+
+    (
+        declare funcName="__numMapperFunction$$$RANDOM" ;
+
+        eval "function $funcName() { declare answer=\$1 arg=\$2 ; $mapper ; } ;" ;
+
+        trap "unset -f $funcName" 'EXIT' ;
+
+        if [ $# -lt 1 -o "$1" = '-' ] ; then
+            while read arg  ; do answer=$( $funcName "$answer" "$arg" ) ; done
+        else
+            for arg in "$@" ; do answer=$( $funcName "$answer" "$arg" ) ; done
+        fi
+
+        unset -f "$funcName" ;
+    ) ;
+
+    echo "$answer" ;
+} ;
+
+unset -f numSum ; function numSum() {
+    __numMap 'echo $(( ${answer:-0}+arg ))' "$@" ;
+#    declare -i answer='' ;
+#    
+#    while read ; do
+#        answer=$(( ${answer:-0} + $REPLY )) ;
+#    done ;
+#
+#    echo $answer ;
+} ;
+
+unset -f numMax ; function numMax() {
+    __numMap '(( arg >= ${answer:-xMININT} )) && echo $answer' "$@" ;
+#    declare -i answer='' ;
+#    
+#    while read ; do
+#        if (( REPLY >= ${answer:-0} )) ; then
+#            answer=$REPLY ;
+#        fi
+#    done ;
+#
+#    echo $answer ;
+} ;
+
+unset -f numMin ; function numMin() {
+    __numMap '(( arg <= ${answer:-xMAXINT} )) && echo $answer' "$@" ;
+#    declare -i answer='' ;
+#    
+#    while read ; do
+#        if (( REPLY <= ${answer:-0} )) ; then
+#            answer=$REPLY ;
+#        fi
+#    done ;
+#
+#    echo $answer ;
+} ;
+
+
+unset -f numBytes ; function numBytes() {
+    declare    unitLabel='' unitScale='' blockSize=1 ;
     declare -i prettyPrint=0 ;
 
     declare gOpt ;
@@ -35,19 +100,28 @@ Usage: $FUNCNAME [options]
     --pretty    Include thousands-place separators and units in output." ;
             return ;;
 
-        --block-size|--bs|-b ) blockSize=$2 ; shift 2 ;;
+        --block-size|--bs  |-b ) blockSize=$2 ; shift 2 ;;
+        --units     |--unit|-u ) unitLabel=$2 ; shift 2 ;;
 
-        --scale    |-s ) unitScale=$2  ; shift 2 ;;
-        --unit{,s} |-u ) unitSpec=$2   ; shift 2 ;;
-        --pretty   |-p ) prettyPrint=1 ; shift   ;;
+        --scale  |-s ) unitScale=$2  ; shift 2 ;;
+        --pretty |-p ) prettyPrint=1 ; shift   ;;
 
         -- ) shift ; break ;;
     esac ; done ;
 
+    declare bytes ;
+
+    if [[ $# -lt 1 ]] || [[ $# -eq 1 && $1 = '-' ]] ; then
+        read bytes ;
+    else
+        bytes=$( echo "$@" | numSum ) ;
+    fi
+
     bytes=$(( bytes * blockSize )) ; 
 
-    declare -i unitPower=1 unitBase=1024 bitDivisor=1;
-    declare    unitLabel=${unitSpec:-KB} ;
+    declare -i unitPower=0 unitBase=1024 bitMultiplier=1;
+
+    declare powerLabel ;
 
     if [[ -n "$unitLabel" ]] ; then
         if [[ ! "$unitLabel" =~ ^([kKmMgGtT])?((i)?([Bb]))?$ ]] ; then
@@ -57,26 +131,49 @@ Usage: $FUNCNAME [options]
             return 2 ;
         fi
 
-        declare powerLabel=${BASH_REMATCH[1]} ;
+        powerLabel=${BASH_REMATCH[1]} ;
 
-        printf '%s\n' "${BASH_REMATCH[@]}" ;
+#       printf '%s\n' "${BASH_REMATCH[@]}" ;
 
         [[ -n "${BASH_REMATCH[3]}" ]] && unitBase=1000 ;
-        [[ -n "${BASH_REMATCH[4]}" && ${BASH_REMATCH[4]} == 'b' ]] && bitDivisor=8 ;
+        [[ -n "${BASH_REMATCH[4]}" && ${BASH_REMATCH[4]} == 'b' ]] && bitMultiplier=8 ;
 
-        case "$powerLabel" in 
-            [kK] ) unitPower=1 ;;
-            [mM] ) unitPower=2 ;;
-            [gG] ) unitPower=3 ;;
-            [tT] ) unitPower=4 ;;
-        esac
+    elif (( prettyPrint > 0 )) ; then
+        if   (( bytes < 1024*1024 )) ; then
+            powerLabel='KB' ;
+        elif (( bytes < 1024*1024*1024 )) ; then
+            powerLabel='MB' ;
+        elif (( bytes < 1024*1024*1024*1024 )) ; then
+            powerLabel='GB' ;
+        elif (( bytes < 1024*1024*1024*1024*1024 )) ; then
+            powerLabel='TB' ;
+        fi
     fi
 
-    echo "bytes=$bytes;unitScale=$unitScale;unitBase=$unitBase;unitPower=$unitPower;bitDivisor=$bitDivisor" ;
+    case "$powerLabel" in 
+        [kK]* ) unitPower=1 ;;
+        [mM]* ) unitPower=2 ;;
+        [gG]* ) unitPower=3 ;;
+        [tT]* ) unitPower=4 ;;
+    esac
 
-    declare units=$( bc <<< "scale=$unitScale;$bytes/($unitBase^$unitPower)/$bitDivisor" ) ;
+    declare unitDivisor=$(( unitBase ** unitPower )) ; # $( bc <<< "scale=$__xSCALE;$unitBase^$unitPower" ) ;
 
-    (( prettyPrint == 0 )) && echo $units || printf "%'.*f %s\n" $unitScale $units "$unitLabel" ;
+    if [[ -z "$unitScale" ]] ; then
+        if   (( bytes < (unitDivisor) )) ; then
+            unitScale=4 ;
+        elif (( bytes < (unitDivisor * unitBase) )) ; then
+            unitScale=3 ; 
+        else
+            unitScale=0 ;
+        fi
+    fi
+
+    (( bitMultiplier != 1 )) && bytes=$( bc <<< "scale=$__xSCALE;$bytes*$bitMultiplier" ) ;
+
+    declare units=$( bc <<< "scale=$unitScale;$bytes/$unitDivisor" ) ;
+
+    (( prettyPrint == 0 )) && echo $units || printf "%'.*f%s\n" $unitScale $units "${unitLabel:-$powerLabel}" ;
 } ;
 
 
