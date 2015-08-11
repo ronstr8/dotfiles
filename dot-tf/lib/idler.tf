@@ -62,7 +62,8 @@
 		/let _line=$(/nth %{i} %{_sockets}) %;\
 	/done %;\
 	/for i 1 $(/length %{_worlds}) \
-		/send -w\$(/nth \%{i} \%{_worlds}) \\\\ %;\
+;   	/send -w\$(/nth \%{i} \%{_worlds}) \\\\ %;\
+		/send -w\$(/nth \%{i} \%{_worlds}) ;ctime() %;\
 	/repeat -0:$[rand(5,15)]:$[rand(60)] 1 /_idler %;\
 	/set idlerpid %?
 
@@ -81,4 +82,7 @@
 	/endif
 
 /def -i ki = /killidler
+
+;; @see http://christianrobinson.name/tf/idler.tf
+
 
