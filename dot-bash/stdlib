@@ -1,6 +1,5 @@
 
-unset -f whinge ;
-function whinge() {
+unset -f whinge ; function whinge() {
     local fmtMsg="$1" ; shift ;
 
     if [ "$*" ] ; then
@@ -11,16 +10,74 @@ function whinge() {
     echo "# [$( date -Is )] $msg" 1>&2 ;
 }
 
-unset -f croak ;
-function croak() {
-    __whinge $@ ;
-    return `false` ;
+unset -f croak ; function croak() {
+    __whinge $@ ; false ;
 }
 
+## XXX ARGH XXX Work in progress!
+##
+## [[ -z "$__SHLIB_PROVIDER_REGISTRY" ]] && declare -x -a __SHLIB_PROVIDER_REGISTRY=() ;
+## 
+## declare __SHLIB_PROVIDER_DELIMITER=':' ;
+## declare __SHLIB_PROVIDER_ENTRY_FMT='%s:%s:%d:%d' ;
+## 
+## ## shlib_provider
+## #
+## # Returns a list of provided functionality name, filename, load time in epoch
+## # seconds, and whether or not it is currently being processed.
+## #
+## # @param functionality
+## # @return a list as described above.
+## ##
+## unset -f shlib_provider ; function shlib_provider() {
+##     declare    baseName=$1 ;
+##     declare    regEntry ;
+##     declare -a fileInfo=() ;
+## 
+##     for regEntry in "${__SHLIB_PROVIDER_REGISTRY[@]}" ; do
+##         if [[ $regEntry =~ "^$baseName$__SHLIB_PROVIDER_DELIMITER" ]] ; then
+##             read -d"$__SHLIB_PROVIDER_DELIMITER" -a fileInfo < <( echo "$regEntry" ) ;
+##             break ;
+##         fi
+##     done
+## 
+##     return "${fileInfo[@]}" ;
+## } ; 
+## 
+## unset -f shlib_require ; function shlib_require() {
+##     declare baseName=$1 ;
+## 
+## 
+##     declare fVarName=$( printf "$__SHLIB_PROVIDER_FILE_FMT" "$baseName" ) ;
+##     declare fileName=${!fVarName} ;
+## 
+##     declare tVarName=$( printf "$__SHLIB_PROVIDER_TIME_FMT" "$baseName" ) ;
+## 
+##     if [[ ! "$fileName" ]] ; then
+##         croak "shlib_require: Provider of '$baseName' not found" ; return $? ;
+##     else if [[ ! -e "$fileName" ]] ; then
+##         croak "shlib_require: Provider of '$baseName' has disappeared" ; return $? ;
+##     else if [[ $( date +%s -r "$fileName" ) -gt ${!tVarName} ]] ; then
+##         ## XXX File has been changed since last loaded, so reload.
+##     else
+##         __SHLIB_PROVIDER_STACK+=";${baseName};" ;
+##         __SHLIB_PROVIDER_STACK="${__SHLIB_PROVIDER_STACK//;${baseName};/}" ;
+##     fi
+## } ;
+## 
+## unset -f shlib_provide ; function shlib_provide() {
+##     declare baseName
+## } ;
+## 
+## unset -f __tmpLoadLibs ; function __tmpLoadLibs() {
+## } ; __tmpLoadLibs ; unset -f __tmpLoadLibs ;
+## 
+## for fn in $HOME/.bash/lib/*.bash ; do
+## done
+
+
 for fn in $HOME/.bash/lib/*.bash ; do
-	if [ -x "$fn" ] ; then
-		. "$fn"
-	fi
+	[ -x "$fn" ] && . "$fn"
 done
 
 # vim: ft=sh
