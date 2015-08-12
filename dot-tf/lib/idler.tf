@@ -63,7 +63,8 @@
 	/done %;\
 	/for i 1 $(/length %{_worlds}) \
 ;   	/send -w\$(/nth \%{i} \%{_worlds}) \\\\ %;\
-		/send -w\$(/nth \%{i} \%{_worlds}) ;ctime() %;\
+;		/send -w\$(/nth \%{i} \%{_worlds}) \#\$\# %;\
+ 		/send -w\$(/nth \%{i} \%{_worlds}) ;kill_task(task_id()) %;\
 	/repeat -0:$[rand(5,15)]:$[rand(60)] 1 /_idler %;\
 	/set idlerpid %?
 
