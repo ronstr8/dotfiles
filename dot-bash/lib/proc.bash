@@ -1,5 +1,6 @@
 
-if [[ ${__PROVIDED_PROC_BASH:-0} -lt $( date +%s -r "$0" ) ]] ; then declare -i -x  __PROVIDED_PROC_BASH=$( date +%s -r "$0" ) ; # echo "Loading $0 ..." >&2
+# if [[ ${__PROVIDED_PROC_BASH:-0} -lt $( date +%s -r "$0" ) ]] ; then declare -i -x  __PROVIDED_PROC_BASH=$( date +%s -r "$0" ) ;
+if [[ ${__PROVIDED_PROC_BASH:-0} -eq 0 ]] ; then declare -i -x __PROVIDED_PROC_BASH=$( date +%s ) ;
 
 ## xPostMortem - Display exit status of previous command.
 #
