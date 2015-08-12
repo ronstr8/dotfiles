@@ -430,21 +430,7 @@ function __echoBashEnv() {
 EOT
 } ;
 
-## function __echoExport() {
-##     local varName="$1" ;
-##     local varValue="$2" ;
-## 
-##     echo "export ${varName}='${varValue}' ; " ;
-## #    [ "$varValue" ] && echo -n "${varName}='${varValue}' ; " ;
-## #    echo "export $varName ; " ;
-## } ;
-
 function __echoExports() {
-## XXX The "move window" functionality doesn't work.
-#   if [ "$MOVED_WINDOW_HISTORY_FILE" ] ; then __whinge "Paste these settings into the window swapped to ${MOVED_WINDOW_NUMBER}." ; __echoExport 'WINDOW_NUMBER' "$MOVED_WINDOW_NUMBER" ; __echoExport 'HISTFILE'      "$MOVED_WINDOW_HISTORY_FILE" ; fi
-#   __whinge "Paste these settings into your current window ${MOVED_WINDOW_NUMBER}:" ;
-#   __echoExport 'SESSION_NAME'  "$SESSION_NAME" ; __echoExport 'WINDOW_NUMBER' "$WINDOW_NUMBER" ; __echoExport 'WINDOW_TITLE'  "$WINDOW_TITLE" ; __echoExport 'HISTFILE'      "${WINDOW_HISTORY_FILE:-$HISTFILE}" ;
-
     declare declaration='declare -x' varName='' ;
 
     for varName in "${SESSION_VARS[@]}" ; do
@@ -616,26 +602,22 @@ function __readyForCheckpoint() {
     local nowEpoch ;
     local refEpoch ;
 
-#   __whinge "refFile=$refFile" ;
-
-    if [ ! -f "$refFile" ] ; then
+    if [[ ! -e "$refFile" ]] ; then
         ## Never wrote session, so do a checkpoint.
         nowEpoch=0 ;
         refEpoch=1 ;
+        ## And touch the refFile.
+        touch $refFile ;
     else
         nowEpoch=$( date +%s ) ;
         refEpoch=$( date +%s --reference="$refFile" ) ;
     fi
  
-#   __whinge "refEpoch=$refEpoch ; staleSeconds=$staleSeconds ; nowEpoch=$nowEpoch" ;
-
     if (( ( refEpoch + staleSeconds ) < nowEpoch )) ; then
         EVAL='yes' ;
         VIVIFY='yes' ;
         WRITE_SCREENRC='yes' ;
     fi
-
-#   __whinge "EVAL='$EVAL' ; VIVIFY='$VIVIFY' ; WRITE_SCREENRC='$WRITE_SCREENRC'" ;
 
     return $OK ;
 } ;
@@ -651,7 +633,7 @@ function __echoStatus() {
         subDir=$( basename $winDir ) ;
 
         histFile="$winDir/$HISTORY_BASENAME" ;
-        histTime=$( date --ref="$histFile" +'%m/%d/%Y@%H:%M:%S' ) ;
+        histTime=$( date --ref="$histFile" +'%m/%d/%Y@%H:%M:%S' 2>/dev/null ) ;
 
         hcFile="$winDir/$HARDCOPY_BASENAME" ;
 
@@ -667,13 +649,7 @@ function __echoStatus() {
 
     __whinge ;
 
-    declare exportables='declare -x' varName='' ;
-
-    for varName in "${SESSION_VARS[@]}" ; do
-        exportables+=" $varName='${!varName}'" ;
-    done
-
-    __whinge "$exportables ;" ;
+    __whinge "$( __echoExports )" ; # exportables ;" ;
 #   __whinge $( export | grep -E 'WINDOW|STY|HISTFILE|SESSION|SCREEN' | xargs | sed -e 's/ declare -x \(\w\+\)='?\(\)'?/ /g;' ) ;
 
     return $OK ;
@@ -759,14 +735,11 @@ function __main() {
     export WINDOW_HOME WINDOW_NUMBER WINDOW_TITLE ;
 
     if [ "$DO_STATUS" ] ; then
-        __echoStatus ;
-        return $OK ;
+        __echoStatus ; return $OK ;
     fi
 
     if [ "$DO_HARDCOPY_DUMP" ] ; then
-        __dumpHardcopyFiles ${WINDOW_HOME}/${HARDCOPY_BASENAME}.* $WINDOW_HARDCOPY_FILE ;
-
-        return $OK ;
+        __dumpHardcopyFiles ${WINDOW_HOME}/${HARDCOPY_BASENAME}.* $WINDOW_HARDCOPY_FILE ; return $OK ;
     fi
 
     __saveWindowState || return $ERR ;
