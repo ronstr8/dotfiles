@@ -2,15 +2,15 @@
 #unset -f whinge ; function whinge() { local fmtMsg="$1" ; shift ; if [ "$*" ] ; then fmtMsg=$( printf "$fmtMsg" $* ) ; fi ; echo "# [$( date -Is )] $msg" 1>&2 ; } ;
 #unset -f croak  ; function croak()  { __whinge $@ ; return 1 ; } ;
 
-declare __LIBINFO='' ;
+[[ "$__LIBINFO" ]] || declare __LIBINFO='' ;
 
 ## __ld $resource [$fileName[ $lastLoaded]]
 #
 #  __ld 'FUNK'
 #   Reload the file providing the given resource if its record in __LIBINFO indicates that it needs to be.
 #
-#  __ld 'FUNK' "$HOME/.bash/lib/funk.bash" [0]
-#   Query whether or not the given file needs reloaded.  Zero is implied if $lastLoaded is not passed.
+#  __ld 'FUNK' "$HOME/.bash/lib/funk.bash" -1
+#   Query whether or not the given file needs reloaded.
 #
 #  __ld 'FUNK' "$HOME/.bash/lib/funk.bash"  1
 #   Force the unconditional reload of the given file.
@@ -27,12 +27,14 @@ declare __LIBINFO='' ;
 # @return false/failure if the resource should be reloaded, true/success otherwise.
 ##
 unset -f __ld ; function __ld() {
-    declare    resource="$1" ;
-    declare    fileName="$2" ;
-    declare -i lastLoaded=${3:-0} ;
+    declare resource="$1" ;
+    declare fileName="$2" ;
+    declare lastLoaded="$3" ;
 
-    if [[ $lastLoaded -eq 0 && $fileName =~ ^[0-9]+$ ]] ; then
-        lastLoaded=$fileName ;
+    echo "__ld $@" >&2 ;
+
+    if [[ -n "$lastLoaded" && $lastLoaded -eq 0 && $fileName =~ ^-?[1-9][0-9]+$ ]] ; then
+        lastLoaded="$fileName" ;
         fileName='' ;
     fi
 
@@ -41,6 +43,7 @@ unset -f __ld ; function __ld() {
 
     declare bashLib=${__BASHLIB:-$HOME/.bash/lib} ;
     declare recordRE="(${rDelim}((${resource})=([^@]+)@([0-9]+))${rDelim})" ;
+    declare recordStripperSedRE="${rDelim}${resource}[^${rDelim}]\\+${rDelim}" ;
 
     if [[ "$fileName" ]] ; then
         declare lastModified=$( date +%s -r "$fileName" ) ;
@@ -49,7 +52,7 @@ unset -f __ld ; function __ld() {
             ## The resource file does not need to be reloaded.
             record="${rDelim}${resource}=${fileName}@${lastLoaded}${rDelim}" ;
             needLoaded=0 ;
-        elif (( lastLoaded == 0 )) ; then
+        elif (( lastLoaded < 0 )) ; then
             ## The resource file needs to be reloaded, but
             ## this call is only a query for that info.
             needLoaded=1 ;
@@ -66,26 +69,37 @@ unset -f __ld ; function __ld() {
             needLoaded=${?:1} ;
         fi 
 
-        __LIBINFO="${__LIBINFO//$recordRE/}$record" ;
+#       __LIBINFO="${__LIBINFO//$recordRE/}$record" ;
+
+        __LIBINFO="$( sed -e "s/$recordStripperSedRE//g;" <<< $__LIBINFO )${record}" ;
 
     elif [[ "$resource" ]] ; then
         declare reLoaded=$lastLoaded ;
 
         fileName="${bashLib}/${resource}.bash" ;
 
+        echo "[[ -e \"$fileName\" && \"$__LIBINFO\" =~ $recordRE ]]" >&2 ;
+
         if [[ -e "$fileName" && $__LIBINFO =~ $recordRE ]] ; then
             fileName=${BASH_REMATCH[4]} ;
             reLoaded=${BASH_REMATCH[5]} ;
         fi
 
+        echo "reLoaded=$reLoaded;lastLoaded=$lastLoaded" >&2 ;
+
         if (( reLoaded > lastLoaded )) ; then
-            lastLoaded=$pastLoaded ;
+            lastLoaded=$reLoaded ;
         fi
 
         __ld "$resource" "$fileName" $lastLoaded ; needLoaded=$? ;
     else
+        declare -a resourceInfo=() ;
+
         for fileName in $bashLib/*.bash ; do
-            __ld $( basename "$fileName" .bash ) "$fileName" 1 ;
+            resource=$( basename "$fileName" .bash ) ;
+            IFS='@' read -a resourceInfo < <( __ld "$resource" "$fileName" ) ;
+            lastLoaded=$( tr -cd '0-9' <<< ${resourceInfo[1]} ) ;
+            __ld "$resource" "$fileName" "$lastLoaded" ;
         done
     fi
 
@@ -104,7 +118,8 @@ unset -f __ld ; function __ld() {
 # @return true if the latest version of the resource is already loaded.
 ##
 unset -f pingLib ; function pingLib() {
-    __ld "$1" 0 ;
+    echo "__ld $1 -1" >&2 ;
+    __ld "$1" -1 ;
 } ;
 
 ## requireLib $resource
