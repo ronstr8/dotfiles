@@ -1,4 +1,6 @@
 
+if ! pingLib 'aliases' ; then
+
 unset -f ssh-ensure-keychain ;
 function ssh-ensure-keychain() {
     if ssh-add -l &> /dev/null ; then
@@ -22,5 +24,5 @@ function utf8-locale-force() {
     locale | fgrep -v "$desiredLocale" ;
 }
 
-
+touchLib 'aliases' ; fi ;
 
