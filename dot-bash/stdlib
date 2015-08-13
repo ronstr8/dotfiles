@@ -1,27 +1,138 @@
 
-unset -f whinge ;
-function whinge() {
-    local fmtMsg="$1" ; shift ;
+#unset -f whinge ; function whinge() { local fmtMsg="$1" ; shift ; if [ "$*" ] ; then fmtMsg=$( printf "$fmtMsg" $* ) ; fi ; echo "# [$( date -Is )] $msg" 1>&2 ; } ;
+#unset -f croak  ; function croak()  { __whinge $@ ; return 1 ; } ;
 
-    if [ "$*" ] ; then
-        fmtMsg=$( printf "$fmtMsg" $* ) ;
+declare __LIBINFO='' ;
+
+## __ld $resource [$fileName[ $lastLoaded]]
+#
+#  __ld 'FUNK'
+#   Reload the file providing the given resource if its record in __LIBINFO indicates that it needs to be.
+#
+#  __ld 'FUNK' "$HOME/.bash/lib/funk.bash" [0]
+#   Query whether or not the given file needs reloaded.  Zero is implied if $lastLoaded is not passed.
+#
+#  __ld 'FUNK' "$HOME/.bash/lib/funk.bash"  1
+#   Force the unconditional reload of the given file.
+#
+#  __ld 'FUNK' $( date +%s )
+#   Update the last-loaded time in __LIBINFO to the given epoch seconds, but do _not_ reload the file.
+#
+# @param $resource the resource provided by some library.
+# @param $fileName provider of $resource; sourced iff $lastLoaded -lt its mtime.
+# @param $lastLoaded new load time of resource if -ge mtime of provider file.
+#
+# @stdout "$fileName@$lastLoaded" iff $resource is passed.
+# @stderr output from any sourcing of files.
+# @return false/failure if the resource should be reloaded, true/success otherwise.
+##
+unset -f __ld ; function __ld() {
+    declare    resource="$1" ;
+    declare    fileName="$2" ;
+    declare -i lastLoaded=${3:-0} ;
+
+    if [[ $lastLoaded -eq 0 && $fileName =~ ^[0-9]+$ ]] ; then
+        lastLoaded=$fileName ;
+        fileName='' ;
     fi
 
-    ## Prefix shell comment markers before all whinging so as not to interfere with --eval.
-    echo "# [$( date -Is )] $msg" 1>&2 ;
-}
+    declare -i needLoaded=0 ;
+    declare    rDelim=':' record='' ;
 
-unset -f croak ;
-function croak() {
-    __whinge $@ ;
-    return `false` ;
-}
+    declare bashLib=${__BASHLIB:-$HOME/.bash/lib} ;
+    declare recordRE="(${rDelim}((${resource})=([^@]+)@([0-9]+))${rDelim})" ;
 
-for fn in $HOME/.bash/lib/*.bash ; do
-	if [ -x "$fn" ] ; then
-		. "$fn"
-	fi
-done
+    if [[ "$fileName" ]] ; then
+        declare lastModified=$( date +%s -r "$fileName" ) ;
+
+        if (( lastLoaded >= lastModified )) ; then
+            ## The resource file does not need to be reloaded.
+            record="${rDelim}${resource}=${fileName}@${lastLoaded}${rDelim}" ;
+            needLoaded=0 ;
+        elif (( lastLoaded == 0 )) ; then
+            ## The resource file needs to be reloaded, but
+            ## this call is only a query for that info.
+            needLoaded=1 ;
+        elif source "$fileName" 2>/dev/null ; then
+            ## The resource needs to be loaded, and some non-zero
+            ## number was sent for the last load time, and we
+            ## successfully loaded the file, so it doesn't need
+            ## to be loaded again.
+            record="${rDelim}${resource}=${fileName}@$( date +%s )${rDelim}" ;
+            needLoaded=0 ;
+        else
+            ## We were requested to reload the resource, but
+            ## failed, so it still needs to be loaded.
+            needLoaded=${?:1} ;
+        fi 
+
+        __LIBINFO="${__LIBINFO//$recordRE/}$record" ;
+
+    elif [[ "$resource" ]] ; then
+        declare reLoaded=$lastLoaded ;
+
+        fileName="${bashLib}/${resource}.bash" ;
+
+        if [[ -e "$fileName" && $__LIBINFO =~ $recordRE ]] ; then
+            fileName=${BASH_REMATCH[4]} ;
+            reLoaded=${BASH_REMATCH[5]} ;
+        fi
+
+        if (( reLoaded > lastLoaded )) ; then
+            lastLoaded=$pastLoaded ;
+        fi
+
+        __ld "$resource" "$fileName" $lastLoaded ; needLoaded=$? ;
+    else
+        for fileName in $bashLib/*.bash ; do
+            __ld $( basename "$fileName" .bash ) "$fileName" 1 ;
+        done
+    fi
+
+    [[ "$record" ]] && echo "$record" ;
+
+    return $(( needLoaded ? 1 : 0 ));
+} ;
+
+## pingLib $resource
+##      Should the named resource be reloaded?
+#
+# @param $resource a resource provided by some library.
+#
+# @stdout "$fileName@$lastLoaded" iff $resource is passed.
+# @stderr receives errors encountered while sourcing library files.
+# @return true if the latest version of the resource is already loaded.
+##
+unset -f pingLib ; function pingLib() {
+    __ld "$1" 0 ;
+} ;
+
+## requireLib $resource
+##      Load (or reload) the given resource if it needs to be.
+#
+# @param $resource a resource provided by some library.
+#
+# @stdout is dumped to /dev/null.
+# @stderr receives errors encountered while sourcing library files.
+# @return true if the latest version of the resource is already loaded.
+##
+unset -f requireLib ; function requireLib() {
+    __ld "$1" >/dev/null ;
+} ;
+
+## touchLib $resource
+##      Set the last-loaded time of the given resource to the current time.
+#
+# @stdout is normally silent.
+# @stderr receives errors encountered while sourcing library files.
+# @param $resource a resource provided by some library.
+##
+unset -f touchLib ; function touchLib() {
+    __ld "$1" $( date +%s ) ;
+} ;
+
+requireLib 'CONSTANTS' ;
+__ld ;
 
 # vim: ft=sh
 
