@@ -2,8 +2,37 @@
 function git-current-branch() {
 	git rev-parse --abbrev-ref HEAD 2>/dev/null
 ##	git branch --no-color 2> /dev/null | awk '/^\*/ { print $2 }'
-}
+} ;
 
+function git-cat-changed() {
+    declare substring=${1:?Missing required arg of file substring} ;
+    declare isDead=$2 ;
+
+#   git whatchanged --no-abbrev | awk '$5 == "D" { printf("git cat-file -p %8.8s # %s\n", $3, $NF); }'
+
+    declare -i maxCommits=9 ;
+    declare    awkScript="${isDead:+\$5 == \"D\" &&} /$substring/ { print \$3 }" ;
+    declare    commitFinder="git whatchanged --no-abbrev | awk '$awkScript' | head -n $maxCommits" ;
+
+    echo "$commitFinder" ;
+
+    declare -a commits=() ;
+    read -a commits < <( eval $commitFinder ) ;
+
+#   while read ; do
+#       [[ $REPLY =~ $pattern ]] && sha[${#sha[@]}]="$REPLY" ;
+#   done < <( git whatchanged --no-abbrev -n$maxCommits | awk "$awkScript" ) ;
+
+    declare commit ;
+
+    for commit in "${commits[@]}" ; do
+        git-cat-file -p "$commit" | less ; # vim -R -c 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim'
+    done
+} ;
+
+function git-dead-cat() {
+    git-cat-changed "$1" 1 ;
+} ;
 
 function git-set-prompt() {
 	#  Customize BASH PS1 prompt to show current GIT repository and branch.
