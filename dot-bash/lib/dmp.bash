@@ -1,4 +1,6 @@
 
+__resourceName='dmp' ; if ! pingLib "$__resourceName" ; then
+
 
 unset -f curl-dmp ;
 function curl-dmp() {

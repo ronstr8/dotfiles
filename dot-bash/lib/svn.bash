@@ -1,4 +1,6 @@
 
+__resourceName='svn' ; if ! pingLib "$__resourceName" ; then
+
 ## @see http://subversion.tigris.org/ds/viewMessage.do?dsForumId=1065&dsMessageId=88333&orderBy=createDate&orderType=desc
 
 unset -f svn ;
@@ -34,6 +36,9 @@ function svn() {
         esac
     fi
 }
+
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
+
 
 ## vim: ft=sh
 

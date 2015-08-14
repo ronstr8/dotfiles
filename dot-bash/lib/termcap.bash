@@ -1,13 +1,33 @@
 
-if ! pingLib 'CONSTANTS' ; then
+__resourceName='termcap' ; if ! pingLib "$__resourceName" ; then
 
-declare -r -i RV_SUCCESS=0 RV_FAILURE=1 ;
-declare -r -i TRUE=1 FALSE=0 ;
+## xcFF_*
+#   xterm-color256 color codes.
+#
+#   These are interpolated into raw code sequences such as:
+#       [<ESC>[38;5;${xcFF_RED}m][<ESC>[${xcFF_BOLD}m]]
+#
+#   TODO Callers should be using tput or some abstraction thereof.
+##
+    declare xcFF_NONE=0
+    declare xcFF_BOLD=1
+    declare xcFF_NORMAL=2
+    declare xcFF_UNDERLINE=4
+    declare xcFF_BLINK=5
+    declare xcFF_REVERSE=7
+    declare xcFF_INVISIBLE=8
+    declare xcFF_GRAY=30
+    declare xcFF_RED=31
+    declare xcFF_GREEN=32
+    declare xcFF_YELLOW=33
+    declare xcFF_BLUE=34
+    declare xcFF_MAGENTA=35
+    declare xcFF_CYAN=36
+    declare xcFF_WHITE=37
+    declare xcFF_ORANGE=172
+    declare xcFF_OLIVE_DRAB=65
 
-declare -r -i RV_NOOP=$RV_SUCCESS ;
-declare -r -i RV_TRUE=$RV_SUCCESS RV_FALSE=$RV_FAILURE ;
-declare    -i RV_FAILBASE=$(( RV_FAILURE+1  )) ;
-declare    -i RV_MISMATCH=$(( RV_FAILBASE++ )) RV_MISSING=$(( RV_FAILBASE++ )) RV_SYNTAX=$(( RV_FAILBASE++ )) ;
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
 
 ## 	# Reset
 ## 	Color_Off="\[\033[0m\]"       # Text Reset
@@ -81,7 +101,5 @@ declare    -i RV_MISMATCH=$(( RV_FAILBASE++ )) RV_MISSING=$(( RV_FAILBASE++ )) R
 ## 	On_IPurple="\[\033[10;95m\]"  # Purple
 ## 	On_ICyan="\[\033[0;106m\]"    # Cyan
 ## 	On_IWhite="\[\033[0;107m\]"   # White
-
-touchLib 'CONSTANTS' ; fi ;
 
 

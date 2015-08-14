@@ -1,4 +1,6 @@
 
+__resourceName='elinks' ; if ! pingLib "$__resourceName" ; then
+
 unset -f elinks-dump ;
 function elinks-dump() {
 	local uri="$1" ;
@@ -15,3 +17,6 @@ function elinks-dump() {
 
 	elinks -dump -no-references -no-numbering "$uri" > "$fileName" ;
 }
+
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
+

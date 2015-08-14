@@ -4,8 +4,34 @@
 
 [[ "$__LIBINFO" ]] || declare __LIBINFO='' ;
 
-declare __DEFAULT_BASHLIB="$HOME/.bash/lib" ;
+declare DEFAULT_BASHLIB="$HOME/.bash/lib" ;
+
 declare __RDELIM=':' ;
+
+declare -i LD_QUERY=$(( 0 - 1 )) ; ## XXX Personal preference-- that's why.  XXX
+declare -i LD_FORCE=$(( 0 + 1 )) ; ## XXX Ditto. XXX
+
+## __ldupdate $resource $fileName $lastLoadedAt
+#       Output information on the named library.
+#
+# @param $resource the resource provided by some library.
+# @param $fileName provider of $resource.
+# @param $lastLoadedAt last (epoch seconds) time the resource was loaded.
+#
+# @stdout null
+# @stderr pass
+# @return true/success if we had any info, false/failure otherwise.
+##
+unset -f __ldupdate ; function __ldupdate() {
+    declare    resource="${1:?${FUNCNAME[0]}: Missing 'resource'}" ;
+    declare    fileName="${2:?${FUNCNAME[0]}: Missing 'fileName'}" ;
+    declare -i lastLoadedAt="${3:?${FUNCNAME[0]}: Missing 'lastLoadedAt'}" ;
+
+    declare record="${__RDELIM}${resource}=${fileName}@${lastLoadedAt}${__RDELIM}" ;
+    declare stripper="${__RDELIM}${resource}[^${__RDELIM}]\\+${__RDELIM}" ;
+
+    __LIBINFO="$( sed -e "s/$stripper//g;" <<< $__LIBINFO )${record}" ;
+} ;
 
 ## __ldd $resource [$fileName]
 #       Output information on the named library.
@@ -16,15 +42,16 @@ declare __RDELIM=':' ;
 # @return true/success if we had any info, false/failure otherwise.
 ##
 unset -f __ldd ; function __ldd() {
-    declare resource="$1" ;
-    declare customFileName="$2" ;
+    declare resource="${1:?${FUNCNAME[0]}: Missing 'resource'}" ;
+    declare customFileName="${2:-}" ;
 
-    echo "__ldd $@" >&2 ;
+#   echo "__ldd $@" >&2 ;
 
-    declare standardFileName="${__BASHLIB:-$__DEFAULT_BASHLIB}/${resource}.bash" ;
+    declare standardFileName="${__BASHLIB:-$DEFAULT_BASHLIB}/${resource}.bash" ;
     declare recordRE="(${__RDELIM}((${resource})=([^@]+)@([0-9]+))${__RDELIM})" ;
 
     if [[ ! $__LIBINFO =~ $recordRE ]] ; then
+        echo "customFileName=$customFileName;standardFileName=$standardFileName;" >&2
         echo "${customFileName:-$standardFileName}@0" ;
         false ; return ;
     fi
@@ -35,8 +62,9 @@ unset -f __ldd ; function __ldd() {
     declare finalFileName ;
 
     if [[ "$customFileName" ]] ; then
-        if [[ $customFileName == $savedFileName ]] ; then
+        if [[ $customFileName != $savedFileName ]] ; then
             finalFileName=$customFileName ;
+            lastLoaded=0 ;
         else
             finalFileName=$savedFileName ;
         fi
@@ -54,10 +82,10 @@ unset -f __ldd ; function __ldd() {
 #  __ld 'FUNK'
 #   Reload the file providing the given resource if its record in __LIBINFO indicates that it needs to be.
 #
-#  __ld 'FUNK' -1 "$HOME/.bash/lib/funk.bash"
+#  __ld 'FUNK' $LD_QUERY "$HOME/.bash/lib/funk.bash"
 #   Query whether or not the given file needs reloaded.
 #
-#  __ld 'FUNK'  1 "$HOME/.bash/lib/funk.bash"
+#  __ld 'FUNK' $LD_FORCE "$HOME/.bash/lib/funk.bash"
 #   Force the unconditional reload of the given file.
 #
 #  __ld 'FUNK' $( date +%s )
@@ -72,52 +100,39 @@ unset -f __ldd ; function __ldd() {
 # @return false/failure if the resource should be reloaded, true/success otherwise.
 ##
 unset -f __ld ; function __ld() {
-    declare resource="$1" ;
-    declare actionCode="$2" ;
-    declare customFileName="$3" ;
+    declare resource="${1:?${FUNCNAME[0]}: Missing 'resource'}" ;
+    declare actionCode="${2:-}" ;
+    declare givenFn="${3:-}" ;
 
-    echo "__ld $@" >&2 ;
+    if [[ -z "$givenFn" && $resource =~ \.bash$ ]] ; then
+        givenFn=$resource ; resource=${givenFn##*/} ; resource=${resource%.bash} ;
+    fi
 
-#   if [[ -n "$lastLoaded" && $lastLoaded -eq 0 && $fileName =~ ^-?[1-9][0-9]+$ ]] ; then lastLoaded="$fileName" ; fileName='' ; fi
+    declare -a resourceInfo ; IFS='@' read -a resourceInfo < <( __ldd "$resource" "$givenFn" ) ;
+    declare    fileName=${givenFn:-${resourceInfo[0]}} ;
+    declare -i lastLoadedAt=${actionCode:-${resourceInfo[1]}} ;
+    declare -i lastModified=$( date +%s -r "$fileName" ) ;
 
-    declare -i needLoaded=0 ;
-    declare    record='' ;
+#   echo "resource=$resource;fileName=$fileName;lastLoadedAt=$lastLoadedAt;lastModified=$lastModified" >&2;
 
-    declare recordStripperRE="${__RDELIM}${resource}[^${__RDELIM}]\\+${__RDELIM}" ;
+    declare -i srcUpdated=$(( lastLoadedAt < lastModified )) ;
+    declare -i wantedReload=0 shouldReload=0 ;
 
-    declare -a resourceInfo ;
+    if [[ ${actionCode:-0} -eq $LD_FORCE ]] ; then
+        wantedReload=$srcUpdated ;
+        shouldReload=1 ;
+    elif (( srcUpdated )) ; then
+        wantedReload=$srcUpdated ;
+        shouldReload=$(( ${actionCode:-0} == LD_QUERY ? 0 : 1 )) ;
+    fi
 
-    IFS='@' read -a resourceInfo < <( __ldd "$resource" "$customFileName" ) ;
+    if (( shouldReload )) ; then
+        source "$fileName" && lastLoadedAt=$( date +%s ) ; ## XXX Die on fail?
+    fi
 
-    declare fileName=${customFileName:-${resourceInfo[0]}} ;
-    declare lastLoaded=${actionCode:-${resourceInfo[1]}} ;
+    __ldupdate "$resource" "$fileName" $lastLoadedAt ;
 
-    declare lastModified=$( date +%s -r "$fileName" ) ;
-
-    if (( lastLoaded >= lastModified )) ; then
-        ## The resource file does not need to be reloaded.
-        record="${__RDELIM}${resource}=${fileName}@${lastLoaded}${__RDELIM}" ;
-        needLoaded=0 ;
-    elif (( lastLoaded < 0 )) ; then
-        ## The resource file needs to be reloaded, but
-        ## this call is only a query for that info.
-        needLoaded=1 ;
-    elif source "$fileName" 2>/dev/null ; then
-        ## The resource needs to be loaded, and some non-zero
-        ## number was sent for the last load time, and we
-        ## successfully loaded the file, so it doesn't need
-        ## to be loaded again.
-        record="${__RDELIM}${resource}=${fileName}@$( date +%s )${__RDELIM}" ;
-        needLoaded=0 ;
-    else
-        ## We were requested to reload the resource, but
-        ## failed, so it still needs to be loaded.
-        needLoaded=${?:1} ;
-    fi 
-
-    __LIBINFO="$( sed -e "s/$recordStripperRE//g;" <<< $__LIBINFO )${record}" ;
-
-    return $(( needLoaded ? 1 : 0 ));
+    return $wantedReload ;
 } ;
 
 ## pingLib $resource
@@ -130,7 +145,9 @@ unset -f __ld ; function __ld() {
 # @return true if the latest version of the resource is already loaded.
 ##
 unset -f pingLib ; function pingLib() {
-    __ld "$1" -1 ;
+#   echo "pingLib $@ ..." >&2;
+    declare resource="${1:?${FUNCNAME[0]}: Missing 'resource'}" ;
+    __ld $resource $LD_QUERY ;
 } ;
 
 ## requireLib $resource
@@ -143,8 +160,27 @@ unset -f pingLib ; function pingLib() {
 # @return true if the latest version of the resource is already loaded.
 ##
 unset -f requireLib ; function requireLib() {
-    __ld "$@" >/dev/null ;
+#   echo "requireLib $@ ..." >&2;
+    declare resource="${1:?${FUNCNAME[0]}: Missing 'resource'}" ;
+    __ld $resource >/dev/null ;
 } ;
+unset -f needsLib ; function needsLib() { requireLib "$@" ; } ;
+
+## reloadLib $resource
+##      Force reload of the given resource.
+#
+# @param $resource a resource provided by some library.
+#
+# @stdout is dumped to /dev/null.
+# @stderr receives errors encountered while sourcing library files.
+# @return true if the latest version of the resource is already loaded.
+##
+unset -f reloadLib ; function reloadLib() {
+#   echo "reloadLib $@ ..." >&2;
+    declare resource="${1:?${FUNCNAME[0]}: Missing 'resource'}" ;
+    __ld $resource $LD_FORCE >/dev/null ;
+} ;
+unset -f forceLib ; function forceLib() { reloadLib "$@" ; } ;
 
 ## touchLib $resource
 ##      Set the last-loaded time of the given resource to the current time.
@@ -154,18 +190,22 @@ unset -f requireLib ; function requireLib() {
 # @param $resource a resource provided by some library.
 ##
 unset -f touchLib ; function touchLib() {
-    __ld "$1" $( date +%s ) ;
+    echo "touchLib $@ ..." >&2;
+    declare resource="${1:?${FUNCNAME[0]}: Missing 'resource'}" ;
+    __ld $resource $( date +%s ) ;
 } ;
 
-unset -f __loadDefaultLibs ; function __loadDefaultLibs() {
-    requireLib 'CONSTANTS' ;
+unset -f __ldinit ; function __ldinit() {
+    declare bashLib=${__BASHLIB:-$DEFAULT_BASHLIB} ;
 
-    declare fileName ;
+    declare -a loadable ;
+    while read -d '' ; do
+        loadable[${#loadable[@]}]="$REPLY" ;
+    done  < <( find $bashLib -type f -perm /u+x -name '*.bash' -printf '%p\0'  ) ;
 
-    for fileName in ${__BASHLIB:-$__DEFAULT_BASHLIB}/*.bash ; do
-        [[ -x $fileName ]] && requireLib "$( basename "$fileName" .bash )" 0 "$fileName" ;
-    done
-} ; __loadDefaultLibs ; unset -f __loadDefaultLibs ;
+    declare file ;
+    for file in "${loadable[@]}" ; do requireLib "$file" ; done
+} ; __ldinit ; unset -f __ldinit ;
 
 # vim: ft=sh
 

@@ -1,4 +1,6 @@
 
+__resourceName='screen' ; if ! pingLib "$__resourceName" ; then
+
 
 ## function screen-mrenv {
 ## 	if [ ! "$STY" ] ; then
@@ -22,3 +24,6 @@
 ## 	echo "Slurping most-recently-invoked screen ENV from «$SCREEN_MRENV» ..." > /dev/stderr
 ## 	. "$SCREEN_MRENV"
 ## }
+
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
+

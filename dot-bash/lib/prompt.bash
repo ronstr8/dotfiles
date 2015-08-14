@@ -1,86 +1,65 @@
 
-unset -f __machineColor ;
-function __machineColor() {
-    ## Permutation of final 8-bit quad of the host's IP address.
-    #colorseedstr="$(  hostname --ip-address | head -1 | grep -o '[0-9]\+$' )"
+__resourceName='prompt' ; if ! pingLib "$__resourceName" ; then
 
+## __machineColor
+#       Echo integer representing an xterm-256color color "label" for the current host.
+#
+##
+unset -f __machineColor ; function __machineColor() {
     ## Permutation of alphas in hostname, so all in a server
     ## group share the same prompt color.
-    local colorseedstr="$( hostname -s | tr -cd '[:alpha:]' )" ;
+    declare colorseedstr="$( hostname -s | tr -cd '[:alpha:]' )" ;
 
-    MD5SUM="$( which md5sum 2> /dev/null )" || MD5SUM="md5" ;
+    declare MD5SUM="$( which md5sum 2> /dev/null )" ;
+    : ${MD5SUM:=md5} ;
 
     ## Strip all non-digits.
-    local colorseedint="$( echo $colorseedstr | $MD5SUM | tr -cd '[:digit:]' | sed -e 's/^0//;' )" ;
+    declare -i colorseedint="$( echo $colorseedstr | $MD5SUM | tr -cd '[:digit:]' | sed -e 's/^0//;' )" ;
 
     ## Specify how many colors made available for the prompt.
-    local colorcount=88 ;
+    declare -i colorcount=88 ;
 
-    if [[ "$TERM" =~ '256' ]] ; then
-        colorcount=176 ;
+    [[ $TERM =~ 256 ]] && colorcount=176
+
+    declare maybecolor=$(( colorseedint % colorcount )) ;
+
+    echo "${maybecolor#-}" ; ## Ersatz abs().
+}
+
+## bashprompt [NONE|GRAY|RED|GREEN|YELLOW|BLUE|CYAN|WHITE|{0..255}|...]
+#       Set the primary color of the main command prompt.
+#
+#   Appending an exclamation mark to the color name/number will force the
+#   prompt bold.   
+#
+# @param $colopt the desired fg color, defaults to __machineColor.
+# @needs termcap for xcFF_* color/style variables.
+##
+unset -f bashprompt ; function bashprompt() {
+    declare fgpref="${1:-$( __machineColor )}"
+    declare dtfmt='%F %T' ## 'T' is ugly, '%z' unnecessary.
+
+    declare fnstyle="$xcFF_NORMAL" ;
+
+    [[ $fgpref =~ (^[A-Z]+|!)$ ]] && fnstyle="$xcFF_BOLD" ;
+
+    declare fgname=$( tr '[a-z]' '[A-Z]' <<< ${fgpref%!} ) ;
+    declare fncolor ;
+
+    if [[ $fgname =~ ^[0-9]+$ ]] ; then
+        fncolor="35;5;$fgname" ;
+    else
+        declare ffName="xcFF_$fgname" ;
+        fncolor=${!ffName} ;
     fi
 
-##    maybecolor="$( echo $colorseedstr | sed -e 's/[^[:digit:]]//g' -e 's/$/ % 16/' -e 's/^/scale=0; /' | bc )"
-    local maybecolor="$(( colorseedint % colorcount ))" ;
+    declare escseq="\[\e[${fncolor};${fnstyle}m\]" ;
 
-    echo "${maybecolor#-}" ; ## abs()
+    export PS1_HOST_COLOR_SEQUENCE="${escseq}" ;
+    export PS1="${escseq}\n\D{${dtfmt}} :: \w\n ${escseq}\u@\h\$\[\e[${NONE}m\] " ;
 }
 
+needsLib 'termcap' ;
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
 
-unset -f bashprompt ;
-function bashprompt() {
-        ## bashprompt NONE|GRAY|RED|GREEN|YELLOW|BLUE|CYAN|WHITE
-
-        local fgname="$1"
-
-		if [ ! "$fgname" ] ; then
-			fgname="$( __machineColor )"
-		fi
-
-        local NONE=0
-
-        local BOLD=1
-        local NORMAL=2
-        local UNDERLINE=4
-        local BLINK=5
-        local REVERSE=7
-        local INVISIBLE=8
-
-        local GRAY=30
-        local RED=31
-        local GREEN=32
-        local YELLOW=33
-        local BLUE=34
-        local MAGENTA=35
-        local CYAN=36
-        local WHITE=37
-        local ORANGE=172
-        local OLIVE_DRAB=65
-
-        local datetimef='%F %T' ## 'T' is ugly, '%z' unnecessary
-
-        local fgint
-        local fontstyle
-        local coloresc
-
-        if [ $( echo $fgname | egrep '(^[A-Z]+|!)$' ) ] ; then
-                fontstyle="$BOLD"
-        else
-                fontstyle="$NORMAL"
-        fi
-
-		fgname=$( echo $fgname | tr '[a-z]' '[A-Z]' | sed 's/!$//' )
-
-        if [ $( echo $fgname | egrep '^[0-9]+$' ) ] ; then
-                fgint="38;5;$fgname"
-        else
-                fgint=${!fgname}
-        fi
-
-##        coloresc="\[\e[38;5;${fgint}m\]\[\e[${fontstyle}m\]"
-        coloresc="\[\e[${fgint};${fontstyle}m\]"
-
-		export PS1_HOST_COLOR_SEQUENCE="${coloresc}"
-        export PS1="${coloresc}\n\D{${datetimef}} :: \w\n ${coloresc}\u@\h\$\[\e[${NONE}m\] "
-}
 

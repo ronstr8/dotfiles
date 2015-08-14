@@ -1,4 +1,6 @@
 
+__resourceName='proc' ; if ! pingLib "$__resourceName" ; then
+
 ## xPostMortem - Display exit status of previous command.
 ##
 ##
@@ -12,4 +14,7 @@ function xPostMortem() {
 
     echo -e "\t$( tput setaf $fgColor )# $meaning ($rv), ${origin}.$( tput sgr0 )${disclaimer}" ;
 } ;
+
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
+
 

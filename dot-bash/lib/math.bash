@@ -1,4 +1,6 @@
 
+__resourceName='math' ; if ! pingLib "$__resourceName" ; then
+
 ## Not happy with these:
 ##	* Should read stdin like anything else, not force its own RS
 ##	* Use raw int or length?  An option, e.g. --length?
@@ -151,5 +153,8 @@ Usage: $FUNCNAME [options]
 
     (( prettyPrint == 0 )) && echo $units || printf "%'.*f%s\n" $unitScale $units "${unitLabel:-$powerLabel}" ;
 } ;
+
+
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
 
 

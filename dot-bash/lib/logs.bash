@@ -1,4 +1,6 @@
 
+__resourceName='logs' ; if ! pingLib "$__resourceName" ; then
+
 unset -f mrl ;
 function mrl() {
 	## @TODO Break out log glob logic from tdl, find most recent log/file.
@@ -49,3 +51,6 @@ function tdl() {
 
 	echo $matchingFiles ;
 }
+
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
+

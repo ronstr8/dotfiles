@@ -1,4 +1,6 @@
 
+__resourceName='git' ; if ! pingLib "$__resourceName" ; then
+
 function git-current-branch() {
 	git rev-parse --abbrev-ref HEAD 2>/dev/null
 ##	git branch --no-color 2> /dev/null | awk '/^\*/ { print $2 }'
@@ -38,7 +40,6 @@ function git-set-prompt() {
 	#  Customize BASH PS1 prompt to show current GIT repository and branch.
 	#  by Mike Stewart - http://MediaDoneRight.com
 
-	#  SETUP CONSTANTS
 	#  Bunch-o-predefined colors.  Makes reading code easier than escape sequences.
 	#  I don't remember where I found this.  o_O
 
@@ -176,5 +177,8 @@ function git-set-prompt() {
 ##	fi)'
 }
 
+
+
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
 
 

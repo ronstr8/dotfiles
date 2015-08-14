@@ -1,4 +1,6 @@
 
+__resourceName='files' ; if ! pingLib "$__resourceName" ; then
+
 unset -f pathmunge ;
 function pathmunge() {
         ## . ~/.bash/lib/files.bash ; echo $PATH ; pathmunge PATH +$HOME/work/bin after ; echo $PATH
@@ -34,4 +36,7 @@ function extension() {
 	local fullname=$1
 	basename $fullname | sed 's/^.\+\.\([^.]\+\)$/\1/'
 }
+
+
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
 

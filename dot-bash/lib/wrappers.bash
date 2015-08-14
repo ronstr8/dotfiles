@@ -1,4 +1,6 @@
 
+__resourceName='wrappers' ; if ! pingLib "$__resourceName" ; then
+
 ## @see http://subversion.tigris.org/ds/viewMessage.do?dsForumId=1065&dsMessageId=88333&orderBy=createDate&orderType=desc
 
 ## svn() {
@@ -22,6 +24,9 @@
 ##     esac
 ## }
 ## 
+
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
+
 ## vim: ft=sh
 
 

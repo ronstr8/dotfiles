@@ -1,5 +1,16 @@
 
-if ! pingLib 'aliases' ; then
+##     printf '========================================\n' >&2 ;
+##     printf 'aliases: @:%s\n' "$@" >&2 ;
+##     printf 'aliases: 0:%s\n' "$0" >&2 ;
+##     printf 'aliases: 1:%s\n' "$1" >&2 ;
+##     printf 'aliases: BASH_SUBSHELL:%s\n' "$BASH_SUBSHELL" >&2 ;
+##     printf 'aliases: SHLVL:%s\n' "$SHLVL" >&2 ;
+##     printf 'aliases: FUNCNAME:%s\n' "${FUNCNAME[@]}" >&2 ;
+##     printf 'aliases: BASH_SOURCE:%s\n' "${BASH_SOURCE[@]}" >&2 ;
+##     printf 'aliases: BASH_LINENO:%s\n' "${BASH_LINENO[@]}" >&2 ;
+##     printf 'aliases: PIPESTATUS:%s\n' "${PIPESTATUS[@]}" >&2 ;
+
+__resourceName='aliases' ; if ! pingLib "$__resourceName" ; then
 
 unset -f ssh-ensure-keychain ;
 function ssh-ensure-keychain() {
@@ -24,5 +35,5 @@ function utf8-locale-force() {
     locale | fgrep -v "$desiredLocale" ;
 }
 
-touchLib 'aliases' ; fi ;
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
 

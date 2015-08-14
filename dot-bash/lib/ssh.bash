@@ -1,4 +1,6 @@
 
+__resourceName='ssh' ; if ! pingLib "$__resourceName" ; then
+
 if ( false ) ; then ## Most of this is obsolete since finding/installing `keychain'.
 
 unset -f __getSshDumpFile ;
@@ -161,6 +163,9 @@ function ssh() {
 }
 
 fi
+
+touchLib "$__resourceName" ; unset __resourceName ; fi ;
+
 
 ## vim: ft=sh
 
