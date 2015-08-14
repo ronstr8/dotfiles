@@ -1,4 +1,6 @@
 
+if ! pingLib ${BASH_SOURCE[0]} ; then
+
 x11-try-display() {
 #	export DISPLAY="${HOSTNAME}:${display_number}.${screen_number}"
 	local display_prospect="$1"
@@ -54,6 +56,9 @@ x11-get-display() {
 	echo -e "→ Failed to find the display you are viewing." > /dev/stderr
 	return 1
 }
+
+touchLib ${BASH_SOURCE[0]} ; fi ;
+
 
 ## vim: ft=sh
 

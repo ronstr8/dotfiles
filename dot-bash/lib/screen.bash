@@ -1,4 +1,6 @@
 
+if ! pingLib ${BASH_SOURCE[0]} ; then
+
 
 ## function screen-mrenv {
 ## 	if [ ! "$STY" ] ; then
@@ -22,3 +24,6 @@
 ## 	echo "Slurping most-recently-invoked screen ENV from «$SCREEN_MRENV» ..." > /dev/stderr
 ## 	. "$SCREEN_MRENV"
 ## }
+
+touchLib ${BASH_SOURCE[0]} ; fi ;
+

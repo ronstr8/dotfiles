@@ -4,5 +4,8 @@
 /def -i -b'PgUp' = /fg -> 
 /def -i -b'PgDn' = /fg -<
 
-/def "esc_pgup" = /fg -<
-/def "esc_pgdn" = /fg ->
+/def "key_esc_pgup" = /fg -<
+/def "key_esc_pgdn" = /fg ->
+
+/def key_esc_pgup = /fg -<
+/def key_esc_pgdn = /fg ->

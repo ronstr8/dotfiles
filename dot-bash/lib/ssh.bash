@@ -1,4 +1,6 @@
 
+if ! pingLib ${BASH_SOURCE[0]} ; then
+
 if ( false ) ; then ## Most of this is obsolete since finding/installing `keychain'.
 
 unset -f __getSshDumpFile ;
@@ -161,6 +163,9 @@ function ssh() {
 }
 
 fi
+
+touchLib ${BASH_SOURCE[0]} ; fi ;
+
 
 ## vim: ft=sh
 

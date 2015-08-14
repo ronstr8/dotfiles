@@ -4,16 +4,14 @@
 ## History
 
 export HISTTIMEFORMAT="[%Y-%m-%dT%H:%M:%S] "
+shopt -s histreedit
 
 ## Shell Options
 
 ## [ -f $BASHDIR/hosts ] && export HOSTFILE="$BASHDIR/hosts"
 ## shopt -s hostcomplete
 
-shopt -s histreedit
-
 set -o ignoreeof
-
 
 ## Prompt
 
@@ -21,12 +19,11 @@ set -o ignoreeof
 ## fails to recognize them and plunk me back into my proper directory.
 #export PROMPT_DIRTRIM=3 ;
 
-bashprompt
+bashprompt ;
 
-unset -f __dotBashPrompt ;
-function __dotBashPrompt() {
+unset -f __dotBashPrompt ; function __dotBashPrompt() {
 
-	local windowHome="${WINDOW_HOME}" ;
+	local windowHome="${WINDOW_HOME:-}" ;
 	[ "$windowHome" -a -d "$windowHome" ] || return ;
 
 	## TODO: Let ~/bin/workspace define this function so we don't have to make assumptions about file locations and such.
@@ -37,10 +34,9 @@ function __dotBashPrompt() {
 
 	## TODO: Only do this if $HISTFILE contains $WINDOW_HOME.
 	history -a ;
-}
+} ;
 
-unset -f __updatePromptCommand ;
-function __updatePromptCommand() {
+unset -f __updatePromptCommand ; function __updatePromptCommand() {
 	local customPromptCommand='__dotBashPrompt' ;
 	local newPromptCommand='' ;
 

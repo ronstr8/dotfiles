@@ -1,4 +1,6 @@
 
+if ! pingLib ${BASH_SOURCE[0]} ; then
+
 ## Fucking CentOS 5 doesn't _have_ Bash4 with associative arrays. GRR.
 # declare -A ALL_OPTIONS ; ALL_OPTIONS=(
 #     [debug]='debug'
@@ -240,5 +242,5 @@ function __apparam_test() {
 }
 
 
-
+touchLib ${BASH_SOURCE[0]} ; fi ;
 
