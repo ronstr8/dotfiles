@@ -1,5 +1,5 @@
 
-__resourceName='files' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 unset -f pathmunge ;
 function pathmunge() {
@@ -38,5 +38,5 @@ function extension() {
 }
 
 
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 

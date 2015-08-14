@@ -10,12 +10,12 @@
 ##     printf 'truth: BASH_LINENO:%s\n' "${BASH_LINENO[@]}" >&2 ;
 ##     printf 'truth: PIPESTATUS:%s\n' "${PIPESTATUS[@]}" >&2 ;
 
-__resourceName='truth' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 [[ -z "${TRUE:-}"  ]] && declare -r -i TRUE=1 ;
 [[ -z "${FALSE:-}" ]] && declare -r -i FALSE=0 ;
 
-touchLib $__resourceName ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 
 
 

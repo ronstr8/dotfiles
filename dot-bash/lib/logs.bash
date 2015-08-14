@@ -1,5 +1,5 @@
 
-__resourceName='logs' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 unset -f mrl ;
 function mrl() {
@@ -52,5 +52,5 @@ function tdl() {
 	echo $matchingFiles ;
 }
 
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 

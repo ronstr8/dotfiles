@@ -1,5 +1,5 @@
 
-__resourceName='wrappers' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 ## @see http://subversion.tigris.org/ds/viewMessage.do?dsForumId=1065&dsMessageId=88333&orderBy=createDate&orderType=desc
 
@@ -25,7 +25,7 @@ __resourceName='wrappers' ; if ! pingLib "$__resourceName" ; then
 ## }
 ## 
 
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 
 ## vim: ft=sh
 

@@ -1,5 +1,5 @@
 
-__resourceName='math' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 ## Not happy with these:
 ##	* Should read stdin like anything else, not force its own RS
@@ -155,6 +155,6 @@ Usage: $FUNCNAME [options]
 } ;
 
 
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 
 

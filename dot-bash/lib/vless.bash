@@ -1,5 +1,5 @@
 
-__resourceName='vless' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 unset -f vless ;
 function vless() {
@@ -12,5 +12,5 @@ function vless() {
 	eval "vim -R -c 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim' $params" ;
 }
 
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 

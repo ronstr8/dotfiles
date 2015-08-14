@@ -1,5 +1,5 @@
 
-__resourceName='proc' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 ## xPostMortem - Display exit status of previous command.
 ##
@@ -15,6 +15,6 @@ function xPostMortem() {
     echo -e "\t$( tput setaf $fgColor )# $meaning ($rv), ${origin}.$( tput sgr0 )${disclaimer}" ;
 } ;
 
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 
 

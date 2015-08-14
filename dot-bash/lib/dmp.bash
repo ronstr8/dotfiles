@@ -1,5 +1,5 @@
 
-__resourceName='dmp' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 
 unset -f curl-dmp ;

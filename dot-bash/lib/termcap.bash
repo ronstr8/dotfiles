@@ -1,5 +1,5 @@
 
-__resourceName='termcap' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 ## xcFF_*
 #   xterm-color256 color codes.
@@ -27,7 +27,7 @@ __resourceName='termcap' ; if ! pingLib "$__resourceName" ; then
     declare xcFF_ORANGE=172
     declare xcFF_OLIVE_DRAB=65
 
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 
 ## 	# Reset
 ## 	Color_Off="\[\033[0m\]"       # Text Reset

@@ -1,5 +1,5 @@
 
-__resourceName='status' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 needsLib 'truth' ;
 
@@ -12,6 +12,5 @@ needsLib 'truth' ;
 declare -i RV_FAILBASE=$(( RV_FAILURE+1  )) ;
 declare -i RV_MISMATCH=$(( RV_FAILBASE++ )) RV_MISSING=$(( RV_FAILBASE++ )) RV_SYNTAX=$(( RV_FAILBASE++ )) ;
 
-touchLib $__resourceName ; unset __resourceName ; fi ;
-
+touchLib ${BASH_SOURCE[0]} ; fi ;
 

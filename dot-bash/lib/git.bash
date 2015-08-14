@@ -1,5 +1,5 @@
 
-__resourceName='git' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 function git-current-branch() {
 	git rev-parse --abbrev-ref HEAD 2>/dev/null
@@ -179,6 +179,6 @@ function git-set-prompt() {
 
 
 
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 
 

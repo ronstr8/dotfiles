@@ -10,7 +10,7 @@
 ##     printf 'aliases: BASH_LINENO:%s\n' "${BASH_LINENO[@]}" >&2 ;
 ##     printf 'aliases: PIPESTATUS:%s\n' "${PIPESTATUS[@]}" >&2 ;
 
-__resourceName='aliases' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 unset -f ssh-ensure-keychain ;
 function ssh-ensure-keychain() {
@@ -35,5 +35,5 @@ function utf8-locale-force() {
     locale | fgrep -v "$desiredLocale" ;
 }
 
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 

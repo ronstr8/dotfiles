@@ -51,7 +51,7 @@ unset -f __ldd ; function __ldd() {
     declare recordRE="(${__RDELIM}((${resource})=([^@]+)@([0-9]+))${__RDELIM})" ;
 
     if [[ ! $__LIBINFO =~ $recordRE ]] ; then
-        echo "customFileName=$customFileName;standardFileName=$standardFileName;" >&2
+#       echo "customFileName=$customFileName;standardFileName=$standardFileName;" >&2
         echo "${customFileName:-$standardFileName}@0" ;
         false ; return ;
     fi
@@ -190,7 +190,7 @@ unset -f forceLib ; function forceLib() { reloadLib "$@" ; } ;
 # @param $resource a resource provided by some library.
 ##
 unset -f touchLib ; function touchLib() {
-    echo "touchLib $@ ..." >&2;
+#   echo "touchLib $@ ..." >&2;
     declare resource="${1:?${FUNCNAME[0]}: Missing 'resource'}" ;
     __ld $resource $( date +%s ) ;
 } ;

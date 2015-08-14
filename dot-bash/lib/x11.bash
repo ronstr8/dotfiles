@@ -1,5 +1,5 @@
 
-__resourceName='x11' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 x11-try-display() {
 #	export DISPLAY="${HOSTNAME}:${display_number}.${screen_number}"
@@ -57,7 +57,7 @@ x11-get-display() {
 	return 1
 }
 
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 
 
 ## vim: ft=sh

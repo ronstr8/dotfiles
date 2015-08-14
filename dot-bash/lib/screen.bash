@@ -1,5 +1,5 @@
 
-__resourceName='screen' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 
 ## function screen-mrenv {
@@ -25,5 +25,5 @@ __resourceName='screen' ; if ! pingLib "$__resourceName" ; then
 ## 	. "$SCREEN_MRENV"
 ## }
 
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 

@@ -1,5 +1,5 @@
 
-__resourceName='prompt' ; if ! pingLib "$__resourceName" ; then
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 ## __machineColor
 #       Echo integer representing an xterm-256color color "label" for the current host.
@@ -60,6 +60,6 @@ unset -f bashprompt ; function bashprompt() {
 }
 
 needsLib 'termcap' ;
-touchLib "$__resourceName" ; unset __resourceName ; fi ;
+touchLib ${BASH_SOURCE[0]} ; fi ;
 
 
