@@ -8,7 +8,8 @@
 ##      retitled.  If another window existed with that number, it will be moved to
 ##      the $WINDOW envvar, or renamed with a date extension if no $WINDOW.
 ##
-##  --status     Show data relevant to the current session window.
+##  --status         Show data relevant to the current session.
+##  --dump-hardcopy
 ##
 ##  --eval       Echo some export commands useful for future invocations.
 ##  --screeenrc  Write a new screenrc in the root session directory.
@@ -429,31 +430,28 @@ function __echoBashEnv() {
 EOT
 } ;
 
-function __echoExport() {
-    local varName="$1" ;
-    local varValue="$2" ;
-
-    echo "export ${varName}='${varValue}' ; " ;
-#    [ "$varValue" ] && echo -n "${varName}='${varValue}' ; " ;
-#    echo "export $varName ; " ;
-} ;
+## function __echoExport() {
+##     local varName="$1" ;
+##     local varValue="$2" ;
+## 
+##     echo "export ${varName}='${varValue}' ; " ;
+## #    [ "$varValue" ] && echo -n "${varName}='${varValue}' ; " ;
+## #    echo "export $varName ; " ;
+## } ;
 
 function __echoExports() {
-#   echo -e "\n\n" ;
-
-    if [ "$MOVED_WINDOW_HISTORY_FILE" ] ; then
-        __whinge "Paste these settings into the window swapped to ${MOVED_WINDOW_NUMBER}." ;
-
-        __echoExport 'WINDOW_NUMBER' "$MOVED_WINDOW_NUMBER" ; 
-        __echoExport 'HISTFILE'      "$MOVED_WINDOW_HISTORY_FILE" ;
-    fi
-
+## XXX The "move window" functionality doesn't work.
+#   if [ "$MOVED_WINDOW_HISTORY_FILE" ] ; then __whinge "Paste these settings into the window swapped to ${MOVED_WINDOW_NUMBER}." ; __echoExport 'WINDOW_NUMBER' "$MOVED_WINDOW_NUMBER" ; __echoExport 'HISTFILE'      "$MOVED_WINDOW_HISTORY_FILE" ; fi
 #   __whinge "Paste these settings into your current window ${MOVED_WINDOW_NUMBER}:" ;
+#   __echoExport 'SESSION_NAME'  "$SESSION_NAME" ; __echoExport 'WINDOW_NUMBER' "$WINDOW_NUMBER" ; __echoExport 'WINDOW_TITLE'  "$WINDOW_TITLE" ; __echoExport 'HISTFILE'      "${WINDOW_HISTORY_FILE:-$HISTFILE}" ;
 
-    __echoExport 'SESSION_NAME'  "$SESSION_NAME" ; 
-    __echoExport 'WINDOW_NUMBER' "$WINDOW_NUMBER" ; 
-    __echoExport 'WINDOW_TITLE'  "$WINDOW_TITLE" ; 
-    __echoExport 'HISTFILE'      "${WINDOW_HISTORY_FILE:-$HISTFILE}" ;
+    declare declaration='declare -x' varName='' ;
+
+    for varName in "${SESSION_VARS[@]}" ; do
+        declaration+=" $varName='${!varName}'" ;
+    done
+
+    echo "$declaration" ;
 } ;
 
 function __maybeVivifySessionDir() {
@@ -564,7 +562,12 @@ function __dumpWindowHardcopy() {
 
 function __saveWindowState() {
     ## XXX The semicolons are imperative for `eval'!
-    [ "$EVAL" ] && echo "history -a \"${WINDOW_HISTORY_FILE:-$HISTFILE}\" ;" ;
+    declare historyCommand="history -a \"${WINDOW_HISTORY_FILE:-$HISTFILE}\"" ;
+    if [ "$EVAL" ] ; then
+        echo "$historyCommand ; " ;
+    else
+        $historyCommand
+    fi
 
     [ "$WINDOW_TITLE" ] && echo "$WINDOW_TITLE" > "$WINDOW_TITLE_FILE" ;
 
@@ -676,6 +679,38 @@ function __echoStatus() {
     return $OK ;
 } ;
 
+## 0-black 1-red 2-green 3-yellow 4-blue 5-magenta 6-cyan 7-white
+
+function __dumpHardcopyFiles() {
+    declare    fileName='' skippedLine='' ;
+    declare -a skippedLines=() ;
+    declare -i skippedLineThreshold=24 ;
+
+    for fileName in "$@" ; do
+        cat $fileName | while read ; do
+            if [[ "$REPLY" =~ ^[[:space:]]*$ ]] ; then
+                skippedLines[${#skippedLines[@]}]="$REPLY" ;
+                continue ;
+            fi
+
+            if [[ ${#skippedLines[@]} -le $skippedLineThreshold ]] ; then
+                for skippedLine in "${skippedLines[@]}" ; do
+                    echo $skippedLine ;
+                done
+            else
+                ## Print a brief "skip-notice" if count exceeds threshold.
+                printf '\n\n## skippedLines+=%d %s%s%s\n\n' ${#skippedLines[@]} "$( tput setaf 3 )" "$( yes '#' | head -n 10 | xargs )" "$( tput sgr0 )" ;
+            fi
+
+            skippedLines=() ;
+
+            echo "$REPLY" ;
+        done
+    done
+
+    return $OK ;
+} ;
+
 function __main() {
     __validateSessionState  || return $ERR ;
     __maybeVivifySessionDir || return $ERR ;
@@ -729,11 +764,8 @@ function __main() {
     fi
 
     if [ "$DO_HARDCOPY_DUMP" ] ; then
-        # TODO: Actually useless now, since when we start, we'll have backed up
-        # the previous hardcopy to start a new one.  Unfortunately, those can
-        # be quite huge, so we need an intelligent way to dump part of the
-        # penultimate hardcopy.
-        screen -X stuff "cat \"$WINDOW_HARDCOPY_FILE\"\n" ;
+        __dumpHardcopyFiles ${WINDOW_HOME}/${HARDCOPY_BASENAME}.* $WINDOW_HARDCOPY_FILE ;
+
         return $OK ;
     fi
 

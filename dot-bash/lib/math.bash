@@ -20,13 +20,23 @@ if ! pingLib ${BASH_SOURCE[0]} ; then
 [[ -z "${__xMININT}" ]] && declare -r -i __xMININT=$(( xMAXINT * -1 )) ;
 
 unset -f numSum ; function numSum() {
-    declare -i answer=0 arg=0 ;
-    declare    mapper='answer+=$arg' ;
+    declare -i answer=0 ;
+    declare    mapper='answer+="$arg"' ;
 
-    if [ $# -lt 1 ] || [ $# -eq 1 -a "$1" = '-' ] ; then
-        while read arg  ; do eval $mapper ; done # answer+=$arg ; done
-    else
-        for arg in "$@" ; do eval $mapper ; done # answer+=$arg ; done
+    declare -a args=() ;
+    read -a args < <( readArgs "$@" ) ;
+    declare arg ;
+    for arg in "${args[@]}" ; do eval $mapper ; done # answer+=$arg ; done
+#    while read arg ; do
+#        eval $mapper ;
+#    done < <( readArgs "$@" ) ;
+
+    if false ; then
+        if [ $# -lt 1 ] || [ $# -eq 1 -a "$1" = '-' ] ; then
+            while read arg  ; do eval $mapper ; done # answer+=$arg ; done
+        else
+            for arg in "$@" ; do eval $mapper ; done # answer+=$arg ; done
+        fi
     fi
 
     echo $answer ; 
