@@ -9,23 +9,23 @@ if ! pingLib ${BASH_SOURCE[0]} ; then
 #
 #   TODO Callers should be using tput or some abstraction thereof.
 ##
-    declare xcFF_NONE=0
-    declare xcFF_BOLD=1
-    declare xcFF_NORMAL=2
-    declare xcFF_UNDERLINE=4
-    declare xcFF_BLINK=5
-    declare xcFF_REVERSE=7
-    declare xcFF_INVISIBLE=8
-    declare xcFF_GRAY=30
-    declare xcFF_RED=31
-    declare xcFF_GREEN=32
-    declare xcFF_YELLOW=33
-    declare xcFF_BLUE=34
-    declare xcFF_MAGENTA=35
-    declare xcFF_CYAN=36
-    declare xcFF_WHITE=37
-    declare xcFF_ORANGE=172
-    declare xcFF_OLIVE_DRAB=65
+    declare -i -x xcFF_NONE=0 ;
+    declare -i -x xcFF_BOLD=1 ;
+    declare -i -x xcFF_NORMAL=2 ;
+    declare -i -x xcFF_UNDERLINE=4 ;
+    declare -i -x xcFF_BLINK=5 ;
+    declare -i -x xcFF_REVERSE=7 ;
+    declare -i -x xcFF_INVISIBLE=8 ;
+    declare -i -x xcFF_GRAY=30 ;
+    declare -i -x xcFF_RED=31 ;
+    declare -i -x xcFF_GREEN=32 ;
+    declare -i -x xcFF_YELLOW=33 ;
+    declare -i -x xcFF_BLUE=34 ;
+    declare -i -x xcFF_MAGENTA=35 ;
+    declare -i -x xcFF_CYAN=36 ;
+    declare -i -x xcFF_WHITE=37 ;
+    declare -i -x xcFF_ORANGE=172 ;
+    declare -i -x xcFF_OLIVE_DRAB=65 ;
 
 touchLib ${BASH_SOURCE[0]} ; fi ;
 
