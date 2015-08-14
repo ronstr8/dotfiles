@@ -23,7 +23,7 @@ bashprompt ;
 
 unset -f __dotBashPrompt ; function __dotBashPrompt() {
 
-	local windowHome="${WINDOW_HOME}" ;
+	local windowHome="${WINDOW_HOME:-}" ;
 	[ "$windowHome" -a -d "$windowHome" ] || return ;
 
 	## TODO: Let ~/bin/workspace define this function so we don't have to make assumptions about file locations and such.
@@ -34,7 +34,7 @@ unset -f __dotBashPrompt ; function __dotBashPrompt() {
 
 	## TODO: Only do this if $HISTFILE contains $WINDOW_HOME.
 	history -a ;
-}
+} ;
 
 unset -f __updatePromptCommand ; function __updatePromptCommand() {
 	local customPromptCommand='__dotBashPrompt' ;
