@@ -20,7 +20,7 @@ function ssh-ensure-keychain() {
 
     eval `keychain --eval --quick` ;
     ssh-add -l ;
-}
+} ;
 
 unset -f utf8-locale-force ;
 function utf8-locale-force() {
@@ -33,7 +33,7 @@ function utf8-locale-force() {
 
     export LC_ALL="$desiredLocale" ; 
     locale | fgrep -v "$desiredLocale" ;
-}
+} ;
 
 touchLib ${BASH_SOURCE[0]} ; fi ;
 
