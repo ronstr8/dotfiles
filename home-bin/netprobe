@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+DEFAULT_SUDO='' ;
 DEFAULT_TIMEOUT=3 ;
 
 DEFAULT_INSTANCE_USER='ec2-user' ;
@@ -9,12 +10,25 @@ DEFAULT_PING_DEADLINE=$DEFAULT_TIMEOUT ;
 
 DEFAULT_LOOKUP_TIMEOUT=$DEFAULT_TIMEOUT ;
 
-DEFAULT_TRACE_PROBE_WAIT=$DEFAULT_TIMEOUT ; 
-DEFAULT_TRACE_MAX_TTL=$DEFAULT_TIMEOUT ; 
-DEFAULT_TRACE_METHODS=( tcp ) ; # icmp udp raw ) ;
-DEFAULT_TRACE_PROBES=1 ;
+TRACERT_PROBE_WAIT=$DEFAULT_TIMEOUT ; 
+## *MAX_TTL Too low? Some sites are more than a hop, skip and a jump away.
+## However, for the purposes of testing local-ish connectivity as through
+## the fiber of AWS Direct Connect, this is more than enough. Also, keep
+## in mind that the total "timeout" is this times *PROBE_WAIT seconds.
+TRACERT_MAX_TTL=10 ;
+TRACERT_METHODS=( tcp ) ; # icmp udp raw ) ;
+TRACERT_ASYNC_PROBES=1 ;
+TRACERT_PROBES_PER_HOP=1 ;
 
-WHOIS_URI_FORMAT="http://whois.arin.net/rest/net/NET-%s/" ;
+## @see https://www.arin.net/resources/whoisrws/whois_api.html#whoisrws
+## Can also use /rest/cidr/x.x.x.x/bm.
+WHOIS_URI_FORMAT='http://whois.arin.net/rest/ip/%s.txt' ;
+#       curl -sS 'http://whois.arin.net/rest/ip/69.55.75.59.txt'
+
+TRACERT_OPT_E=$( traceroute -e --help &>/dev/null && echo ' -e ' ) ;
+## First %s is the traceroute method to use.  Second %s is the host.
+TRACERT_FORMAT="traceroute -4 -q $TRACERT_PROBES_PER_HOP -d $TRACERT_OPT_E -A -w $TRACERT_PROBE_WAIT -m $TRACERT_MAX_TTL -N $TRACERT_ASYNC_PROBES -M %s %s" ;
+TRACERT_SUDO="${DEFAULT_SUDO:-sudo}" ; # Always use sudo w/traceroute.
 
 #VPC_EXTERNAL_IPV4=(     52.5.138.115                             54.88.5.75 ) ;
 #VPC_EXTERNAL_HOST=( ec2-52-5-138-115.compute-1.amazonaws.com ec2-54-88-5-75.compute-1.amazonaws.com) ;
@@ -23,20 +37,28 @@ WHOIS_URI_FORMAT="http://whois.arin.net/rest/net/NET-%s/" ;
 #VPC_INTERNAL_HOST=( ip-10-17-0-172.ec2.internal ip-10-17-0-51.ec2.internal ip-10-17-127-16.ec2.internal ) ;
 
 DEFAULT_ADDRESS_LIST=(
-    'ip-10-17-0-172.ec2.internal  <10.17.0.172>'
-    'ip-10-17-0-51.ec2.internal   <10.17.0.51>'
+    'ip-10-17-0-172.ec2.internal <10.17.0.172>'
+    'ip-10-17-0-51.ec2.internal <10.17.0.51>'
     'ip-10-17-127-16.ec2.internal <10.17.127.16>'
 ) ;
 
 IPV4_OCTET_REGEX='(2([0-4][0-9]|5[0-5])|1[0-9][0-9]|[0-9]{1,2})' ;
 #IPV4_REGEX="((${IPV4_OCTET_REGEX}\.){3,3}${IPV4_OCTET_REGEX})" ;
-IPV4_REGEX="(${IPV4_OCTET_REGEX}(\.${IPV4_OCTET_REGEX}){3,3})" ;
+IPV4_REGEX_FORMAT="(${IPV4_OCTET_REGEX}(%s${IPV4_OCTET_REGEX}){3,3})" ;
 IPV4_RESERVED_REGEX="(^(10|192\.168|172\.(1[6-9]|2[0-9]|3[01]))\.)" ;
+
+unset -f __renderIpRegexFormat ; function __renderIpRegexFormat() {
+    ## A regex expr matching what would be dots in an IPv4 octet-quad.
+    local dotSubst="${1:-.}" ;
+
+    printf "$IPV4_REGEX_FORMAT" "$dotSubst" ;
+}
 
 unset -f __isValidIp ; function __isValidIp() {
     local ipv4="$1" ;
+    local ipRe=$( __renderIpRegexFormat '[.-]' ) ;
 
-    echo "$ipv4" | egrep -q "$IPV4_REGEX" ;
+    echo "$ipv4" | egrep -q "$ipRe" ;
 } ;
 
 unset -f __isReservedIp ; function __isReservedIp() {
@@ -48,20 +70,53 @@ unset -f __isReservedIp ; function __isReservedIp() {
 unset -f __extractHostFromAddr ; function __extractHostFromAddr() {
     local host="$1" ;
 
-#   echo -n "${host// /}" | tr -d ' ' | sed "s/<${IPV4_REGEX}>//;" ;
     echo -n "${host// /}" | tr -d ' ' | sed "s/<[^>]\+>//;" ;
 } ;
 
+unset -f __getHostFromAddr ; function __getHostFromAddr() {
+    __extractHostFromAddr $@ ;
+}
+
 unset -f __extractIpFromAddr ; function __extractIpFromAddr() {
     local host="$1" ;
+    local ipRe=$( __renderIpRegexFormat '[.-]' ) ;
 
 #   local cutted=$( echo -n "$host" | egrep -o "$IPV4_REGEX" ) ;
 #   local dotted=$( echo -n "$cutted" | tr -c '0-9' '.' ) ;
-#   echo "Host: «$host» ; Cut: «$cutted» ; Dotted: «$dotted»" ; # &>2 ;
+#   echo "Host: «$host» ; Cut: «$cutted» ; Dotted: «$dotted»" ; # 1>&2 ;
 #   echo "$dotted" ;
 
-    echo -n "${host// /}" | egrep -o "$IPV4_REGEX" | tr -d "\n" | tr -c '0-9' '.' ;
+#   echo -n "${host// /}" | egrep -o "$ipRe" | tr -d "\n" | tr -c '0-9' '.' ;
+    echo -n "${host// /}" | egrep -m1 -o "$ipRe" | head -n 1 | sed -e 's/^\([^[:space:]]\+\).*$/\1/; s/[^0-9]/./g;' # tr -d "\n" | tr -c '0-9' '.' ;
 } ;
+
+unset -f __lookupHost ; function __lookupHost() {
+    local host="$1" ;
+
+    local waitSeconds=${DEFAULT_LOOKUP_TIMEOUT} ;
+
+    # -C        Display SOA for all listed authoritative records.
+    # -v/-d     Verbose/debug.
+    # -T        Use TCP instead of UDP requests to nameservers.
+    # -4        Force IPv4 transport.
+    # -t        Query type: A, AAAA, MX, CNAME, NS, SOA, SIG, KEY, AXFR, PTR, IXFR, etc.
+    # -a        Query type of ANY.
+    # -W        Seconds to wait for a reply.
+
+#   host -v -d -C -a -W $waitSeconds "$host" ;
+    host -W "$waitSeconds" "$host" 2>/dev/null | awk '/has address/ { print $4 }' ;
+} ;
+
+unset -f __getIpFromAddr ; function __getIpFromAddr() {
+    local addr="$1" ;
+    local ipv4=$( __extractIpFromAddr "$addr" ) ;
+
+    if [ ! "$ipv4" ] ; then
+        ipv4=$( __lookupHost "$addr" ) ;
+    fi
+
+    echo "$ipv4" ;
+}
 
 unset -f __setFgBg ; function __setFgBg() {
     local fg="$1" ;
@@ -94,7 +149,7 @@ unset -f __echoColoredThenReset ; function __echoColoredThenReset() {
 } ;
 
 unset -f __echoHostHeader ; function __echoHostHeader() {
-    local host="${1}" ;
+    local host=$1 ;
     local line=$( printf " %-72s " "$host" ) ;
     local rule=$( printf "%*s" ${#line} ' ' ) ;
 
@@ -108,7 +163,7 @@ unset -f __echoHostHeader ; function __echoHostHeader() {
 }
 
 unset -f __echoComment ; function __echoComment() {
-    local msg="$1" ;
+    local msg=$1 ;
 
     echo ;
 
@@ -123,11 +178,11 @@ unset -f __echoComment ; function __echoComment() {
 } ;
 
 unset -f __whinge ; function __whinge() {
-    __echoComment $* &>2 ;
+    __echoComment "$*" 1>&2 ;
 }
 
 unset -f __croak ; function __croak() {
-    local msg="${1:-Skip/failing.}" ;
+    local msg="${*:-Skip/failing.}" ;
 
     __echoColoredThenReset 1 0 "${msg}" ;
 
@@ -139,56 +194,45 @@ unset -f __sshHost ; function __sshHost() {
     local user="${2:-$DEFAULT_INSTANCE_USER}" ;
     local timeout=${3:-$DEFAULT_SSH_TIMEOUT} ;
 
-    __echoComment "${host}: ssh as ${user}" ;
+    __echoComment "ssh ${user}@${host}" ;
 
-    ssh -o "ConnectTimeout=$timeout" "$host" 'echo "[$( date -Is )] $( hostname )"' ;
-} ;
-
-unset -f __lookupHost ; function __lookupHost() {
-    local host="$1" ;
-
-    local waitSeconds=${DEFAULT_LOOKUP_TIMEOUT} ;
-
-    __echoComment "${host} DNS lookup" ;
-
-    # -C        Display SOA for all listed authoritative records.
-    # -v/-d     Verbose/debug.
-    # -T        Use TCP instead of UDP requests to nameservers.
-    # -4        Force IPv4 transport.
-    # -t        Query type: A, AAAA, MX, CNAME, NS, SOA, SIG, KEY, AXFR, PTR, IXFR, etc.
-    # -a        Query type of ANY.
-    # -W        Seconds to wait for a reply.
-
-    host -v -d -C -a -W $waitSeconds "$host" ;
+    ssh -o "ConnectTimeout=$timeout" "$host" 'echo "[$( date -Is )] SSH $( hostname ) OK"' ;
 } ;
 
 unset -f __whoisHost ; function __whoisHost() {
-    local ipv4="${1//./-}" ;
+    local ipv4=$1 ; # "${1//./-}" ;
     local uri=$( printf "$WHOIS_URI_FORMAT" "$ipv4" ) ;
 
-    __whinge "TBD: $uri" ; return ;
+    __echoComment "WHOIS <$uri>" ;
 
-    curl -i -H 'Content-Type: text/plain' -X GET "$uri" ;
+    curl -sS -X GET "$uri" ;
 } ;
 
 unset -f __pingHost ; function __pingHost() {
     local host="$1" ;
     local deadline=${2:-$DEFAULT_PING_DEADLINE} ;
 
-    __echoComment "${host} ping" ;
+    __echoComment "ping ${host}" ;
 
     ping -w $deadline "$host" ;
 } ;
 
+
+unset -f __traceHostWithMethod ; function __traceHostWithMethod() {
+    local host="$1" ;
+    local method="${2:-tcp}" ;
+
+#   local opt_e=' -e ' ; if ! traceroute -e localhost &>/dev/null ; then opt_e='' ; fi
+
+    local traceRtCmd=$( printf "$TRACERT_FORMAT" "$method" "$host" ) ;
+    __echoComment "$traceRtCmd" ;
+
+    $TRACERT_SUDO $traceRtCmd ;
+}
+
 unset -f __traceHost ; function __traceHost() {
     local host="$1" ;
-
-    local method ;
-
-    local probeWait=${DEFAULT_TRACE_PROBE_WAIT} ;
-    local maxTtl=${DEFAULT_TRACE_MAX_TTL} ;
-    local methods=${DEFAULT_TRACE_METHODS[@]} ;
-    local probes=${DEFAULT_TRACE_PROBES} ;
+    local methods=${TRACERT_METHODS[@]} ;
 
 
     # -4    Force IPv4 transport.
@@ -204,16 +248,16 @@ unset -f __traceHost ; function __traceHost() {
     # -e    Show RFC4884 ICMP extension data.
     # -A    Print AS (autonomous system) from routing registries.
     # -M    Method to use:
-    #           icmp    - If ping works, this should.
+    #           icmp    - Should work if ping does, but then we wouldn't be using this script.
     #           tcp     - Intended to bypass firewalls.
-    #           udp     - Likewise as per tcp.
+    #           udp     - Also intended to bypass firewalls.
     #           udplite - UDP w/constant destination port.
     #           raw     - Raw packets consisting only of IP header.
 
     for method in ${methods[@]} ; do
-        __echoComment "traceroute w/$method" ;
+        __traceHostWithMethod "$host" "$method" ;
 
-        sudo traceroute -4 -d -e -A -w $probeWait -m $maxTtl -N $probes -M $method "$host" ;
+#       sudo traceroute -4 -d -e -A -w $probeWait -m $maxTtl -N $probes -M $method "$host" ;
     done
 
     # After the trip time, some additional annotation can be printed:
@@ -236,23 +280,23 @@ unset -f __testHost ; function __testHost() {
 
     __echoHostHeader "$addr" ;
 
-    local host=$( __extractHostFromAddr "$addr" ) ;
+    local host=$( __getHostFromAddr "$addr" ) ;
 
     if [ ! "$host" ] ; then
-        __croak "Failed to extract hostname from string «$addr»." ;
+        __croak "Failed to deduce hostname from string «$addr»." ;
         return ;
     fi
 
-#   echo "addr=«$addr» host=«$host» ipv4=«$ipv4»" &>2 ;
+#   echo "addr=«$addr» host=«$host» ipv4=«$ipv4»" 1>&2 ;
 
-    local ipv4=$( __extractIpFromAddr "$addr" ) ;
+    local ipv4=$( __getIpFromAddr "$addr" ) ;
 
     if [ ! "$ipv4" ] ; then 
-        __croak "Failed to extract IPv4 address from string «$addr»." ;
+        __croak "Failed to deduce IPv4 address from string «$addr»." ;
         return ;
     fi
 
-#   echo "addr=«$addr» host=«$host» ipv4=«$ipv4»" &>2 ;
+#   echo "addr=«$addr» host=«$host» ipv4=«$ipv4»" 1>&2 ;
 
     if ! __isValidIp "$ipv4" ; then 
         __croak "String «$ipv4» does not look like an IPv4 address." ;
@@ -260,9 +304,8 @@ unset -f __testHost ; function __testHost() {
     fi
 
     if __isReservedIp "$ipv4" ; then
-        __whinge "IPv4 «$ipv4» is in the private range specified by RFC1918.\n" ;
+        __whinge "IPv4 «$ipv4» is in the private range reserved by RFC1918." ;
     else
-        __lookupHost "$host" ;
         __whoisHost  "$ipv4" ;
     fi
 
@@ -275,31 +318,18 @@ unset -f __testHost ; function __testHost() {
 # echo "IPV4_REGEX=«$IPV4_REGEX»" ;
 # echo "IPV4_RESERVED_REGEX=«$IPV4_RESERVED_REGEX»" ;
 
-if [ $# -gt 0 ] ; then
-    for addr in "$@" ; do __testHost "$addr" ; done
-else
-    for addr in $DEFAULT_ADDRESS_LIST ; do __testHost $addr ; done
-fi
+# if [ $# -gt 0 ] ; then for addr in "$@" ; do __testHost "$addr" ; done else for addr in ${DEFAULT_ADDRESS_LIST[@]} ; do __testHost $addr ; done fi
 
-# unset -f __main ; function __main() {
-#     echo "#: $#" ;
-#     local addresses=( $* ) ;
-#     local addr ;
-# 
-#     echo "#: $#" ;
-#     echo "#addresses: ${#addresses[@]}" ;
-#     echo "addresses[@]: ${addresses[@]}" ;
-#     echo "addresses[*]: ${addresses[*]}" ;
-# 
-#     for addr in $@ ; do echo "@: $addr" ; done
-#     for addr in $* ; do echo "*: $addr" ; done
-# 
-#     for addr in "$@" ; do echo "\"@\": $addr" ; done
-#     for addr in "$*" ; do echo "\"*\": $addr" ; done
-# 
-# } ;
-# 
-# [ $# -gt 0 ] && __main ( $@ ) || __main $DEFAULT_ADDRESS_LIST ;
+unset -f __main ; function __main() {
+    declare -a addresses=${@:-${DEFAULT_ADDRESS_LIST[@]}} ;
+    [ ${#addresses[@]} -gt 0 ] || addresses=${DEFAULT_ADDRESS_LIST[@]} ;
+
+    declare addr ;
+
+    for addr in ${addresses[@]} ; do
+        __testHost "$addr" ;
+    done
+} ; __main $@ ;
 
 # netprobe 'ip-10-17-0-172.ec2.internal <10.17.0.172>' 'ip-10-17-0-51.ec2.internal <10.17.0.51>' 'ip-10-17-127-16.ec2.internal <10.17.127.16>'
 
