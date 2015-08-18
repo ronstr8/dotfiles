@@ -44,8 +44,6 @@ export XENVIRONMENT="$HOME/.Xdefaults"
 ## Grokked from /etc/vpnc/vpnc-script:
 export CISCO_DEF_DOMAIN="adblade.com"
 
-export HISTTIMEFORMAT="[%FT%T%z] "
-
 ## @see http://consttype.blogspot.com/2007/08/mysql-command-line-tricks.html
 export MYSQL_PS1="\\d@\\h> "
 
