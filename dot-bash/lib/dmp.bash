@@ -1,4 +1,6 @@
 
+if ! pingLib ${BASH_SOURCE[0]} ; then
+
 
 unset -f curl-dmp ;
 function curl-dmp() {

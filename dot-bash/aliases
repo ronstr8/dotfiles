@@ -39,41 +39,6 @@ alias psthr='ps axms'
 
 alias xdaliclock='xdaliclock -builtin3 -bg wheat -fg brown -noseconds -cycle -geometry +950+40'
 
-alias screen-mrenv=". $HOME/.screen/var/mrenv.$STY"
-
-alias vless="vim -R -c 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim' " ;
-
-function screen-stuff() {
-    screen -X at \# stuff "$*\n" ;
-} ;
-
-function session-checkpoint() {
-    declare    sleepSeconds='0.25' ;
-    declare -i remainingWaits=20 ;
-    declare    WAITFILE='' ;
-
-    if [[ -f "$HISTFILE" ]] ; then
-        WAITFILE="/tmp/screen-stuff-waitfile-$$-$RANDOM.txt" ; 
-        touch --reference="$HISTFILE" "$WAITFILE" ;
-        trap "rm -f '$WAITFILE'" RETURN EXIT ;
-    fi
-
-
-    while [[ ! "$HISTFILE" -nt "$WAITFILE" ]] && (( remainingWaits-- > 0 )) ; do
-        sleep $sleepSeconds ;
-    done
-
-    screen-stuff "(( WINDOW != $WINDOW )) && eval \$( session --eval )\n" ;
-
-    eval $( session --eval ) ; 
-    session --screenrc ;
-    session --status   ;
-
-    [[ ! "$HISTFILE" -nt "$WAITFILE" ]] ;
-} ;
-
-#alias ssh-agent-reuse='eval `ssh-agent-attach`'
-#alias screendoor='source ~/.x-terminal-emulator/screendoor.sh'
 
 # vim: ft=sh
 

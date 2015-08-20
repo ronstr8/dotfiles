@@ -1,6 +1,5 @@
 
-# if [[ ${__PROVIDED_PROC_BASH:-0} -lt $( date +%s -r "$0" ) ]] ; then declare -i -x  __PROVIDED_PROC_BASH=$( date +%s -r "$0" ) ;
-if [[ ${__PROVIDED_PROC_BASH:-0} -eq 0 ]] ; then declare -i -x __PROVIDED_PROC_BASH=$( date +%s ) ;
+if ! pingLib ${BASH_SOURCE[0]} ; then
 
 ## xPostMortem - Display exit status of previous command.
 #
@@ -112,6 +111,4 @@ unset -f readArgs ; function readArgs() {
     echo ${args[@]} ;
 } ;
 
-
-fi ; ## __PROVIDED_PROC_BASH
-
+touchLib ${BASH_SOURCE[0]} ; fi ;

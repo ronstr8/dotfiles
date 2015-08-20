@@ -1,15 +1,158 @@
 
+if ! pingLib ${BASH_SOURCE[0]} ; then
+
+requireLib 'status' ;
+
 function git-current-branch() {
 	git rev-parse --abbrev-ref HEAD 2>/dev/null
 ##	git branch --no-color 2> /dev/null | awk '/^\*/ { print $2 }'
-}
+} ;
 
+function git-cat-changed() {
+    declare substring=${1:?Missing required arg of file substring} ;
+    declare isDead=$2 ;
+
+#   git whatchanged --no-abbrev | awk '$5 == "D" { printf("git cat-file -p %8.8s # %s\n", $3, $NF); }'
+
+    declare -i maxCommits=9 ;
+    declare    awkScript="${isDead:+\$5 == \"D\" &&} /$substring/ { print \$3 }" ;
+    declare    commitFinder="git whatchanged --no-abbrev | awk '$awkScript' | head -n $maxCommits" ;
+
+    echo "$commitFinder" ;
+
+    declare -a commits=() ;
+    read -a commits < <( eval $commitFinder ) ;
+
+#   while read ; do
+#       [[ $REPLY =~ $pattern ]] && sha[${#sha[@]}]="$REPLY" ;
+#   done < <( git whatchanged --no-abbrev -n$maxCommits | awk "$awkScript" ) ;
+
+    declare commit ;
+
+    for commit in "${commits[@]}" ; do
+        git-cat-file -p "$commit" | less ; # vim -R -c 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim'
+    done
+} ;
+
+function git-dead-cat() {
+    git-cat-changed "$1" 1 ;
+} ;
+
+function git-publish() {
+    declare featureBranch="${1}" ;
+    declare mergingBranch="${2:-demo/develop}" ;
+    declare currentBranch=$( git-current-branch ) ;
+
+    declare yesPattern='^[Yy]([Ee][Ss])?$' ;
+
+    declare    promptMsg ;
+    declare -i switchToMergingBranch=1 ;
+
+    if [[ -z "$featureBranch" ]] ; then
+        if [[ $currentBranch == $mergingBranch ]] ; then
+            echo -e "${FUNCNAME}: No explicit feature branch and current is branch to be published." 1>&2 ;
+            echo -e "${FUNCNAME}: Are you resuming a previous publishing attempt?  If so, try:" 1>&2 ;
+            echo -e "\t${FUNCNAME} $featureBranch $mergingBranch" 1>&2 ;
+
+            return $RV_FAILURE ;
+        fi
+
+        featureBranch="$currentBranch" ;
+        promptMsg="Ready to publish your «$featureBranch» to «$mergingBranch»? (Yes/No) " ; 
+    elif [[ $currentBranch == $mergingBranch ]] ; then
+        echo -e "${FUNCNAME}: Current branch «$currentBranch» is the branch to be published." 1>&2 ;
+        echo -e "${FUNCNAME}: Assuming merge issues with «$featureBranch» have been resolved." 1>&2 ;
+
+        promptMsg="Ready to verify merge of «$featureBranch» and publish «$mergingBranch»? (Yes/No) " ; 
+        switchToMergingBranch=0 ;
+    fi
+
+    ## TODO Refactor the confirmation prompt logic into a reusable function.
+
+    while read -p "$promptMsg" ; do
+        if [[ -z "$REPLY" ]] ; then
+            echo -e "${FUNCNAME}: Please enter YES or NO." 1>&2 ;
+
+        elif [[ "$REPLY" =~ ^[yY]([eE][sS])?$ ]] ; then
+            break ;
+
+        else
+            echo -e "${FUNCNAME}: Confirmation \"$REPLY\" was not YES.  Aborting." 1>&2 ;
+
+            return $RV_NOOP ;
+        fi
+    done
+
+    ## XXX The implied --prune option here might be presumptious.
+
+    if ! git fetch --all --prune ; then
+        echo -e "${FUNCNAME}: Failed to update working copy metadata using fetch --all." 1>&2 ;
+
+        return $RV_FAILURE ;
+    fi
+
+
+    if (( switchToMergingBranch )) ; then
+        read -p "Continue w/«git checkout $mergingBranch»? " && [[ $REPLY =~ "$yesPattern" ]] || return $RV_NOOP ; ## DEBUG
+
+        if ! git checkout "$mergingBranch" ; then
+            echo -e "${FUNCNAME}: Failed to checkout «$mergingBranch»." 1>&2 ;
+            echo -e "\tForget to commit? Try: git commit -a -m 'Issue #XXXXX: Stuff changed in $featureBranch.'" 1>&2 ;
+
+            return $RV_FAILURE ;
+        fi
+
+        read -p "Continue w/«git pull»? " && [[ $REPLY =~ "$yesPattern" ]] || return $RV_NOOP ; ## DEBUG
+
+        if ! git pull ; then
+            echo -e "${FUNCNAME}: Failed to pull up-to-date «$mergingBranch»." 1>&2 ;
+
+            return $RV_FAILURE ;
+        fi
+    fi
+
+    read -p "Continue w/«git merge $featureBranch»? " && [[ $REPLY =~ "$yesPattern" ]] || return $RV_NOOP ; ## DEBUG
+
+    if ! git merge "$featureBranch" ; then
+        echo -e "${FUNCNAME}: Failed to merge «$featureBranch» into «$mergingBranch»." 1>&2 ;
+        echo -e "${FUNCNAME}: Fix/commit unresolved issues, then try:" 1>&2 ;
+        echo -e "\t${FUNCNAME} $featureBranch $mergingBranch" 1>&2 ;
+
+        return $RV_FAILURE ;
+    fi
+
+    ## TODO A loop over merge/pull/push until all is resolved?
+
+    read -p "Continue w/«git pull && git push»? " && [[ $REPLY =~ "$yesPattern" ]] || return $RV_NOOP ; ## DEBUG
+
+    if ! git pull && git push ; then
+        echo -e "${FUNCNAME}: Failed to pull updates and push merged changes to «$mergingBranch»." 1>&2 ;
+
+        return $RV_FAILURE ;
+    fi
+
+    read -p "Continue w/«git checkout $featureBranch»? " && [[ $REPLY =~ "$yesPattern" ]] || return $RV_NOOP ; ## DEBUG
+
+    if ! git checkout "$featureBranch" ; then
+        echo -e "${FUNCNAME}: Failed to return to «$featureBranch»." 1>&2 ;
+
+        ## XXX Just informational, although it does indicate a problem.
+    fi
+
+    git status ;
+} ;
+
+
+
+## TODO Make the following demo/develop untwister into a function.
+## for xFn in www.adblade.com/application/modules/admin/views/scripts/apps/grid/revenue-body.phtml www.adblade.com/application/modules/admin/views/scripts/apps/grid/revenue-sl-body.phtml ; do git diff demo/develop -- $xFn ; done
+## git blame to find who/when the conflicting change was made?
+## TODO Just change git-publish to prefer changes from current branch (demo/develop) when merging?  How? --ours? --theirs?
 
 function git-set-prompt() {
 	#  Customize BASH PS1 prompt to show current GIT repository and branch.
 	#  by Mike Stewart - http://MediaDoneRight.com
 
-	#  SETUP CONSTANTS
 	#  Bunch-o-predefined colors.  Makes reading code easier than escape sequences.
 	#  I don't remember where I found this.  o_O
 
@@ -147,5 +290,45 @@ function git-set-prompt() {
 ##	fi)'
 }
 
+#   # Generates completion reply with compgen from newline-separated possible
+#   # completion words by appending a space to all of them.
+#   # It accepts 1 to 4 arguments:
+#   # 1: List of possible completion words, separated by a single newline.
+#   # 2: A prefix to be added to each possible completion word (optional).
+#   # 3: Generate possible completion matches for this word (optional).
+#   # 4: A suffix to be appended to each possible completion word instead of
+#   #    the default space (optional).  If specified but empty, nothing is
+#   #    appended.
+#   __gitcomp_nl ()
+#   {
+#       local IFS=$'\n'
+#       COMPREPLY=($(compgen -P "${2-}" -S "${4- }" -W "$1" -- "${3-$cur}"))
+#   }
+
+#   unset -f $__GITCOMP_WRAPPER_NAME ; function $__GITCOMP_WRAPPER_NAME {
+#       # XXX __git_complete git-publish __git_main
+#       # XXX __gitcomp_nl "$( __git_refs )" ;
+
+#       COMPREPLY=($( git-branch -a | fgrep $cur 
+#   } ;
+
+#   __git_complete git-publish $__GITCOMP_WRAPPER_NAME ;
+
+#   complete -W "$( git branch --no-color --list ${cur}* )" git-publish ;
+
+# declare -x __GITCOMP_WRAPPER_NAME='__dot_bash_git_branch_comp' ;
+
+unset -f __dot_bash_git_branch_comp ; function __dot_bash_git_branch_comp() {
+    declare curr=${COMP_WORDS[COMP_CWORD]}
+    declare prev=${COMP_WORDS[COMP_CWORD-1]}
+
+    COMPREPLY=( $( git branch --no-color --all --list ${curr}* | sed -e 's/^*\?[[:space:]]\+//' ) ) ;
+
+    return 0 ;
+} ;
+
+complete -F __dot_bash_git_branch_comp git-publish ;
+
+touchLib ${BASH_SOURCE[0]} ; fi ;
 
 

@@ -278,6 +278,7 @@ EOT
 
         $chdirCmd
 
+        setenv WINDOW_HOME "$winDir"
         setenv WINDOW_NUMBER "$winNumber"
         setenv WINDOW_TITLE "${winTitle:-win$winNumber}"
         setenv HISTFILE "$winHistoryFile"
@@ -423,7 +424,7 @@ function __echoBashEnv() {
     # cat '${winLogFile}' ;
 
     export HISTFILE='${winHistoryFile}' ;
-    history -r $HISTFILE ;
+    [[ -e "$HISTFILE" ]] && history -r $HISTFILE ;
 
     unset BASH_ENV ;
 
@@ -498,7 +499,7 @@ function __validateWindowState() {
         WINDOW_NUMBER="$WINDOW" ;
     fi
 
-    WINDOW_HOME="$( __buildWindowDir "$SESSION_HOME" "$WINDOW_NUMBER" )" ;
+    export WINDOW_HOME="$( __buildWindowDir "$SESSION_HOME" "$WINDOW_NUMBER" )" ;
     return $OK ;
 } ;
 
@@ -547,12 +548,17 @@ function __dumpWindowHardcopy() {
 } ;
 
 function __saveWindowState() {
-    ## XXX The semicolons are imperative for `eval'!
-    declare historyCommand="history -a \"${WINDOW_HISTORY_FILE:-$HISTFILE}\"" ;
-    if [ "$EVAL" ] ; then
-        echo "$historyCommand ; " ;
+    declare histFile="${WINDOW_HISTORY_FILE:-$HISTFILE}" ;
+
+    if [[ -e "$histFile" ]] ; then
+        declare historyCommand="history -a \"${WINDOW_HISTORY_FILE:-$HISTFILE}\"" ;
+        if [ "$EVAL" ] ; then
+            echo "$historyCommand ; " ;
+        else
+            $historyCommand
+        fi
     else
-        $historyCommand
+        touch "$histFile" ; 
     fi
 
     [ "$WINDOW_TITLE" ] && echo "$WINDOW_TITLE" > "$WINDOW_TITLE_FILE" ;
@@ -585,6 +591,7 @@ function __loadWindowState() {
     export SESSION_NAME="$sessionName" ;
     export WINDOW="$winNumber" ;
     export WINDOW_NUMBER="$winNumber" ;
+    export WINDOW_HOME="$winDir" ;
     export WINDOW_TITLE="${winTitle:-win$winNumber}" ;
     export HISTFILE="$winHistoryFile"
 
