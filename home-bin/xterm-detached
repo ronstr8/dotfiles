@@ -3,18 +3,14 @@
 #eval $( ssh-agent )
 #ssh-add
 
+XTERM_EXE=x-terminal-emulator
+
 #XTERM_LAUNCH_DIR="$HOME/.x-terminal-emulator"
 ##### USE ABOVE INSTEAD WHEN LOGGING IS ENABLED TO AVOID
 ##### CLUTTERING YOUR HOME DIRECTORY!
 XTERM_LAUNCH_DIR="$HOME"
 
-xrdb ~/.Xdefaults
-
-#eval $( ssh-agent-attach )
-
-#SCREENDOOR="${XTERM_LAUNCH_DIR}/screendoor.sh"
-#touch $SCREENDOOR
-#export | egrep 'DISPLAY|SSH' > $SCREENDOOR 
+[[ -f "$HOME/.Xdefaults" ]] && xrdb $HOME/.Xdefaults
 
 XTERM_ARGS=""
 ## -aw This option indicates that auto-wraparound should be allowed.  This allows the cursor to automatically wrap to the beginning of the
@@ -129,7 +125,7 @@ XTERM_ARGS="${XTERM_ARGS} -xrm 'vt100Graphics: true'"
 
 
 
-CMDLINE="cd $XTERM_LAUNCH_DIR ; nohup x-terminal-emulator $XTERM_ARGS &> /dev/null &"
+CMDLINE="cd $XTERM_LAUNCH_DIR ; nohup $XTERM_EXE $XTERM_ARGS &> /dev/null &"
 echo -e "\n$CMDLINE\n\n" > /dev/stderr
 #read -p "[ENTER] "
 
