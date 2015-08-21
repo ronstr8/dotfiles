@@ -6,7 +6,8 @@
 #XTERM_LAUNCH_DIR="$HOME/.x-terminal-emulator"
 ##### USE ABOVE INSTEAD WHEN LOGGING IS ENABLED TO AVOID
 ##### CLUTTERING YOUR HOME DIRECTORY!
-XTERM_LAUNCH_DIR="$HOME"
+##### Empty string/undef doesn't switch directories at all.
+XTERM_LAUNCH_DIR="" # "$HOME"
 
 xrdb ~/.Xdefaults
 
@@ -128,15 +129,13 @@ XTERM_ARGS="${XTERM_ARGS} -xrm 'vt100Graphics: true'"
 #XTERM_ARGS="${XTERM_ARGS} -xrm 'set-appkeypad(off)'"
 
 
+[[ -n "$XTERM_LAUNCH_DIR" ]] && cd $XTERM_LAUNCH_DIR ;
 
-CMDLINE="cd $XTERM_LAUNCH_DIR ; nohup x-terminal-emulator $XTERM_ARGS &> /dev/null &"
+CMDLINE="nohup x-terminal-emulator $XTERM_ARGS &> /dev/null &"
+
 echo -e "\n$CMDLINE\n\n" > /dev/stderr
+
 #read -p "[ENTER] "
 
-eval $CMDLINE
-
-
-
-
-
+exec $CMDLINE
 
