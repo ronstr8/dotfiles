@@ -3,19 +3,15 @@
 #eval $( ssh-agent )
 #ssh-add
 
+XTERM_EXE=x-terminal-emulator
+
 #XTERM_LAUNCH_DIR="$HOME/.x-terminal-emulator"
 ##### USE ABOVE INSTEAD WHEN LOGGING IS ENABLED TO AVOID
 ##### CLUTTERING YOUR HOME DIRECTORY!
 ##### Empty string/undef doesn't switch directories at all.
 XTERM_LAUNCH_DIR="" # "$HOME"
 
-xrdb ~/.Xdefaults
-
-#eval $( ssh-agent-attach )
-
-#SCREENDOOR="${XTERM_LAUNCH_DIR}/screendoor.sh"
-#touch $SCREENDOOR
-#export | egrep 'DISPLAY|SSH' > $SCREENDOOR 
+[[ -f "$HOME/.Xdefaults" ]] && xrdb $HOME/.Xdefaults
 
 XTERM_ARGS=""
 ## -aw This option indicates that auto-wraparound should be allowed.  This allows the cursor to automatically wrap to the beginning of the
