@@ -110,8 +110,11 @@ XTerm.toolBar: false
 *.vt100.scrollKey:       true
 
 *.vt100.showMissingGlyphs:  true
-*.vt100.italicULMode:       true
 *.vt100.wideBoldFont:       true
+
+
+! MobaXterm doesn't appear to respect a true italicULMode.
+*.vt100.italicULMode:       true
 
 ! trimSelection is false by default; this should get rid of trailing spaces in selections!
 *.vt100.trimSelection: true
