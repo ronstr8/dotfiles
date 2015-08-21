@@ -127,11 +127,11 @@ XTERM_ARGS="${XTERM_ARGS} -xrm 'vt100Graphics: true'"
 
 [[ -n "$XTERM_LAUNCH_DIR" ]] && cd $XTERM_LAUNCH_DIR ;
 
-CMDLINE="nohup x-terminal-emulator $XTERM_ARGS &> /dev/null &"
+CMDLINE="exec nohup x-terminal-emulator $XTERM_ARGS &> /dev/null &"
 
 echo -e "\n$CMDLINE\n\n" > /dev/stderr
 
 #read -p "[ENTER] "
 
-exec $CMDLINE
+eval $CMDLINE
 
