@@ -47,6 +47,13 @@ dot-emacs.d: $(HOME)/.emacs.d
 
 emacs: dot-emacs dot-emacs.d
 
+## fonts
+
+dot-fonts: $(HOME)/.fonts
+	$(INSTALL) $(DOTFILES_WC)/dot-fonts $(HOME)/.fonts
+
+fonts: dot-fonts
+
 ## inputrc/readline/libreadline
 
 dot-inputrc: $(HOME)/.inputrc

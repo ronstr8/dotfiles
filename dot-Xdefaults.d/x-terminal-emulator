@@ -76,11 +76,11 @@ XTerm.toolBar: false
 *.fontMenu*font4*Label: FaceSize14
 *.vt100.faceSize4: 14
 
-*.fontMenu*font5*Label: Geometry80x50
-*.vt100.geometry5: 80x48
+*.fontMenu*font5*Label: Consolas
+*.vt100.faceName5: Consolas
 
-*.fontMenu*font6*Label: Geometry160x48
-*.vt100.geometry6: 160x48
+*.fontMenu*font6*Label: SourceCodePro
+*.vt100.faceName6: SourceCodePro
 
 ! *.vt100.faceName\d DOES NOT FUCKING WORK.
 !*.fontMenu*font6*Label: Change-Face-DejaVuSansMono-12-80x32
