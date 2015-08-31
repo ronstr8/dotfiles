@@ -34,6 +34,19 @@ xterm.termName: xterm-256color
 ! Goal: We need no stinking toolbar.
 XTerm.toolBar: false
 
+! UTF-8 mode is initially on.  Escape sequences for turning UTF-8 mode on/off are allowed.
+! utf8 is respected only if locale is false.
+*.vt100.locale: false
+*.vt100.utf8:   1
+
+! These cargo-cult from the uterm command for unicode-useful settings.
+*.vt100.eightBitOutput:  true
+*.vt100.metaSendsEscape: true
+*.vt100.eightBitInput:   false
+*.vt100.allowTitleOps:   true
+*.vt100.allowTcapOps:    true
+
+
 ! Goal: Would this fix instances where the mouse is not getting through to a curses app?
 !*.vt100.allowSendEvents: true
 
@@ -53,33 +66,38 @@ XTerm.toolBar: false
 *.vt100.foreground:      gray
 *.vt100.colorMode:       true
 
+
+! @see https://wiki.archlinux.org/index.php/Xterm
+! @see https://wiki.archlinux.org/index.php/X_resources
+! Test with: xterm -fa 'faceName'
 ! faceSize already defaults to 14.
-*.fontMenu*fontdefault*Label: Default
+*.fontMenu*fontdefault*Label: Default - DejaVuSansMono10
 
 !*.vt100.faceName: Consolas
 !*.vt100.faceSize: 8
 !*.vt100.geometry: 120x40
 
-*.vt100.faceName: DejaVuSansMono8
-*.vt100.faceSize: 8
-*.vt100.geometry: 160x48
+*.vt100.faceName: DejaVuSansMono
+*.vt100.faceSize: 10
+*.vt100.geometry: 80x24
+*.vt100.faceAntialias: true
 
-*.fontMenu*font1*Label: FaceSize08
-*.vt100.faceSize1: 8
+*.fontMenu*font1*Label: FaceSize 08
+*.vt100.faceName1: size=8
 
-*.fontMenu*font2*Label: FaceSize10
-*.vt100.faceSize2: 10
+*.fontMenu*font2*Label: FaceSize 10
+*.vt100.faceName2: size=10
 
-*.fontMenu*font3*Label: FaceSize12
-*.vt100.faceSize3: 12
+*.fontMenu*font3*Label: FaceSize 12
+*.vt100.faceName3: size=12
 
-*.fontMenu*font4*Label: FaceSize14
-*.vt100.faceSize4: 14
+*.fontMenu*font4*Label: FaceSize 14
+*.vt100.faceName4: size=14
 
 *.fontMenu*font5*Label: Consolas
 *.vt100.faceName5: Consolas
 
-*.fontMenu*font6*Label: SourceCodePro
+*.fontMenu*font6*Label: Source Code Pro
 *.vt100.faceName6: SourceCodePro
 
 ! *.vt100.faceName\d DOES NOT FUCKING WORK.
@@ -89,26 +107,14 @@ XTerm.toolBar: false
 !*.vt100.faceSize6: 8
 !*.vt100.geometry6: 190x50
 
-! UTF-8 mode is initially on.  Escape sequences for turning UTF-8 mode on/off are allowed.
-! utf8 is respected only if locale is false.
-*.vt100.locale: false
-*.vt100.utf8:   1
-
-! These cargo-cult from the uterm command for unicode-useful settings.
-*.vt100.eightBitOutput:  true
-*.vt100.metaSendsEscape: true
-*.vt100.eightBitInput:   false
-*.vt100.allowTitleOps:   true
-*.vt100.allowTcapOps:    true
-
 ! bogosity enables a funny little alien pointer.
 !*.vt100.pointerShape: bogosity
 
 ! saveLines!
 *.vt100.saveLines:       40000
+*.vt100.scrollBar:       false
 *.vt100.scrollTtyOutput: false
 *.vt100.scrollKey:       true
-
 *.vt100.showMissingGlyphs:  true
 
 ! The wideBoldFont resource causes problems with CentOS 5.11/xterm-215-8.el5_4.1
@@ -116,7 +122,10 @@ XTerm.toolBar: false
 
 
 ! MobaXterm does not appear to respect a true italicULMode.
-*.vt100.italicULMode:       true
+*.vt100.italicULMode: true
+
+! Maybe this will help?
+*.vt100.underLine: off
 
 ! trimSelection is false by default; this should get rid of trailing spaces in selections!
 *.vt100.trimSelection: true
