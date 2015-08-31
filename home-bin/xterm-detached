@@ -3,7 +3,10 @@
 #eval $( ssh-agent )
 #ssh-add
 
-XTERM_EXE=x-terminal-emulator
+## Cygwin encloses executable file in parentheses.
+## Note many of the options added herein will probably not work with non-xterm x-terminal-emulators.
+## Should encapsulate this in a function.
+XTERM_EXE=$( type x-terminal-emulator lxterm uxterm xterm 2>/dev/null | awk '/is .* (builtin|aliased|function)/ { print $1; exit; } { print $NF; exit; }' | tr -cd 'a-zA-Z0-9_/-' ) ;
 
 #XTERM_LAUNCH_DIR="$HOME/.x-terminal-emulator"
 ##### USE ABOVE INSTEAD WHEN LOGGING IS ENABLED TO AVOID
@@ -127,7 +130,7 @@ XTERM_ARGS="${XTERM_ARGS} -xrm 'vt100Graphics: true'"
 
 [[ -n "$XTERM_LAUNCH_DIR" ]] && cd $XTERM_LAUNCH_DIR ;
 
-CMDLINE="exec nohup x-terminal-emulator $XTERM_ARGS &> /dev/null &"
+CMDLINE="exec nohup $XTERM_EXE $XTERM_ARGS &> /dev/null &"
 
 echo -e "\n$CMDLINE\n\n" > /dev/stderr
 
