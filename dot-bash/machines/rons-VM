@@ -15,6 +15,11 @@ if ( tty --silent ) ; then
 	eval `keychain --quiet --nogui` # --eval ~/.ssh/keyfiles/autoload/*.key`
 fi
 
+if ( pgrep 'gnome-terminal' &> /dev/null ) ; then
+    echo '*.vt100.wideBoldFont' | xrdb -remove
+    echo '*vt100.italicULMode: false' | xrdb -merge
+fi
+
 #ssh-agent-sync
 
 # vim: ft=sh
