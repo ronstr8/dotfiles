@@ -1,35 +1,33 @@
 
 if ! pingLib ${BASH_SOURCE[0]} ; then
 
+needsLib 'status' ;
+
 # alias screen-mrenv=". $HOME/.screen/var/mrenv.$STY"
 
 function screen-stuff() {
-    screen -X at \# stuff "$*\n" ;
+    ## Use \015 instead of \n for older versions of screen.
+    screen -X at \# stuff "$*\015" ;
 } ;
 
 function session-checkpoint() {
-    declare    sleepSeconds='0.25' ;
-    declare -i remainingWaits=20 ;
-    declare    WAITFILE='' ;
-
-    if [[ -f "$HISTFILE" ]] ; then
-        WAITFILE="/tmp/screen-stuff-waitfile-$$-$RANDOM.txt" ; 
-        touch --reference="$HISTFILE" "$WAITFILE" ;
-        trap "rm -f '$WAITFILE'" RETURN EXIT ;
+    if [[ ! "$SESSION_HOME" ]] ; then
+        echo "${FUNCNAME}: No \$SESSION_HOME defined.  Aborting." >&2 ;
+        return $RV_FAILURE ;
     fi
 
+    declare thisWinDir="${WINDOW_HOME:-}" eachWindir='' ;
 
-    while [[ ! "$HISTFILE" -nt "$WAITFILE" ]] && (( remainingWaits-- > 0 )) ; do
-        sleep $sleepSeconds ;
+    for eachWinDir in $SESSION_HOME/window-[0-9][0-9] ; do
+        [[ $eachWinDir != $thisWinDir ]] && screen -X at ${eachWinDir/#*window-} stuff "eval \$( session --eval )\015" ;
     done
 
-    screen-stuff "(( WINDOW != $WINDOW )) && eval \$( session --eval )\n" ;
-
     eval $( session --eval ) ; 
+
     session --screenrc ;
     session --status   ;
 
-    [[ ! "$HISTFILE" -nt "$WAITFILE" ]] ;
+    [[ ! -f "$HISTFILE" ]] || [[ "$HISTFILE" -nt "$WAITFILE" ]] ;
 } ;
 
 #alias ssh-agent-reuse='eval `ssh-agent-attach`'
