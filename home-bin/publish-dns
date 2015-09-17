@@ -36,10 +36,9 @@ function __croak()  { __whinge $@ ; return $ERR ; } ;
 function __main() {
     declare weblog="${1:-$DEFAULT_WEBLOG}" ;
     declare hostRe='GET \/puship\/([a-zA-Z0-9_.-]+)\/' ; 
-    declare begin='aa[0]="";' ;
-    declare script=$( printf 'match($0, /%s/, aa) { print $1 " " aa[1] }' "$hostRe" ) ;
+    declare script=$( printf "match(\$0, /%s/, aa) { printf(\"%18s %s\n\", \$1, aa[1] }" "$hostRe" ) ;
 
-    tail -n +1 "$weblog" | awk "BEGIN { $begin } $script" | tail -n 1 ;
+    tail -n +1 "$weblog" | awk 'BEGIN { aa[0]=""; } match($0, /'"$hostRe"'/, aa) { printf("%-18s %s\n", $1, aa[1]); }' | sort | uniq ;
 } ;
 
 __getOptions $* && __main $* ;
