@@ -15,8 +15,9 @@ if [ -d "/opt/gradle" ] ; then
     pathmunge PATH "$GRADLE_HOME/bin" ;
 fi
 
-[ -d "/opt/perl5/bin" ] && pathmunge PATH "/opt/perl5/bin"
-[ -d "$JAVA_HOME"     ] && pathmunge PATH "$JAVA_HOME/bin" after
+[ -d "/opt/genymotion" ] && pathmunge PATH "/opt/genymotion"
+[ -d "/opt/perl5/bin"  ] && pathmunge PATH "/opt/perl5/bin"
+[ -d "$JAVA_HOME"      ] && pathmunge PATH "$JAVA_HOME/bin" after
 
 ## for dn in $HOME/man $HOME/perl/man ; do
 ##     pathmunge MANPATH $dn after
