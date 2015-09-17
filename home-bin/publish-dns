@@ -1,0 +1,48 @@
+#!/bin/bash
+## publish-dns [<weblog>]
+##
+##      Scan the given file, assumed to be in the traditional Apache common log
+##      file format.  For all requests to "/puship/*/" (trailing slash required),
+##      print a hosts-style line with the originating IP address to stdout.
+##
+## --
+## Ronald E. Straight <straightre@gmail.com>
+
+declare -r    SCRIPT_DIR="$( dirname $0 )" SCRIPT_NAME="$( basename $0 )" ;
+declare -r -i NOOP=2 ERR=1 OK=0 ;
+
+declare -r    DEFAULT_WEBLOG='/var/log/apache2/access.log' ;
+declare -r -a ALL_OPTIONS=() ;
+
+function __getOptions() {
+    declare pristineArgs="$*" ;
+    declare longOpts="$( echo "${ALL_OPTIONS[*]}" | sed -e 's/[[:space:]]+/,/gm' )"
+    declare getoptOutput=$( getopt -o hv --long "help,verbose,$longOpts" --name "$0" -- "$@" ) \
+        && eval set -- "$getoptOutput" || return $NOOP ;
+
+    while true ; do case "$1" in
+            -h|--help )
+                    awk '/^## -- $/ { exit } !/^#!/ { gsub("^#+ ?", "") ; print }' $0 >&2 ; return $NOOP ;;
+            -v|--verbose )
+                    VERBOSITY+=1 ; VERBOSISM[${#VERBOSISM[@]}]='verbose' ; shift ;;
+            -- )
+                    shift ; break ;;
+    esac ; done
+} ;
+
+function __whinge() { echo "# [$( date -Is )] $*" 1>&2 ; } ;
+function __croak()  { __whinge $@ ; return $ERR ; } ;
+
+function __main() {
+    declare weblog="${1:-$DEFAULT_WEBLOG}" ;
+    declare hostRe='GET \/puship\/([a-zA-Z0-9_.-]+)\/' ; 
+    declare begin='aa[0]="";' ;
+    declare script=$( printf 'match($0, /%s/, aa) { print $1 " " aa[1] }' "$hostRe" ) ;
+
+    tail -n +1 "$weblog" | awk "BEGIN { $begin } $script" | tail -n 1 ;
+} ;
+
+__getOptions $* && __main $* ;
+
+## vim: ft=sh:expandtab:tabstop=4
+
