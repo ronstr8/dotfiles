@@ -12,5 +12,7 @@ needsLib 'truth' ;
 declare -i RV_FAILBASE=$(( RV_FAILURE+1  )) ;
 declare -i RV_MISMATCH=$(( RV_FAILBASE++ )) RV_MISSING=$(( RV_FAILBASE++ )) RV_SYNTAX=$(( RV_FAILBASE++ )) ;
 
+[[ -z "${RV_NAN:-}" ]] || declare -r RV_NAN='NaN'; ## Not a Number.
+
 touchLib ${BASH_SOURCE[0]} ; fi ;
 
