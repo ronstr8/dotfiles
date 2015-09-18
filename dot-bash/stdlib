@@ -1,7 +1,4 @@
 
-#unset -f whinge ; function whinge() { local fmtMsg="$1" ; shift ; if [ "$*" ] ; then fmtMsg=$( printf "$fmtMsg" $* ) ; fi ; echo "# [$( date -Is )] $msg" 1>&2 ; } ;
-#unset -f croak  ; function croak()  { __whinge $@ ; return 1 ; } ;
-
 [[ "$__LIBINFO" ]] || declare __LIBINFO='' ;
 
 declare DEFAULT_BASHLIB="$HOME/.bash/lib" ;
@@ -110,6 +107,9 @@ unset -f __ld ; function __ld() {
 
     declare -a resourceInfo ; IFS='@' read -a resourceInfo < <( __ldd "$resource" "$givenFn" ) ;
     declare    fileName=${givenFn:-${resourceInfo[0]}} ;
+
+    [[ -f "$fileName" ]] || return 1 ;
+
     declare -i lastLoadedAt=${actionCode:-${resourceInfo[1]}} ;
     declare -i lastModified=$( date +%s -r "$fileName" ) ;
 
