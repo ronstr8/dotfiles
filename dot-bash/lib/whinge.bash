@@ -39,15 +39,15 @@ unset -f __digitOr ; function __digitOr() {
 ##
 unset -f whinge ; function whinge() {
     declare statusCode ;
-    statusCode=$( __digitOr $? $1 ) && shift ;
+    statusCode=$( __digitOr $? "$1" ) && shift ;
 
-    declare fmtMsg="$1?Need a printf-style format or literal message" ; shift ;
+    declare fmtMsg="${1:?Need a printf-style format or literal message.}" ; shift ;
     
     if [ "$*" ] ; then
-        fmtMsg=$( printf "$fmtMsg" $* ) ;
+        fmtMsg=$( printf "$fmtMsg" "$@" ) ;
     fi ;
 
-    echo "# [$( date -Is )] $msg" 1>&2 ;
+    echo "# [$( date -Is )] $fmtMsg" 1>&2 ;
 
     return $statusCode ;
 }
@@ -58,8 +58,9 @@ unset -f whinge ; function whinge() {
 #   If every character of the first argument isdigit, use that as the return
 #   value or exit code.  Else, use $RV_FAILURE from status.bash.
 #
-#   The default behavior is to exit with $statusCode.  Interactive shells do
-#   not exit.
+#   The default behavior should be to exit with $statusCode, but I can't
+##  figure out how to prevent that from happening during an interactive shell
+##  session, e.g. from sourced function serving as a command.
 #
 # @param $statusCode is the value returned
 # @param $fmtMsg is the format for the bash printf builtin
@@ -72,11 +73,11 @@ unset -f whinge ; function whinge() {
 ##
 unset -f croak  ; function croak() {
     declare statusCode ;
-    statusCode=$( __digitOr $RV_FAILURE $1 ) && shift ;
+    statusCode=$( __digitOr $RV_FAILURE "$1" ) && shift ;
 
-    __whinge $statusCode $* ;
+    whinge $statusCode "$@" ;
 
-    __isInteractive && return $statusCode || exit $statusCode ;
+    ## XXX exit one day.
 } ;
 
 touchLib ${BASH_SOURCE[0]} ; fi ;

@@ -36,15 +36,23 @@ if has("autocmd")
     autocmd BufReadPost * if line("'\"") > 0 && line ("'\"") <= line("$") | exe "normal g'\"" | endif
 endif
 
-nnoremap <F11> :set invpaste<CR> " toggle between paste and no-paste mode
+" Toggle between paste and no-paste mode.
+nnoremap <F11> :set invpaste<CR> 
+inoremap <F11> :set invpaste<CR>
 
-nnoremap <F5>  "=strftime("%F %T")<CR>P    " insert date and time
-inoremap <F5>  <C-R>=strftime("%F %T")<CR> " insert date and time
+" Insert date and time.
+nnoremap <F5> :=strftime("%F %T")<CR>P
+inoremap <F5> <C-R>=strftime("%F %T")<CR>
 
-noremap <F1>  :bprev<CR>        " switch to previous buffer
-noremap <F2>  :bnext<CR>        " switch to next buffer
-noremap <F8>  :nohl<CR>         " turn off all (search) highlighting
-noremap <F12> :set number!<CR>  " toggle line nuvigation like firefox
+" Next/prev buffer switching.
+noremap <F1>  :bprev<CR>
+noremap <F2>  :bnext<CR>
+
+" Clear all highligted search results.
+noremap <F8>  :nohl<CR>
+
+" Toggle line numbers?
+noremap <F12> :set number!<CR>
 
 " unmap <C-PageUp>
 " unmap <C-PageDown>

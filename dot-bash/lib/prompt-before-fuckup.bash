@@ -27,15 +27,8 @@ function __machineColor() {
 }
 
 
-unset -f bashprompt ;
-function bashprompt() {
-        ## bashprompt NONE|GRAY|RED|GREEN|YELLOW|BLUE|CYAN|WHITE
-
-        local fgname="$1"
-
-		if [ ! "$fgname" ] ; then
-			fgname="$( __machineColor )"
-		fi
+unset -f bashprompt ; function bashprompt() {
+        declare fgname="${1:-$( __machineColor )}" ;
 
         local NONE=0
 
@@ -57,30 +50,25 @@ function bashprompt() {
         local ORANGE=172
         local OLIVE_DRAB=65
 
-        local datetimef='%F %T' ## 'T' is ugly, '%z' unnecessary
+        declare datetimef='%F %T' ## 'T' is ugly, '%z' unnecessary
+        declare fgint fontstyle coloresc ;
 
-        local fgint
-        local fontstyle
-        local coloresc
+        ## Bold if name is (a) all caps or (b) ends in a bang.
 
-        if [ $( echo $fgname | egrep '(^[A-Z]+|!)$' ) ] ; then
-                fontstyle="$BOLD"
-        else
-                fontstyle="$NORMAL"
-        fi
+        [[ $fgname =~ (^[A-Z]+|!)$ ]] && fontstyle="$BOLD" || fontstyle="$NORMAL" ;
 
-		fgname=$( echo $fgname | tr '[a-z]' '[A-Z]' | sed 's/!$//' )
+        ## Remove any trailing bang and normalize to uppercase.
 
-        if [ $( echo $fgname | egrep '^[0-9]+$' ) ] ; then
-                fgint="38;5;$fgname"
-        else
-                fgint=${!fgname}
-        fi
+		fgname=$( echo ${fgname%!} | tr '[a-z]' '[A-Z]' ) ;
+
+        ## Integer names reference explicit color slots.  Else, check if we
+        ## define the given name in termcap.bash.
+
+        [[ $fgname =~ ^[0-9]+$ ]] && fgint="38;5;$fgname" || fgint=${!fgname} ;
 
 ##        coloresc="\[\e[38;5;${fgint}m\]\[\e[${fontstyle}m\]"
         coloresc="\[\e[${fgint};${fontstyle}m\]"
 
-		export PS1_HOST_COLOR_SEQUENCE="${coloresc}"
         export PS1="${coloresc}\n\D{${datetimef}} :: \w\n ${coloresc}\u@\h\$\[\e[${NONE}m\] "
 }
 
