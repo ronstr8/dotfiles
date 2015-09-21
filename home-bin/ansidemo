@@ -50,7 +50,7 @@ function __ansiResetStyles() { __ansiEcho 0 ; }
 
 function __ansiDemoPalettes() {
     declare    text=${1:-$DEFAULT_SAMPLE_TEXT_LIL} ;
-    declare -i colorCount=8 styleCount=5 ;
+    declare -i colorCount=8 styleCount=8 ;
     declare -i fgIdx fgBeg=30 ;
     declare -i bgIdx bgBeg=40 ;
     declare -i ssIdx ssBeg=0  ;
@@ -66,11 +66,20 @@ function __ansiDemoPalettes() {
 
     bgEnd=bgBeg ; ## XXX Hack to avoid the backgrounds.
 
+    ## The first is actually a superscripted "n".
+    ## Should use composition.
+    declare -a UnicodeSuperscripts=( 207F 00B9 00B2 00B3 2074 2075 2076 2077 2078 2079 ) ;
+ 
     for fgIdx in $( seq $fgBeg $fgEnd ) ; do
         for bgIdx in $( seq $bgBeg $bgEnd ) ; do
-            $PRINTF "$fgIdx/$bgIdx+ " ;
+            $PRINTF "$fgIdx/$bgIdx+\u${UnicodeSuperscripts[0]} " ;
             for ssIdx in $( seq $ssBeg $ssEnd ) ; do
-                $PRINTF " ${CSI}${fgIdx}${CSI}${ssIdx};${fgIdx}m${CSI}${bgIdx}m $text\u208${ssIdx}" ;
+                $PRINTF " ${CSI}${ssIdx};${fgIdx};${bgIdx}m" ;
+#                $PRINTF "${CSI}${fgIdx}" ;
+#                $PRINTF "${CSI}${ssIdx}m" ;
+#                $PRINTF "${CSI}${bgIdx}m" ;
+                $PRINTF " ${text}\u${UnicodeSuperscripts[ssIdx+1]} " ; ## unicode subscript of style index
+                $PRINTF "${CSI}m" ; ## Reset style.
             done
             __ansiResetStyles ; echo ;
         done
