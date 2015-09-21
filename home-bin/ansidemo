@@ -12,6 +12,8 @@
 declare -r DEFAULT_SAMPLE_TEXT_BIG='The quick red fox jumped over the lazy brown dog.' ;
 declare -r DEFAULT_SAMPLE_TEXT_LIL='gYwMX' ;
 
+declare -r PRINTF='/usr/bin/printf ' ;
+
 declare -r -a FG_CODES=( $( for cc in {30..37} ; do for ss in '' {0..5} ; do echo -n "${ss}m ${ss};${cc}m " ; done ; done ) ) ;
 declare -r -a BG_CODES=( $( for cc in {40..47} ; do echo -n "${cc}m " ; done ) ) ;
 
@@ -34,40 +36,41 @@ declare -r -a BG_CODES=( $( for cc in {40..47} ; do echo -n "${cc}m " ; done ) )
 # XXX paste  <( printf "%dm\n" {30..37} ) <( printf "1;%dm\n" {30..37} )
 # XXX echo {30..37}m\ 1\;{30..37}m\
 
-declare -r ESC=$( printf "\033" ) ;
-declare -r ANSI_LEADER="${ESC}[" ;
+declare -r ESC=$( $PRINTF "\033" ) ;
+declare -r CSI="${ESC}[" ; ## "Control Sequence Initiator"
+## XXX Apparently one can use 155/0x9B/0233 as a CSI instead.
 
 function __ansiEcho() {
     declare -i code=$1 ;
     declare -i needsEm=1 ; # TODO The m depends on context, not cardinality. $(( code >= 16 )) ;
-    echo -ne "${ANSI_LEADER}${code}${needsEm:+m}" ;
+    echo -ne "${CSI}${code}${needsEm:+m}" ;
 }
 
 function __ansiResetStyles() { __ansiEcho 0 ; }
 
 function __ansiDemoPalettes() {
     declare    text=${1:-$DEFAULT_SAMPLE_TEXT_LIL} ;
-    declare -i colorCount=8 styleCount=6 ;
+    declare -i colorCount=8 styleCount=5 ;
     declare -i fgIdx fgBeg=30 ;
     declare -i bgIdx bgBeg=40 ;
     declare -i ssIdx ssBeg=0  ;
     declare -i fgEnd=$(( fgBeg + colorCount - 1 )) bgEnd=$(( bgBeg + colorCount - 1 )) ssEnd=$(( ssBeg + styleCount - 1 )) ;
     
 ##     for fgIdx in "${FG_IdxS[@]}" ; do
-## #       printf "%s ${ANSI_LEADER}%s %s" "$fgIdx" "$fgIdx" "$text" ;
+## #       printf "%s ${CSI}%s %s" "$fgIdx" "$fgIdx" "$text" ;
 ##         for bgIdx in "${BG_IdxS[@]}" ; do
-##             printf " ${ANSI_LEADER}%s${ANSI_LEADER}%s %s" "$fgIdx" "$bgIdx" "$text" ;
+##             printf " ${CSI}%s${CSI}%s %s" "$fgIdx" "$bgIdx" "$text" ;
 ##         done
 ##         __ansiResetStyles ; echo ;
 ##     done
 
-    echo "$fgBeg/$fgEnd ... $bgBeg/$bgEnd + $ssBeg-$ssEnd"
+    bgEnd=bgBeg ; ## XXX Hack to avoid the backgrounds.
 
     for fgIdx in $( seq $fgBeg $fgEnd ) ; do
         for bgIdx in $( seq $bgBeg $bgEnd ) ; do
-            echo -n "$fgIdx/$bgIdx+ " ;
+            $PRINTF "$fgIdx/$bgIdx+ " ;
             for ssIdx in $( seq $ssBeg $ssEnd ) ; do
-                echo -n " ${ANSI_LEADER}${fgIdx} ${ANSI_LEADER}${ssIdx};${fgIdx}m${ANSI_LEADER}${bgIdx}m ${ssIdx}=$text" ;
+                $PRINTF " ${CSI}${fgIdx}${CSI}${ssIdx};${fgIdx}m${CSI}${bgIdx}m $text\u208${ssIdx}" ;
             done
             __ansiResetStyles ; echo ;
         done
@@ -84,7 +87,7 @@ function __ansiDemoStyles() {
 
     for nowCode in $( seq $minCode $maxCode ) ; do
         __ansiEcho $nowCode ;
-        printf '%3d: %s\n' $nowCode "$text" ;
+        $PRINTF '%3d: %s\n' $nowCode "$text" ;
         __ansiResetStyles ;
     done
 
