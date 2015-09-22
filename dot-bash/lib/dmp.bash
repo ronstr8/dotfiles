@@ -15,6 +15,8 @@ if ! pingLib ${BASH_SOURCE[0]} ; then
 ## }
 ## EOT
 
+needsLib 'whinge' ;
+
 [[ -z "${DEFAULT_DMP_UID:-}"      ]] || declare -i -r DEFAULT_DMP_UID=12345678901234567890 ;
 [[ -z "${DEFAULT_DMP_PORT_WWW:-}" ]] || declare -i -r DEFAULT_DMP_PORT_WWW=8080 ;
 [[ -z "${DEFAULT_DMP_PORT_SSL:-}" ]] || declare -i -r DEFAULT_DMP_PORT_SSL=8443 ;
@@ -34,27 +36,41 @@ function dmp-benchmark() {
     declare -i napMillis=1 ;
 
     declare -i wwwPort=$DEFAULT_DMP_PORT_WWW ; 
-    declare -i sslPort=$DEFAULT_DMP_PORT_WWW ; 
+    declare -i sslPort=$DEFAULT_DMP_PORT_SSL ; 
     declare -a servers=( "$@" ) ;
     
-    declare __tuid=${uId-$DEFAULT_UID} ;
-
     declare baseCmdline='curl' ;
-    baseCmdline+=" -b '__tuid=$__tuid' " ; ## Cookie tracking user-id.
-    baseCmdline+=' -k ' ; ## Allow "insecure" connections with bad SSL cred.
-    baseCmdline+=' -i ' ; ## Include headers.
+    baseCmdline="${baseCmdline} -b '__tuid=${uId:-$DEFAULT_DMP_UID}' " ; ## Cookie tracking user-id.
+    baseCmdline="${baseCmdline} -k " ; ## Allow "insecure" connections with bad SSL cred.
+    baseCmdline="${baseCmdline} -i " ; ## Include headers.
 
     ## TODO Option for Connection: keep-alive?
 
-    declare server requestCmdline ;
+    declare server requestCmdline serverPort ;
 
     for server in "${servers[@]}" ; do
-        if [[ ! $server =~ :[0-9]+$ ]] ; then
-            server+=":$wwwPort" ;
-        fi
+        serverPort=$wwwPort ;
         
+        if [[  $server =~ :([0-9]+)$ ]] ; then
+            serverPort=${BASH_REMATCH[1]} ;
+        else
+            serverPort=$wwwPort ;
+            serverPort="${server}:${serverPort}" ;
+        fi
+
+        if [[ ! $server =~ ^https?:// ]] ; then
+            if [[ $serverPort =~ 43$ ]] ; then
+                server="https://$server" ;
+            else
+                server="http://$server" ;
+            fi
+        fi
+ 
+        server="${server}${path}" ;
+
         requestCmdline="$baseCmdline '$server'" ;
 
+        whinge "$requestCmdline" ;
         eval "$requestCmdline" ;
     done
 }
