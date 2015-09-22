@@ -64,24 +64,24 @@ function __ansiDemoPalettes() {
 ##         __ansiResetStyles ; echo ;
 ##     done
 
-    bgEnd=bgBeg ; ## XXX Hack to avoid the backgrounds.
+##    bgEnd=bgBeg ; ## XXX Hack to avoid the backgrounds.
 
     ## The first is actually a superscripted "n".
     ## Should use composition.
-    declare -a UnicodeSuperscripts=( 207F 00B9 00B2 00B3 2074 2075 2076 2077 2078 2079 ) ;
+    declare -a utf8SS=( 207F 00B9 00B2 00B3 2074 2075 2076 2077 2078 2079 ) ;
+    declare    printCsi=$( printf '%q' "$CSI" ) ;
+    declare    xmpSsIdx=1 ;
  
     for fgIdx in $( seq $fgBeg $fgEnd ) ; do
         for bgIdx in $( seq $bgBeg $bgEnd ) ; do
-            $PRINTF "$fgIdx/$bgIdx+\u${UnicodeSuperscripts[0]} " ;
+            $PRINTF "$fgIdx/$bgIdx+\u${utf8SS[0]} " ;
             for ssIdx in $( seq $ssBeg $ssEnd ) ; do
-                $PRINTF " ${CSI}${ssIdx};${fgIdx};${bgIdx}m" ;
-#                $PRINTF "${CSI}${fgIdx}" ;
-#                $PRINTF "${CSI}${ssIdx}m" ;
-#                $PRINTF "${CSI}${bgIdx}m" ;
-                $PRINTF " ${text}\u${UnicodeSuperscripts[ssIdx+1]} " ; ## unicode subscript of style index
-                $PRINTF "${CSI}m" ; ## Reset style.
+                $PRINTF "${CSI}${ssIdx};${fgIdx};${bgIdx}m" ;
+                $PRINTF "${text}\u${utf8SS[ssIdx]}" ; ## unicode subscript of style index
+                $PRINTF "${CSI}m " ; ## Reset style.
             done
-            __ansiResetStyles ; echo ;
+            __ansiResetStyles ;
+            printf '\t ## echo ""%q"%d;%d;%dm %s "%q"m"\n' "$CSI" $xmpSsIdx $fgIdx $bgIdx "$text" "$CSI" ; # ${printCsi}\"$xmpSsIdx;${fgIdx};${bgIdx}m Sample \"${printCsi}\"m\n\"" ;
         done
     done
 }
