@@ -13,11 +13,18 @@ needsLib 'truth' ;
 unset -f __digitOr ; function __digitOr() {
     declare ifNot=$1 ;
     declare maybe=$2 ;
-    declare isDigit=${maybe:-${maybe//[0123456789]+}} ;
+    declare hasNonDigits=${maybe:+${maybe//[0123456789]+}} ;
 
-    echo ${isDigit:-$maybe} ;
-
-    return $(( ${isDigit:-0} ? RV_SUCCESS : RV_NAN )) ;
+    if [[ -z "$maybe" ]] ;then
+        echo $ifNot ;
+        return $RV_FALSE ; 
+    elif [[ -n "$hasNonDigits" ]] ; then
+        echo $ifNot ;
+        return $RV_FALSE ; 
+    else 
+        echo $maybe ;
+        return $RV_TRUE ;
+    fi
 }
 
 ### whinge [$statusCode] $fmtMsg ${fmtArgs[@]}
