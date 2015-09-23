@@ -1,0 +1,108 @@
+#!/bin/bash
+#
+#   This file echoes a bunch of color codes to the 
+#   terminal to demonstrate what's available.  Each 
+#   line is the color code of one forground color,
+#   out of 17 (default + 16 escapes), followed by a 
+#   test use of that color on all nine background 
+#   colors (default + 8 escapes).
+#
+# @see http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x329.html
+
+declare -r DEFAULT_SAMPLE_TEXT_BIG='The quick red fox jumped over the lazy brown dog.' ;
+declare -r DEFAULT_SAMPLE_TEXT_LIL='gYwMX' ;
+
+declare -r PRINTF='/usr/bin/printf ' ;
+
+declare -r -a FG_CODES=( $( for cc in {30..37} ; do for ss in '' {0..5} ; do echo -n "${ss}m ${ss};${cc}m " ; done ; done ) ) ;
+declare -r -a BG_CODES=( $( for cc in {40..47} ; do echo -n "${cc}m " ; done ) ) ;
+
+## T='gYw'   # The test text
+## echo -e "\n                 40m     41m     42m     43m\
+##      44m     45m     46m     47m";
+## 
+## for FGs in '    m' '   1m' '  30m' '1;30m' '  31m' '1;31m' '  32m' \
+##            '1;32m' '  33m' '1;33m' '  34m' '1;34m' '  35m' '1;35m' \
+##            '  36m' '1;36m' '  37m' '1;37m';
+##   do FG=${FGs// /}
+##   echo -en " $FGs \033[$FG  $T  "
+##   for BG in 40m 41m 42m 43m 44m 45m 46m 47m;
+##     do echo -en "$EINS \033[$FG\033[$BG  $T  \033[0m";
+##   done
+##   echo;
+## done
+## echo
+
+# XXX paste  <( printf "%dm\n" {30..37} ) <( printf "1;%dm\n" {30..37} )
+# XXX echo {30..37}m\ 1\;{30..37}m\
+
+declare -r ESC=$( $PRINTF "\033" ) ;
+declare -r CSI="${ESC}[" ; ## "Control Sequence Initiator"
+## XXX Apparently one can use 155/0x9B/0233 as a CSI instead.
+
+function __ansiEcho() {
+    declare -i code=$1 ;
+    declare -i needsEm=1 ; # TODO The m depends on context, not cardinality. $(( code >= 16 )) ;
+    echo -ne "${CSI}${code}${needsEm:+m}" ;
+}
+
+function __ansiResetStyles() { __ansiEcho 0 ; }
+
+function __ansiDemoPalettes() {
+    declare    text=${1:-$DEFAULT_SAMPLE_TEXT_LIL} ;
+    declare -i colorCount=8 styleCount=8 ;
+    declare -i fgIdx fgBeg=30 ;
+    declare -i bgIdx bgBeg=40 ;
+    declare -i ssIdx ssBeg=0  ;
+    declare -i fgEnd=$(( fgBeg + colorCount - 1 )) bgEnd=$(( bgBeg + colorCount - 1 )) ssEnd=$(( ssBeg + styleCount - 1 )) ;
+    
+##     for fgIdx in "${FG_IdxS[@]}" ; do
+## #       printf "%s ${CSI}%s %s" "$fgIdx" "$fgIdx" "$text" ;
+##         for bgIdx in "${BG_IdxS[@]}" ; do
+##             printf " ${CSI}%s${CSI}%s %s" "$fgIdx" "$bgIdx" "$text" ;
+##         done
+##         __ansiResetStyles ; echo ;
+##     done
+
+##    bgEnd=bgBeg ; ## XXX Hack to avoid the backgrounds.
+
+    ## The first is actually a superscripted "n".
+    ## Should use composition.
+    declare -a utf8SS=( 207F 00B9 00B2 00B3 2074 2075 2076 2077 2078 2079 ) ;
+    declare    printCsi=$( printf '%q' "$CSI" ) ;
+    declare    xmpSsIdx=1 ;
+ 
+    for fgIdx in $( seq $fgBeg $fgEnd ) ; do
+        for bgIdx in $( seq $bgBeg $bgEnd ) ; do
+            $PRINTF "$fgIdx/$bgIdx+\u${utf8SS[0]} " ;
+            for ssIdx in $( seq $ssBeg $ssEnd ) ; do
+                $PRINTF "${CSI}${ssIdx};${fgIdx};${bgIdx}m" ;
+                $PRINTF "${text}\u${utf8SS[ssIdx]}" ; ## unicode subscript of style index
+                $PRINTF "${CSI}m " ; ## Reset style.
+            done
+            __ansiResetStyles ;
+            printf '\t ## echo ""%q"%d;%d;%dm %s "%q"m"\n' "$CSI" $xmpSsIdx $fgIdx $bgIdx "$text" "$CSI" ; # ${printCsi}\"$xmpSsIdx;${fgIdx};${bgIdx}m Sample \"${printCsi}\"m\n\"" ;
+        done
+    done
+}
+
+function __ansiDemoStyles() {
+    declare    text=${1:-$DEFAULT_SAMPLE_TEXT_BIG} ;
+    declare -i minCode=0  ; 
+    declare -i maxCode=15 ;
+    declare -i nowCode ;
+
+    __ansiResetStyles ;
+
+    for nowCode in $( seq $minCode $maxCode ) ; do
+        __ansiEcho $nowCode ;
+        $PRINTF '%3d: %s\n' $nowCode "$text" ;
+        __ansiResetStyles ;
+    done
+
+    __ansiResetStyles ;
+}
+
+__ansiDemoPalettes ;
+# __ansiDemoStyles ;
+

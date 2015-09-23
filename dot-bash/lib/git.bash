@@ -38,6 +38,10 @@ function git-dead-cat() {
     git-cat-changed "$1" 1 ;
 } ;
 
+function git-unmerged() {
+    git status | awk 'BEGIN { unmerged=0; } /^# Unmerged paths:/ { unmerged=1; } unmerged && $NF ~ /\// { print $NF }' ;
+} ;
+
 function git-publish() {
     declare featureBranch="${1}" ;
     declare mergingBranch="${2:-demo/develop}" ;

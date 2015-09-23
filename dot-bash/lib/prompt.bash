@@ -1,9 +1,11 @@
 
 if ! pingLib ${BASH_SOURCE[0]} ; then
 
+    requireLib 'status' ;
     requireLib 'termcap' ;
+    requireLib 'whinge' ;
 
-## __machineColor
+### __machineColor
 #       Echo integer representing an xterm-256color color "label" for the current host.
 #
 ##
@@ -31,7 +33,7 @@ unset -f __machineColor ; function __machineColor() {
 ## XXX Intended to escape for PS1, but doesn't work.  LATER. TODO
 ## unset -f __escesc ; function __escesc() { echo "$@" | awk '{ print gensub("\033", "\\\e", "g"); }' ; } ;
 
-## bashprompt [NONE|GRAY|RED|GREEN|YELLOW|BLUE|CYAN|WHITE|{0..255}|...]
+### bashprompt [NONE|GRAY|RED|GREEN|YELLOW|BLUE|CYAN|WHITE|{0..255}|...]
 #       Set the primary color of the main command prompt.
 #
 #   Appending an exclamation mark to the color name/number will force the
@@ -39,145 +41,102 @@ unset -f __machineColor ; function __machineColor() {
 #
 # @param $colopt the desired fg color, defaults to __machineColor.
 # @needs termcap for xcFF_* color/style variables.
+#
+# @see terminfo(5)
+# @see infocmp(1M)
 ##
 unset -f bashprompt ; function bashprompt() {
-    declare fgpref="${1:-$( __machineColor )}"
-    declare dtfmt='%F %T' ## 'T' is ugly, '%z' unnecessary.
+    declare fgname="${1:-$( __machineColor )}" ;
+    declare datetimef='%F %T' ; ## 'T' is ugly, '%z' unnecessary
+    declare fgint fontWeight fontStyle ;
 
-    declare fnstyle='' ; # "$xcFF_NORMAL" ;
+    ## Bold if name is (a) all caps or (b) ends in a bang.
 
-    [[ $fgpref =~ (^[A-Z_]+|!)$ ]] && fnstyle=$( tput smso ) ; # "$xcFF_BOLD" ;
+    [[ $fgname =~ (^[A-Z_]+|!_?)$ ]] && fontWeight="$xcFF_BOLD" || fontWeight="" ; # $xcFF_NORMAL" ;
 
-    declare fgattr=$( tr 'a-z' 'A-Z' <<< ${fgpref%!} ) ;
-    
-    declare ffPrefix='xcFF_' ;
-    declare ffName="${ffPrefix}${fgattr}" ;
+    ## Normalize what remains to uppercase.
 
-    declare setseq="$fnstyle" ; # "\[\e[${fnstyle};" ;
-#   declare rstseq="$( tput oc )$( tput sgr0 )" ; # "\[\e[${xcFF_NONE}m\]" ;
-    declare rstseq="$( tput sgr0 )" ; # "oc" does some weird shit.
+    fgname=$( echo ${fgname} | sed -e 's/(!_|_!)$/_/;' | tr 'a-z' 'A-Z' ) ;
 
-    declare -i fncolor ;
+    ## Italics/underlined if name is enclosed in underbars.
 
-    if [[ $fgattr =~ ^[0-9]+$ ]] ; then
-        fncolor=$fgattr ;
-    elif [[ "${!ffName}" ]] ; then
-        fncolor="${!ffName}" ;
-    else
-        echo "Unknown embellishment '${fgattr}'.  Try one of these:" >&2 ;
-        declare -a available ;
-        read -a available <<< "${!xcFF_*}" ;
-        printf "\t%s\n" "${available[@]#$ffPrefix}" >&2 ;
+    [[ $fgname =~ ^_[A-Z]+_$ ]] && fontStyle="$xcFF_UNDERLINE" || fontStyle="" ;
 
-#        while read ; do
-#            echo -e "\t${REPLY#$ffPrefix}" >&2 ;
-#        done < <( printf '%s\n' "${!xcFF_*}" ) ;
+    fgname=$( echo ${fgname} | sed -e 's/^_//; s/_$//;' ) ;
 
-        return 1 ;
+    ## Integer names reference explicit color slots.  Else, check if we
+    ## define the given name in termcap.bash.
+
+    [[ $fgname =~ ^[0-9]+$ ]] && fgint="38;5;$fgname" || fgint=${!fgname} ;
+
+    if [[ -z "$fgint" ]] ; then
+        whinge "Color name «$fgname» is not recognized.  Try these..." ;
+
+        declare -a available ; read -a available <<< "${!xcFF_*}" ;
+        printf "\t%s\n" "${available[@]#xcFF_}" >&2 ;
+
+        return $RV_FAILURE ;
     fi
 
-#   setseq="${setseq}${fncolor}m\]" ;
-    setseq="${setseq}$( tput setaf $(( fncolor - 30 )) )" ;
+##  declare coloresc="\[\e[38;5;${fgint}m\]\[\e[${fontWeight}m\]"
+    declare coloresc="\[\e[${fgint}${fontWeight:+;$fontWeight}${fontStyle:+;$fontStyle}m\]"
 
-#   setseq="$( sed -e 's/\033/\\e/g;' <<< $setseq )" ; rstseq="$( sed -e 's/\033/\\e/g;' <<< $rstseq )" ;
-#   setseq="$( __escesc "$setseq" )" ;
-#   rstseq="$( __escesc "$rstseq" )" ;
+    declare -i depth=$SHLVL ; [[ "$STY" ]] && let SHLVL+=2 ;
+    declare    depthMarker="$( printf '«%0.0s' $( seq 1 $depth ) )" ;
 
-    export PS1_HOST_COLOR_SEQUENCE="$setseq" ;
-    export PS1_HOST_RESET_SEQUENCE="$rstseq" ;
-    export PS1="${setseq}\n\D{${dtfmt}} :: \w\n ${setseq}\u@\h\$${rstseq} " ;
-} ;
-
-## unset -f bashprompt ; function bashprompt() { local fgname="$1" ; if [ ! "$fgname" ] ; then ; fgname="$( __machineColor )" ; fi ; local NONE=0 ; local BOLD=1 ; local NORMAL=2 ; local UNDERLINE=4 ; local BLINK=5 ; local REVERSE=7 ; local INVISIBLE=8 ; local GRAY=30 ; local RED=31 ; local GREEN=32 ; local YELLOW=33 ; local BLUE=34 ; local MAGENTA=35 ; local CYAN=36 ; local WHITE=37 ; local ORANGE=172 ; local OLIVE_DRAB=65 ; local datetimef='%F %T' local fgint ; local fontstyle ; local coloresc ; if [ $( echo $fgname | egrep '(^[A-Z]+|!)$' ) ] ; then ; fontstyle="$BOLD" ; else ; fontstyle="$NORMAL" ; fi ; fgname=$( echo $fgname | tr '[a-z]' '[A-Z]' | sed 's/!$//' ) ; if [ $( echo $fgname | egrep '^[0-9]+$' ) ] ; then ; fgint="38;5;$fgname" ; else ; fgint=${!fgname} ; fi ; coloresc="\[\e[38;5;${fgint}m\]\[\e[${fontstyle}m\]" ; coloresc="\[\e[${fgint};${fontstyle}m\]" ; export PS1_HOST_COLOR_SEQUENCE="${coloresc}" ; export PS1="${coloresc}\n\D{${datetimef}} :: \w\n ${coloresc}\u@\h\$\[\e[${NONE}m\] " ; } ;
-
-unset -f bashprompt ;
-function bashprompt() {
-        ## bashprompt NONE|GRAY|RED|GREEN|YELLOW|BLUE|CYAN|WHITE
-
-        local fgname="$1"
-
-		if [ ! "$fgname" ] ; then
-			fgname="$( __machineColor )"
-		fi
-
-        local NONE=0
-
-        local BOLD=1
-        local NORMAL=2
-        local UNDERLINE=4
-        local BLINK=5
-        local REVERSE=7
-        local INVISIBLE=8
-
-        local GRAY=30
-        local RED=31
-        local GREEN=32
-        local YELLOW=33
-        local BLUE=34
-        local MAGENTA=35
-        local CYAN=36
-        local WHITE=37
-        local ORANGE=172
-        local OLIVE_DRAB=65
-
-        local datetimef='%F %T' ## 'T' is ugly, '%z' unnecessary
-
-        local fgint
-        local fontstyle
-        local coloresc
-
-        if [ $( echo $fgname | egrep '(^[A-Z]+|!)$' ) ] ; then
-                fontstyle="$BOLD"
-        else
-                fontstyle="$NORMAL"
-        fi
-
-		fgname=$( echo $fgname | tr '[a-z]' '[A-Z]' | sed 's/!$//' )
-
-        if [ $( echo $fgname | egrep '^[0-9]+$' ) ] ; then
-                fgint="38;5;$fgname"
-        else
-                fgint=${!fgname}
-        fi
-
-##        coloresc="\[\e[38;5;${fgint}m\]\[\e[${fontstyle}m\]"
-        coloresc="\[\e[${fgint};${fontstyle}m\]"
-
-		export PS1_HOST_COLOR_SEQUENCE="${coloresc}"
-        export PS1="${coloresc}\n\D{${datetimef}} :: \w\n ${coloresc}\u@\h\$\[\e[${NONE}m\] "
+    export PS1="${coloresc}\n\D{${datetimef}} ${depthMarker} \w\n ${coloresc}\u@\h\$\[\e[${xcFF_NONE}m\] "
 }
 
-touchLib ${BASH_SOURCE[0]} ; fi ;
+##### unset -f bashprompt ; function bashprompt() {
+#####     declare fgPref="${1:-$( __machineColor )}"
+#####     declare dtfmt='%F %T' ## 'T' is ugly, '%z' unnecessary.
+##### 
+#####     declare fnstyle='' ; # "$xcFF_NORMAL" ;
+##### 
+#####     [[ $fgPref =~ (^[A-Z_]+|!)$ ]] && fnstyle=$xcFF_BOLD ; # $( tput smso ) ; # "$xcFF_BOLD" ;
+##### 
+#####     declare fgAttr=$( tr 'a-z' 'A-Z' <<< ${fgPref%!} ) ;
+#####     
+#####     declare ffPrefix='xcFF_' ;
+#####     declare ffName="${ffPrefix}${fgAttr}" ;
+##### 
+#####     declare setSeq="\[\e[${fnstyle};" ; # "$fnstyle" ; # "\[\e[${fnstyle};" ;
+#####     declare rstSeq="$( tput sgr0 )" ; # "oc" does some weird shit.
+##### 
+#####     declare -i fncolor ;
+##### 
+#####     if [[ $fgAttr =~ ^[0-9]+$ ]] ; then
+#####         fncolor=$fgAttr ;
+#####     elif [[ "${!ffName}" ]] ; then
+#####         fncolor="${!ffName}" ;
+#####     else
+#####         echo "Unknown embellishment '${ffName}'.  Try one of these:" >&2 ;
+#####         declare -a available ;
+#####         read -a available <<< "${!xcFF_*}" ;
+#####         printf "\t%s\n" "${available[@]#$ffPrefix}" >&2 ;
+##### 
+##### #        while read ; do
+##### #            echo -e "\t${REPLY#$ffPrefix}" >&2 ;
+##### #        done < <( printf '%s\n' "${!xcFF_*}" ) ;
+##### 
+#####         return 1 ;
+#####     fi
+##### 
+#####     setSeq="${setSeq}${fncolor}m\]" ;
+##### #   setSeq="${setSeq}$( tput setaf $(( fncolor - 30 )) )" ;
+##### 
+#####     declare -i eSHLVL=$(( SHLVL - ${STY:+1} - 1 )) ;
+#####     declare    iSHLVL="" ;
+##### 
+#####     if (( eSHLVL )) ; then
+#####         iSHLVL="$( tput setaf 1 )$( tput sitm ) «login+$(( eSHLVL ))»${rstSeq}$( tput ritm )" ;
+#####     fi
+##### 
+#####     export PS1="${setSeq}\n\D{${dtfmt}} :: \w${iSHLVL}\n ${setSeq}\u@\h\$${rstSeq} " ;
+##### } ;
 
-##  Color_Off="\[\033[0m\]"       # Text Reset
-##
-##  # Regular Colors
-##  Black="\[\033[0;30m\]"        # Black
-##  Red="\[\033[0;31m\]"          # Red
-##  Green="\[\033[0;32m\]"        # Green
-##  Yellow="\[\033[0;33m\]"       # Yellow
-##  Blue="\[\033[0;34m\]"         # Blue
-##  Purple="\[\033[0;35m\]"       # Purple
-##  Cyan="\[\033[0;36m\]"         # Cyan
-##  White="\[\033[0;37m\]"        # White
-##
-##  # Bold
-##  BBlack="\[\033[1;30m\]"       # Black
-##  BRed="\[\033[1;31m\]"         # Red
-##  BGreen="\[\033[1;32m\]"       # Green
-##  BYellow="\[\033[1;33m\]"      # Yellow
-##  BBlue="\[\033[1;34m\]"        # Blue
-##  BPurple="\[\033[1;35m\]"      # Purple
-##  BCyan="\[\033[1;36m\]"        # Cyan
-##  BWhite="\[\033[1;37m\]"       # White
-##
-##  # Underline
-##  UBlack="\[\033[4;30m\]"       # Black
-##  URed="\[\033[4;31m\]"         # Red
-##  UGreen="\[\033[4;32m\]"       # Green
-##  UYellow="\[\033[4;33m\]"      # Yellow
-##  UBlue="\[\033[4;34m\]"        # Blue
-##  UPurple="\[\033[4;35m\]"      # Purple
-##  UCyan="\[\033[4;36m\]"        # Cyan
-##  UWhite="\[\033[4;37m\]"       # White
+
+# unset -f bashprompt ; function bashprompt() { local fgname="$1" ; if [ ! "$fgname" ] ; then ; fgname="$( __machineColor )" ; fi ; local NONE=0 ; local BOLD=1 ; local NORMAL=2 ; local UNDERLINE=4 ; local BLINK=5 ; local REVERSE=7 ; local INVISIBLE=8 ; local GRAY=30 ; local RED=31 ; local GREEN=32 ; local YELLOW=33 ; local BLUE=34 ; local MAGENTA=35 ; local CYAN=36 ; local WHITE=37 ; local ORANGE=172 ; local OLIVE_DRAB=65 ; local datetimef='%F %T' local fgint ; local fontstyle ; local coloresc ; if [ $( echo $fgname | egrep '(^[A-Z]+|!)$' ) ] ; then ; fontstyle="$BOLD" ; else ; fontstyle="$NORMAL" ; fi ; fgname=$( echo $fgname | tr '[a-z]' '[A-Z]' | sed 's/!$//' ) ; if [ $( echo $fgname | egrep '^[0-9]+$' ) ] ; then ; fgint="38;5;$fgname" ; else ; fgint=${!fgname} ; fi ; coloresc="\[\e[38;5;${fgint}m\]\[\e[${fontstyle}m\]" ; coloresc="\[\e[${fgint};${fontstyle}m\]" ; export PS1_HOST_COLOR_SEQUENCE="${coloresc}" ; export PS1="${coloresc}\n\D{${datetimef}} :: \w\n ${coloresc}\u@\h\$\[\e[${NONE}m\] " ; } ;
+
+touchLib ${BASH_SOURCE[0]} ; fi ;
 

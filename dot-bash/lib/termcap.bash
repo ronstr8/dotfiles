@@ -9,23 +9,23 @@ if ! pingLib ${BASH_SOURCE[0]} ; then
 #
 #   TODO Callers should be using tput or some abstraction thereof.
 ##
-    declare -i -x xcFF_NONE=0 ;
-    declare -i -x xcFF_BOLD=1 ;
-    declare -i -x xcFF_NORMAL=2 ;
-    declare -i -x xcFF_UNDERLINE=4 ;
-    declare -i -x xcFF_BLINK=5 ;
-    declare -i -x xcFF_REVERSE=7 ;
-    declare -i -x xcFF_INVISIBLE=8 ;
-    declare -i -x xcFF_GRAY=30 ;
-    declare -i -x xcFF_RED=31 ;
-    declare -i -x xcFF_GREEN=32 ;
-    declare -i -x xcFF_YELLOW=33 ;
-    declare -i -x xcFF_BLUE=34 ;
-    declare -i -x xcFF_MAGENTA=35 ;
-    declare -i -x xcFF_CYAN=36 ;
-    declare -i -x xcFF_WHITE=37 ;
-    declare -i -x xcFF_ORANGE=172 ;
-    declare -i -x xcFF_OLIVE_DRAB=65 ;
+    export xcFF_NONE=0 ;
+    export xcFF_BOLD=1 ;
+    export xcFF_NORMAL=2 ;
+    export xcFF_UNDERLINE=4 ;
+    export xcFF_BLINK=5 ;
+    export xcFF_REVERSE=7 ;
+    export xcFF_INVISIBLE=8 ;
+    export xcFF_GRAY=30 ;
+    export xcFF_RED=31 ;
+    export xcFF_GREEN=32 ;
+    export xcFF_YELLOW=33 ;
+    export xcFF_BLUE=34 ;
+    export xcFF_MAGENTA=35 ;
+    export xcFF_CYAN=36 ;
+    export xcFF_WHITE=37 ;
+    export xcFF_ORANGE=172 ;
+    export xcFF_OLIVE_DRAB=65 ;
 
 touchLib ${BASH_SOURCE[0]} ; fi ;
 
@@ -102,4 +102,36 @@ touchLib ${BASH_SOURCE[0]} ; fi ;
 ## 	On_ICyan="\[\033[0;106m\]"    # Cyan
 ## 	On_IWhite="\[\033[0;107m\]"   # White
 
+
+##  Color_Off="\[\033[0m\]"       # Text Reset
+##
+##  # Regular Colors
+##  Black="\[\033[0;30m\]"        # Black
+##  Red="\[\033[0;31m\]"          # Red
+##  Green="\[\033[0;32m\]"        # Green
+##  Yellow="\[\033[0;33m\]"       # Yellow
+##  Blue="\[\033[0;34m\]"         # Blue
+##  Purple="\[\033[0;35m\]"       # Purple
+##  Cyan="\[\033[0;36m\]"         # Cyan
+##  White="\[\033[0;37m\]"        # White
+##
+##  # Bold
+##  BBlack="\[\033[1;30m\]"       # Black
+##  BRed="\[\033[1;31m\]"         # Red
+##  BGreen="\[\033[1;32m\]"       # Green
+##  BYellow="\[\033[1;33m\]"      # Yellow
+##  BBlue="\[\033[1;34m\]"        # Blue
+##  BPurple="\[\033[1;35m\]"      # Purple
+##  BCyan="\[\033[1;36m\]"        # Cyan
+##  BWhite="\[\033[1;37m\]"       # White
+##
+##  # Underline
+##  UBlack="\[\033[4;30m\]"       # Black
+##  URed="\[\033[4;31m\]"         # Red
+##  UGreen="\[\033[4;32m\]"       # Green
+##  UYellow="\[\033[4;33m\]"      # Yellow
+##  UBlue="\[\033[4;34m\]"        # Blue
+##  UPurple="\[\033[4;35m\]"      # Purple
+##  UCyan="\[\033[4;36m\]"        # Cyan
+##  UWhite="\[\033[4;37m\]"       # White
 
