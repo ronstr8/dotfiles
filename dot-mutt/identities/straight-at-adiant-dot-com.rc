@@ -1,0 +1,5 @@
+set signature="~/.mutt/identities/straight-at-adblade-dot-com.sig"
+unmy_hdr *
+my_hdr From: Ronald E. Straight <straight@adblade.com>
+
+# vim: ft=muttrc
