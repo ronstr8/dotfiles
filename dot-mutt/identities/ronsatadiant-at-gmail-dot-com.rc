@@ -1,4 +1,6 @@
--- 
-Ronald E. Straight <straight@adiant.com>
-  Senior Software Engineer
-  http://www.adblade.com/
+set signature="~/.mutt/identities/straight-at-adiant-dot-com.sig"
+unmy_hdr *
+my_hdr From: Ronald Straight <straight@adiant.com>
+
+# vim: ft=muttrc
+

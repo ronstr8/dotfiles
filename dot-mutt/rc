@@ -16,8 +16,13 @@ set noconfirmappend   # append saved message to existing files
 ## Identities
 ## =============
 
-send-hook '.' source "~/.mutt/identities/default-profile.rc"
-source "~/mutt/identities/*.init"
+source "~/.mutt/identities/rc"
+
+#source "~/.mutt/identities/default-profile.rc"
+#source "~/.mutt/identities/ronsatadiant-at-gmail-com.rc"
+#source "~/.mutt/identities/straightre-at-gmail-com.rc"
+#source "~/.mutt/identities/quinnfazigu-at-gmail-com.rc"
+#source "~/.mutt/identities/straight-at-adiant-dot-com.rc"
 
 ## ============
 ## Sending Mail
