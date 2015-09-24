@@ -13,11 +13,11 @@ set mark_old          # ???
 set noconfirmappend   # append saved message to existing files
 
 ## =============
-## Personalities
+## Identities
 ## =============
 
-send-hook '.'                            source "~/.mutt/identities/default-profile.rc"
-send-hook '~C \w\+@(adblade|adiant).com' source "~/.mutt/identities/straight-at-adblade-dot-com.rc"
+send-hook '.' source "~/.mutt/identities/default-profile.rc"
+source "~/mutt/identities/*.init"
 
 ## ============
 ## Sending Mail
