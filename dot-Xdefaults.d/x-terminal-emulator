@@ -71,7 +71,6 @@ XTerm.toolBar: false
 ! @see https://wiki.archlinux.org/index.php/X_resources
 ! Test with: xterm -fa 'faceName'
 ! faceSize already defaults to 14.
-*.fontMenu*fontdefault*Label: Default - DejaVuSansMono10
 
 !*.vt100.faceName: Consolas
 !*.vt100.faceName: DejaVuSansMono
@@ -79,10 +78,11 @@ XTerm.toolBar: false
 !*.vt100.geometry: 120x40
 !*.vt100.faceName: DejaVuSansMono
 
-*.vt100.faceName: Source Code Pro
-*.vt100.faceSize: 10.0
-*.vt100.geometry: 80x24
-*.vt100.faceAntialias: true
+*.fontMenu*fontdefault*Label: Default - SourceCodePro10
+*.VT100.faceName: SourceCodePro
+*.VT100.faceSize: 10.0
+*.VT100.geometry: 132x32
+*.VT100.faceAntialias: true
 
 !*.fontMenu*font1*Label: FaceSize 9
 !*.vt100.faceName1: Source Code Pro
@@ -101,18 +101,20 @@ XTerm.toolBar: false
 !*.fontMenu*font6*Label: Source Code Pro
 !*.vt100.faceName6: SourceCodePro
 
-*.fontMenu*font1*Label: SourceCodePro9
-*.vt100.faceName1: SourceCodePro:size=9:antialias=true
-*.fontMenu*font2*Label: SourceCodePro11
-*.vt100.faceName2: SourceCodePro:size=11:antialias=true
-*.fontMenu*font3*Label: Consolas9
-*.vt100.faceName3: Consolas:size=9:antialias=true
-*.fontMenu*font4*Label: Consolas11
-*.vt100.faceName4: Consolas:size=11:antialias=true
-*.fontMenu*font5*Label: DejaVuSansMono9
-*.vt100.faceName5: DejaVuSansMono:size=9:antialias=true
-*.fontMenu*font6*Label: DejaVuSansMono11
-*.vt100.faceName6: DejaVuSansMono:size=11:antialias=true
+! Consolas slashes its zeroes.  SourceCodePro and DejaVuSansMono use dots.
+
+!*fontMenu*font1*Label: SourceCodePro9
+!*vt100*faceName1: SourceCodePro\:size=9
+!*fontMenu*font2*Label: SourceCodePro11
+!*vt100*faceName2: SourceCodePro\:size=11
+!*fontMenu*font3*Label: Consolas 8
+!*vt100*faceName3: Consolas:size=8
+!*fontMenu*font4*Label: Consolas 16
+!*vt100*faceName4: Consolas:size=16
+!*fontMenu*font5*Label: Deja Vu Sans Mono 8
+!*vt100*faceName5: Deja Vu Sans Mono:size=8
+!*fontMenu*font6*Label: Deja Vu Sans Mono 16
+!*vt100*faceName6: Deja Vu Sans Mono:size=16
 
 ! *.vt100.faceName\d DOES NOT FUCKING WORK.
 !*.fontMenu*font6*Label: Change-Face-DejaVuSansMono-12-80x32
@@ -120,6 +122,16 @@ XTerm.toolBar: false
 !*.vt100.faceName6: DejaVuSansMono
 !*.vt100.faceSize6: 8
 !*.vt100.geometry6: 190x50
+
+*fontMenu*font1*Label: SourceCodePro
+*VT100*faceName1: SourceCodePro
+*VT100*font1: SourceCodePro
+*fontMenu*font3*Label: Consolas
+*VT100*faceName3: Consolas
+*VT100*font3: Consolas
+*fontMenu*font5*Label: DejaVuSansMono
+*VT100*faceName5: DejaVuSansMono
+*VT100*font5: DejaVuSansMono
 
 ! bogosity enables a funny little alien pointer.
 !*.vt100.pointerShape: bogosity

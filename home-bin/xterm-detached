@@ -1,5 +1,6 @@
 #!/bin/bash
 
+## Note many of the options added herein will probably not work with non-xterm x-terminal-emulators.
 function __configureXtermArgs() {
     declare xtermArgs=""
 
@@ -163,41 +164,47 @@ function __configureXtermArgs() {
 #   xtermArgs="${xtermArgs} -xrm 'set-appkeypad(off)'"
 
     echo $xtermArgs ;
-}
+} ;
+
+function __findXtermExe() {
+    type x-terminal-emulator lxterm uxterm xterm 2>/dev/null |
+        awk '/is .* (builtin|aliased|function)/ { print $1; exit; } { print $NF; exit; }' |
+        tr -cd 'a-zA-Z0-9_/-' ;
+} ;
 
 function __main() {
 #   eval $( ssh-agent )
 #   ssh-add
+
     eval $( keychain --eval --quiet ) ;
 
-    declare -i SKIP_ALL_CUSTOM_ARGS=0 ;
+    declare -i PASS_EXPLICIT_XTERM_ARGS=0 ;
+    declare -i CD_TO_LAUNCH_DIR=0 ;
+    declare -i LOAD_XRESOURCES=1 ;
 
-    ## Cygwin encloses executable file in parentheses.
-    ## Note many of the options added herein will probably not work with non-xterm x-terminal-emulators.
-    ## Should encapsulate this in a function.
-    declare xtermExe=$( type x-terminal-emulator lxterm uxterm xterm 2>/dev/null | awk '/is .* (builtin|aliased|function)/ { print $1; exit; } { print $NF; exit; }' | tr -cd 'a-zA-Z0-9_/-' ) ;
+    declare xtermExe=$( __findXtermExe ) ;
+    declare xtermArgs='' ;
 
-    #xtermLaunchDir="$HOME/.x-terminal-emulator"
-    ##### USE ABOVE INSTEAD WHEN LOGGING IS ENABLED TO AVOID
-    ##### CLUTTERING YOUR HOME DIRECTORY!
-    ##### Empty string/undef doesn't switch directories at all.
-    declare xtermLaunchDir="" # "$HOME"
-
-    [[ -d "$xtermLaunchDir" ]] && cd $xtermLaunchDir ;
-
+    declare xtermLaunchDir='~/.x-terminal-emulator' ;
+    declare xtermNohupOut='/tmp/xterm-nohup.out' ;
     declare xResources="$HOME/.Xdefaults" ;
     declare xResourcesDotD="${xResources}.d/" ;
 
-    [[ -f "$xResources"     ]] && xrdb -I$HOME -I$xResourcesDotD $xResources ;
+    (( CD_TO_LAUNCH_DIR )) && [[ -d "$xtermLaunchDir" ]] && cd $xtermLaunchDir ;
+    (( LOAD_XRESOURCES  )) && [[ -f "$xResources" ]] && xrdb -I$HOME -I$xResourcesDotD $xResources ;
+    (( PASS_EXPLICIT_XTERM_ARGS )) && xtermArgs=$( __configureXtermArgs ) ;
 
-    declare xtermArgs=$( (( SKIP_ALL_CUSTOM_ARGS )) && __configureXtermArgs || echo ) ;
+    declare commandLine="exec nohup $xtermExe $xtermArgs &> /tmp/xterm-detached-nohup.out &"
+#   declare commandLine="exec nohup $xtermExe $xtermArgs &"
 
-    declare commandLine="exec nohup $xtermExe $xtermArgs &> /dev/null &"
+    echo -ne "\n\t$commandLine " >&2 ;
 
-    echo -e "\n\t$commandLine" > /dev/stderr
+    eval $commandLine ;
 
-    eval $commandLine
+    declare -i launchedPid=$? ;
+
+    echo " → $launchedPid" ; 
 } ;
 
-( __main $* ; )
+( __main $* )
 
