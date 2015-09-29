@@ -1,0 +1,10 @@
+# Default hook.
+send-hook . source "~/.mutt/identities/default-profile.rc"
+
+# Custom by sender and recipients of message to which a reply is being made.
+send-hook '~C quinnfazigu@gmail.com'        source "~/.mutt/identities/quinnfazigu-at-gmail-dot-com.rc"
+send-hook '~C ronsatadiant@gmail.com'       source "~/.mutt/identities/ronsatadiant-at-gmail-dot-com.rc"
+send-hook '~C \w\+@\(adblade\|adiant\).com'    source "~/.mutt/identities/straight-at-adiant-dot-com.rc"
+send-hook '~C straightre@gmail.com'         source "~/.mutt/identities/straightre-at-gmail-dot-com.rc"
+
+# vim: ft=muttrc

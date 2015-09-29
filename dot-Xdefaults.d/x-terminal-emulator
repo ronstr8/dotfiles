@@ -77,42 +77,42 @@ XTerm.toolBar: false
 !*.vt100.faceName: DejaVuSansMono
 !*.vt100.faceSize: 8
 !*.vt100.geometry: 120x40
+!*.vt100.faceName: DejaVuSansMono
 
-*.vt100.faceName: SourceCodePro
-*.vt100.faceSize: 9
-*.vt100.geometry: 80x40
+*.vt100.faceName: Source Code Pro
+*.vt100.faceSize: 10.0
+*.vt100.geometry: 80x24
 *.vt100.faceAntialias: true
 
-*.fontMenu*font1*Label: FaceSize 08
-*.vt100.faceName1: size=8
+!*.fontMenu*font1*Label: FaceSize 9
+!*.vt100.faceName1: Source Code Pro
+!*.vt100.faceSize1: 9
+!*.fontMenu*font2*Label: FaceSize 11
+!*.vt100.faceName2: Source Code Pro
+!*.vt100.faceSize2: 11
+!*.fontMenu*font3*Label: FaceSize 13
+!*.vt100.faceName3: Source Code Pro
+!*.vt100.faceSize3: 13
+!*.fontMenu*font4*Label: FaceSize 15
+!*.vt100.faceName4: Source Code Pro
+!*.vt100.faceSize4: 15
+!*.fontMenu*font5*Label: Consolas
+!*.vt100.faceName5: Consolas
+!*.fontMenu*font6*Label: Source Code Pro
+!*.vt100.faceName6: SourceCodePro
 
-*.fontMenu*font2*Label: FaceSize 10
-*.vt100.faceName2: size=10
-
-*.fontMenu*font3*Label: FaceSize 12
-*.vt100.faceName3: size=12
-
-*.fontMenu*font4*Label: FaceSize 14
-*.vt100.faceName4: size=14
-
-*.fontMenu*font5*Label: Consolas
-*.vt100.faceName5: Consolas
-
-*.fontMenu*font6*Label: Source Code Pro
-*.vt100.faceName6: SourceCodePro
-
-*.font1*Label: SourceCodePro9
-*.faceName1: SourceCodePro:size=9:antialias=true
-*.font2*Label: SourceCodePro11
-*.faceName2: SourceCodePro:size=11:antialias=true
-*.font3*Label: Consolas9
-*.faceName3: Consolas:size=9:antialias=true
-*.font4*Label: Consolas11
-*.faceName4: Consolas:size=11:antialias=true
-*.font5*Label: DejaVuSansMono9
-*.faceName5: DejaVuSansMono:size=9:antialias=true
-*.font6*Label: DejaVuSansMono11
-*.faceName6: DejaVuSansMono:size=11:antialias=true
+*.fontMenu*font1*Label: SourceCodePro9
+*.vt100.faceName1: SourceCodePro:size=9:antialias=true
+*.fontMenu*font2*Label: SourceCodePro11
+*.vt100.faceName2: SourceCodePro:size=11:antialias=true
+*.fontMenu*font3*Label: Consolas9
+*.vt100.faceName3: Consolas:size=9:antialias=true
+*.fontMenu*font4*Label: Consolas11
+*.vt100.faceName4: Consolas:size=11:antialias=true
+*.fontMenu*font5*Label: DejaVuSansMono9
+*.vt100.faceName5: DejaVuSansMono:size=9:antialias=true
+*.fontMenu*font6*Label: DejaVuSansMono11
+*.vt100.faceName6: DejaVuSansMono:size=11:antialias=true
 
 ! *.vt100.faceName\d DOES NOT FUCKING WORK.
 !*.fontMenu*font6*Label: Change-Face-DejaVuSansMono-12-80x32

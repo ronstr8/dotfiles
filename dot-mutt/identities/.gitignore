@@ -1,0 +1,3 @@
+# Ignore default-identity.rc link so that it can be redirected without hassle
+# on individual machines to reflect the dominant local identity.
+default-identity.rc

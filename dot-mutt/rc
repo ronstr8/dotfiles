@@ -1,0 +1,81 @@
+## ==============
+## General Tweaks
+## ==============
+
+ignore    *
+unignore  date from: to subject cc
+
+set smart_wrap=no     # ???
+set markers=no        # ???
+set nomove            # never move mail from /var/spool/mail
+set folder=~/Mail     # directory with all mail folders
+set mark_old          # ???
+set noconfirmappend   # append saved message to existing files
+
+## =============
+## Identities
+## =============
+
+source "~/.mutt/identities/rc"
+
+#source "~/.mutt/identities/default-profile.rc"
+#source "~/.mutt/identities/ronsatadiant-at-gmail-com.rc"
+#source "~/.mutt/identities/straightre-at-gmail-com.rc"
+#source "~/.mutt/identities/quinnfazigu-at-gmail-com.rc"
+#source "~/.mutt/identities/straight-at-adiant-dot-com.rc"
+
+## ============
+## Sending Mail
+## ============
+
+set autoedit           # skip header prompts when replying
+set edit_hdrs          # allow editing of all headers
+set reverse_name=yes   # reply as whomever the message was To:
+set reply_to=ask-yes   # ask to use address in Reply-To
+set include            # include mail as quoted text in replies
+
+set date_format="%a %d-%b-%Y %H:%M:%S" # Er...
+set attribution="%n <%a>, %d:"         # attribution given to quoted text
+
+fcc-hook  .* =Sent  # copy all sent messages to a Sent folder
+save-hook .* =Misc  # save messages to Misc by default
+
+set pager_stop      # don't skip to next message when paging to end
+set noprompt_after  # set: gives you a prompt when pager exits
+
+## ============
+## Key Bindings
+## ============
+
+bind pager <PageUp>     previous-page
+bind pager <PageDown>   next-page
+bind pager <Up>         previous-line
+bind pager <Down>       next-line
+bind pager +            next-undeleted
+bind pager -            previous-undeleted
+bind pager <Home>       top
+bind pager <End>        bottom
+
+bind index <Up>         previous-entry
+bind index <Down>       next-entry
+
+#bind index x delete-message
+#bind pager x delete-message
+
+#macro index d "s=Trash\n"
+#macro pager d "s=Trash\n"
+
+## ============
+## Spamassassin Bindings
+## ============
+
+# Report and classify as spam
+#macro index S "|/usr/bin/spamassassin -r"
+
+# Classify as ham.
+#macro index H "|/usr/bin/sa-learn --ham  --no-rebuild --single"
+
+# Rebuild the spamassassin bayes filter db.
+#macro index R "!/usr/bin/sa-learn --rebuild"
+
+
