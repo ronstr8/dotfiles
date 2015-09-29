@@ -109,6 +109,7 @@ function __configureXtermArgs() {
     ## characters that should be bound to those functions, similar
     ## to the stty program.  The keywords and their values are
     ## described in detail in the "ttyModes" resource.
+
 #   xtermArgs="${xtermArgs} -tm ..."
 
     ## -tn name
@@ -117,17 +118,19 @@ function __configureXtermArgs() {
     ## termcap/terminfo and should have li# and co# entries.  If the
     ## terminal type is not found, xterm uses the built-in list of
     ## "xterm", "vt102", etc. 
+
 #   xtermArgs="${xtermArgs} -tn vt102"
 
     ## -uc
     ## Makes cursor underlined instead of boxed.
     ## XXX Hard to see an underline-cursor in vim and other apps.
+
 #   xtermArgs="${xtermArgs} -uc"
 
     ## +ulit
-    ## Enables display of characters with underline attribute as
-    ## italicized rather than underlined.
+    ## Display characters w/underline attribute in italics.
     ## Corresponds to "italicULMode" resource.
+
     xtermArgs="${xtermArgs} +ulit"
 
     ## -wf
@@ -135,6 +138,7 @@ function __configureXtermArgs() {
     ## subprocess so that initial terminal size settings and environment
     ## variables are correct.  It is the application's responsibility
     ## to catch subsequent terminal size changes.
+
     xtermArgs="${xtermArgs} -wf"
 
     ## -xrm resourcestring
@@ -142,27 +146,29 @@ function __configureXtermArgs() {
     ## for setting resources that do not have command line options.
     ## Understands all core X Toolkit resource names and classes.  Application
     ## specific resources (e.g., "XTerm.NAME") follow.
-    #xtermArgs="${xtermArgs} -xrm 'keyboardType: tcap'"
-    #xtermArgs="${xtermArgs} -xrm 'backarrowKeyIsErase: false'"
+
+#   xtermArgs="${xtermArgs} -xrm 'keyboardType: tcap'"
+#   xtermArgs="${xtermArgs} -xrm 'backarrowKeyIsErase: false'"
     xtermArgs="${xtermArgs} -xrm 'appkeypadDefault: false'"
-    #xtermArgs="${xtermArgs} -xrm 'curses: true'"
+#   xtermArgs="${xtermArgs} -xrm 'curses: true'"
     xtermArgs="${xtermArgs} -xrm 'cutNewline: false'"
     xtermArgs="${xtermArgs} -xrm 'eightBitControl: true'"
     xtermArgs="${xtermArgs} -xrm 'eightBitInput: true'"
     xtermArgs="${xtermArgs} -xrm 'modifyCursorKeys: 0'"
     xtermArgs="${xtermArgs} -xrm 'numLock: true'"
-    #xtermArgs="${xtermArgs} -xrm 'openIm: true'"
-    #xtermArgs="${xtermArgs} -xrm 'on5Clicks: all'" ## word, line, group, page, all, regex, none
-    #xtermArgs="${xtermArgs} -xrm 'trimSelection: true'"
+#   xtermArgs="${xtermArgs} -xrm 'openIm: true'"
+#   xtermArgs="${xtermArgs} -xrm 'on5Clicks: all'" ## word, line, group, page, all, regex, none
+#   xtermArgs="${xtermArgs} -xrm 'trimSelection: true'"
     xtermArgs="${xtermArgs} -xrm 'vt100Graphics: true'"
-    #xtermArgs="${xtermArgs} -xrm 'set-appkeypad(off)'"
+#   xtermArgs="${xtermArgs} -xrm 'set-appkeypad(off)'"
 
     echo $xtermArgs ;
 }
 
 function __main() {
-    #eval $( ssh-agent )
-    #ssh-add
+#   eval $( ssh-agent )
+#   ssh-add
+    eval $( keychain --eval --quiet ) ;
 
     declare -i SKIP_ALL_CUSTOM_ARGS=1 ;
 
@@ -182,14 +188,12 @@ function __main() {
 
     [[ -n "$xtermLaunchDir" ]] && cd $xtermLaunchDir ;
 
-    [[ 
+    declare xtermArgs ;
+    (( SKIP_ALL_CUSTOM_ARGS )) || xtermArgs=$( __configureXtermArgs ) ;
 
     declare cmdline="exec nohup $xtermExe $xtermArgs &> /dev/null &"
 
-    echo -e "\n$cmdline\n\n" > /dev/stderr
-
-    #read -p "[ENTER] "
-
+    echo -e "\n\t$cmdline\n\n" > /dev/stderr
     eval $cmdline
 } ;
 
