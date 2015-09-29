@@ -65,9 +65,19 @@ unset -f whinge ; function whinge() {
 #   If every character of the first argument isdigit, use that as the return
 #   value or exit code.  Else, use $RV_FAILURE from status.bash.
 #
-#   The default behavior should be to exit with $statusCode, but I can't
-##  figure out how to prevent that from happening during an interactive shell
-##  session, e.g. from sourced function serving as a command.
+#   The default behavior is to exit with $statusCode. If this function is
+#   called from an interactive shell (e.g. with `source' or `eval') and that
+#   shell is the one that invoked this process, the _user will be logged out_.
+#   That is unlikely to be the intended behaviour, so any code you write which
+#   invokes a croak() should take precautions against that.  The simplest way
+#   to do so is to run your code in a subshell.  For example:
+#
+#   ( __main $* )
+#
+#   ... wherein any code which may call croak() is in the __main() function.
+#   Thus, when croak() exits, it exits that parenthetical subshell and not the
+#   shell of the invoking user.
+#
 #
 # @param $statusCode is the value returned
 # @param $fmtMsg is the format for the bash printf builtin

@@ -752,7 +752,10 @@ function __main() {
     __saveWindowState || return $ERR ;
 } ;
 
-__getOptions $* && __main $* ;
+## Run in a subshell so any `exit' thrown by the called functions will not
+## cause an interactive shell that is sourcing this file to exit.
+
+( __getOptions $* && __main $* ) ;
 
 ## vim: ft=sh:expandtab:tabstop=4
 

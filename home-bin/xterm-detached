@@ -1,140 +1,197 @@
 #!/bin/bash
 
-#eval $( ssh-agent )
-#ssh-add
+function __configureXtermArgs() {
+    declare xtermArgs=""
 
-## Cygwin encloses executable file in parentheses.
-## Note many of the options added herein will probably not work with non-xterm x-terminal-emulators.
-## Should encapsulate this in a function.
-XTERM_EXE=$( type x-terminal-emulator lxterm uxterm xterm 2>/dev/null | awk '/is .* (builtin|aliased|function)/ { print $1; exit; } { print $NF; exit; }' | tr -cd 'a-zA-Z0-9_/-' ) ;
+    ## -aw
+    ## Auto-wraparound should be allowed.
+    ## Allows the cursor to automatically wrap to the beginning of the next
+    ## line when it at the rightmost position and text is output.
 
-#XTERM_LAUNCH_DIR="$HOME/.x-terminal-emulator"
-##### USE ABOVE INSTEAD WHEN LOGGING IS ENABLED TO AVOID
-##### CLUTTERING YOUR HOME DIRECTORY!
-##### Empty string/undef doesn't switch directories at all.
-XTERM_LAUNCH_DIR="" # "$HOME"
+    xtermArgs="${xtermArgs} -aw"
 
-[[ -f "$HOME/.Xdefaults" ]] && xrdb $HOME/.Xdefaults
+    ## -l
+    ## Turn logging on.
+    ## Normally logging is not supported, due to security concerns.  Some
+    ## versions of xterm may have logging enabled.  The logfile is written
+    ## to the directory from which xterm is invoked.
 
-XTERM_ARGS=""
-## -aw This option indicates that auto-wraparound should be allowed.  This allows the cursor to automatically wrap to the beginning of the
-## next line when it is at the rightmost position of a line and text is output.
-XTERM_ARGS="${XTERM_ARGS} -aw"
+#   xtermArgs="${xtermArgs} -l"
 
-## -l Turn  logging  on.   Normally logging is not supported, due to security concerns.  Some versions of xterm may have logging enabled.
-## The logfile is written to the directory from which xterm is invoked.
-##XTERM_ARGS="${XTERM_ARGS} -l"
+    ## -lc
+    ## Turn on support of various encodings according to LC_ALL, LC_CTYPE, or LANG.
+    ## Achieved by turning on UTF-8 mode and invoking luit for conversion
+    ## between locale encodings and UTF-8.  (luit is not invoked in UTF-8
+    ## locales.)  Corresponds to the "locale" resource.
 
-# -lc Turn on support of various encodings according to users locale setting, i.e., LC_ALL, LC_CTYPE, or LANG environment variables.
-# This  is  achieved  by  turning on UTF-8 mode and by invoking luit for conversion between locale encodings and UTF-8.  (luit is not
-# invoked in UTF-8 locales.)  This corresponds to the locale resource.
-XTERM_ARGS="${XTERM_ARGS} -lc"
+    xtermArgs="${xtermArgs} -lc"
 
-## +nul    This option enables the display of underlining.
-#XTERM_ARGS="${XTERM_ARGS} +nul"
+    ## +nul
+    ## Enables the display of underlining.
 
-## -pc     This option enables the PC-style use of bold colors (see boldColors resource).
-#XTERM_ARGS="${XTERM_ARGS} -pc"
+#   xtermArgs="${xtermArgs} +nul"
 
-## +rvc    This option enables the display of characters with reverse attribute as color.
-#XTERM_ARGS="${XTERM_ARGS} +rvc"
+    ## -pc
+    ## Enables the PC-style use of bold colors (see boldColors resource).
 
-## -rw     This option indicates that reverse-wraparound should be allowed.
-## This allows the cursor to back up from the leftmost column of one line to the
-## rightmost column of the previous line.  This is very useful for editing long
-## shell command  lines  and  is  encouraged.  This option can be turned on and
-## off from the "VT Options" menu.
-#XTERM_ARGS="${XTERM_ARGS} -rw"
+#   xtermArgs="${xtermArgs} -pc"
 
-##       +sb     This option indicates that a scrollbar should not be displayed.
-XTERM_ARGS="${XTERM_ARGS} +sb"
+    ## +rvc
+    ## Enables the display of characters with reverse attribute as color.
 
-##       +sf     This option indicates that the standard escape codes should be generated for function keys.
-#XTERM_ARGS="${XTERM_ARGS} +sf"
+#   xtermArgs="${xtermArgs} +rvc"
 
-##       -si     This option indicates that output to a window should not automatically reposition the screen to the bottom of the scrolling region.  This option can be turned on and off from the "VT Options" menu.
-XTERM_ARGS="${XTERM_ARGS} -si"
+    ## -rw
+    ## Reverse-wraparound should be allowed.
+    ## This allows the cursor to back up from the leftmost column of one line to the
+    ## rightmost column of the previous line.  This is very useful for editing long
+    ## shell command  lines  and  is  encouraged.  This option can be turned on and
+    ## off from the "VT Options" menu.
 
-##     -sk     This  option indicates that pressing a key while using the scrollbar to review previous lines of text should cause the window to be repositioned automatically in the normal position at the bottom of the scroll region.
-XTERM_ARGS="${XTERM_ARGS} -sk"
+#   xtermArgs="${xtermArgs} -rw"
 
-##       -sl number This option specifies the number of lines to save that have been scrolled off the top of the screen.  This corresponds to the save- Lines resource.  The default is "64".
-XTERM_ARGS="${XTERM_ARGS} -sl 65536"
+    ## +sb
+    ## Scrollbar should not be displayed.
 
-##       +sp     This option indicates that the standard escape codes should be generated for keypad and function keys.
-XTERM_ARGS="${XTERM_ARGS} +sp"
+    xtermArgs="${xtermArgs} +sb"
 
-##       +t      This option indicates that xterm should start in VT102 mode.
-#XTERM_ARGS="${XTERM_ARGS} +t"
+    ## +sf
+    ## Standard escape codes should be generated for function keys.
 
-##       -tb     This  option,  corresponding  to the toolBar resource, indicates that xterm should display a toolbar (or menubar) at the top of its window.  The buttons in the toolbar correspond to the popup menus, e.g., control/left/mouse for "Main Options".
-## NOTE :: This turns on Tektronix mode.
-#XTERM_ARGS="${XTERM_ARGS} -tb"
+#   xtermArgs="${xtermArgs} +sf"
 
-## -ti term_id Specify the name used by xterm to select the correct response to
-## terminal ID queries.  It also specifies the emulation level,  used to determine
-## the type of response to a DA control sequence.  Valid values include vt52,
-## vt100, vt101, vt102, and vt220 (the "vt" is optional).  The default is "vt100".
-## The term_id argument specifies the terminal ID to use.  (This is the same as
-## the decTerminalID resource).
-#XTERM_ARGS="${XTERM_ARGS} -ti vt102"
+    ## -si
+    ## Window output should not reposition screen to bottom of scroll region.
+    ## This option can be turned on and off from the "VT Options" menu.
 
-## 	   -tm string This  option  specifies  a  series of terminal setting
-## keywords followed by the characters that should be bound to those functions,
-## similar to the stty program.  The keywords and their values are described in
-## detail in the ttyModes resource.
-#XTERM_ARGS="${XTERM_ARGS} -tm ..."
+    xtermArgs="${xtermArgs} -si"
 
-## 	   -tn name This option specifies the name of the terminal type to be set
-## in the TERM environment variable.  It  corresponds  to  the  termName resource.
-## This terminal type must exist in the terminal database (termcap or terminfo,
-## depending on how xterm is built) and should have li# and co# entries.  If the
-## terminal type is not found, xterm uses the built-in list "xterm", "vt102", etc. 
-#XTERM_ARGS="${XTERM_ARGS} -tn vt102"
+    ## -sk
+    ## Pressing a key in scrollback should reposition to bottom of scroll region.
+    ## This option can be turned on and off from the "VT Options" menu.
 
-##       -uc     This option makes the cursor underlined instead of a box.
-#XTERM_ARGS="${XTERM_ARGS} -uc"
-## Really hard to see an underline-cursor in vim et al.
+    xtermArgs="${xtermArgs} -sk"
 
-## 	   +ulit   This option, corresponding to the italicULMode resource, enables
-## the display of characters  with  underline  attribute  as  italics rather than
-## with underlining.
-XTERM_ARGS="${XTERM_ARGS} +ulit"
+    ## -sl number
+    ## Lines to save that have been scrolled off the top of the screen.
+    ## Corresponds to "saveLines" resource.  Default "64".
 
-## 	   -wf     This option indicates that xterm should wait for the window to
-## be mapped the first time before starting the subprocess so that  the initial
-## terminal  size settings and environment variables are correct.  It is the
-## application's responsibility to catch subsequent terminal size changes.
-#XTERM_ARGS="${XTERM_ARGS} -wf"
+    xtermArgs="${xtermArgs} -sl 65536"
 
-## 	   -xrm resourcestring This option specifies a resource string to be used.
-## This is especially useful for setting resources that do not have separate com-
-## mand line options:
-## The program understands all of the core X Toolkit resource names and
-## classes.  Application specific resources (e.g., "XTerm.NAME") follow:
-#XTERM_ARGS="${XTERM_ARGS} -xrm 'keyboardType: tcap'"
-#XTERM_ARGS="${XTERM_ARGS} -xrm 'backarrowKeyIsErase: false'"
-XTERM_ARGS="${XTERM_ARGS} -xrm 'appkeypadDefault: false'"
-#XTERM_ARGS="${XTERM_ARGS} -xrm 'curses: true'"
-XTERM_ARGS="${XTERM_ARGS} -xrm 'cutNewline: false'"
-XTERM_ARGS="${XTERM_ARGS} -xrm 'eightBitControl: true'"
-XTERM_ARGS="${XTERM_ARGS} -xrm 'eightBitInput: true'"
-XTERM_ARGS="${XTERM_ARGS} -xrm 'modifyCursorKeys: 0'"
-XTERM_ARGS="${XTERM_ARGS} -xrm 'numLock: true'"
-#XTERM_ARGS="${XTERM_ARGS} -xrm 'openIm: true'"
-#XTERM_ARGS="${XTERM_ARGS} -xrm 'on5Clicks: all'" ## word, line, group, page, all, regex, none
-#XTERM_ARGS="${XTERM_ARGS} -xrm 'trimSelection: true'"
-XTERM_ARGS="${XTERM_ARGS} -xrm 'vt100Graphics: true'"
-#XTERM_ARGS="${XTERM_ARGS} -xrm 'set-appkeypad(off)'"
+    ## +sp
+    ## Standard escape codes should be generated for keypad and function keys.
+
+    xtermArgs="${xtermArgs} +sp"
+
+    ## +t
+    ## Xterm should start in VT102 mode.
+
+#   xtermArgs="${xtermArgs} +t"
+
+    ## -tb 
+    ## Corresponds to the "toolBar" resource, displaying tool/menu bar
+    ## companion to "Main Options" popup menu.
+    ## NOTE :: This turns on Tektronix mode.
+
+#   xtermArgs="${xtermArgs} -tb"
+
+    ## -ti term_id
+    ## Specify name used by xterm to select the correct response to
+    ## terminal ID queries.  Also specifies emulation level, used
+    ## to determine type of response to a DA control sequence.
+    ## Valid values: vt52, vt100, vt101, vt102, and vt220 ("vt" optional).
+    ## Default is "vt100".  Corresponds to "decTerminalID" resource.
+
+#   xtermArgs="${xtermArgs} -ti vt102"
+
+    ## -tm string
+    ## Specifies series of terminal setting keywords followed by the
+    ## characters that should be bound to those functions, similar
+    ## to the stty program.  The keywords and their values are
+    ## described in detail in the "ttyModes" resource.
+#   xtermArgs="${xtermArgs} -tm ..."
+
+    ## -tn name
+    ## Specifies value of TERM environment variable.  Corresponds
+    ## to "termName" resource.  Terminal type must exist in the
+    ## termcap/terminfo and should have li# and co# entries.  If the
+    ## terminal type is not found, xterm uses the built-in list of
+    ## "xterm", "vt102", etc. 
+#   xtermArgs="${xtermArgs} -tn vt102"
+
+    ## -uc
+    ## Makes cursor underlined instead of boxed.
+    ## XXX Hard to see an underline-cursor in vim and other apps.
+#   xtermArgs="${xtermArgs} -uc"
+
+    ## +ulit
+    ## Enables display of characters with underline attribute as
+    ## italicized rather than underlined.
+    ## Corresponds to "italicULMode" resource.
+    xtermArgs="${xtermArgs} +ulit"
+
+    ## -wf
+    ## Wait for window to be mapped the first time before starting the
+    ## subprocess so that initial terminal size settings and environment
+    ## variables are correct.  It is the application's responsibility
+    ## to catch subsequent terminal size changes.
+    xtermArgs="${xtermArgs} -wf"
+
+    ## -xrm resourcestring
+    ## Specifies arbitrary resource strings and values.  Especially useful
+    ## for setting resources that do not have command line options.
+    ## Understands all core X Toolkit resource names and classes.  Application
+    ## specific resources (e.g., "XTerm.NAME") follow.
+    #xtermArgs="${xtermArgs} -xrm 'keyboardType: tcap'"
+    #xtermArgs="${xtermArgs} -xrm 'backarrowKeyIsErase: false'"
+    xtermArgs="${xtermArgs} -xrm 'appkeypadDefault: false'"
+    #xtermArgs="${xtermArgs} -xrm 'curses: true'"
+    xtermArgs="${xtermArgs} -xrm 'cutNewline: false'"
+    xtermArgs="${xtermArgs} -xrm 'eightBitControl: true'"
+    xtermArgs="${xtermArgs} -xrm 'eightBitInput: true'"
+    xtermArgs="${xtermArgs} -xrm 'modifyCursorKeys: 0'"
+    xtermArgs="${xtermArgs} -xrm 'numLock: true'"
+    #xtermArgs="${xtermArgs} -xrm 'openIm: true'"
+    #xtermArgs="${xtermArgs} -xrm 'on5Clicks: all'" ## word, line, group, page, all, regex, none
+    #xtermArgs="${xtermArgs} -xrm 'trimSelection: true'"
+    xtermArgs="${xtermArgs} -xrm 'vt100Graphics: true'"
+    #xtermArgs="${xtermArgs} -xrm 'set-appkeypad(off)'"
+
+    echo $xtermArgs ;
+}
+
+function __main() {
+    #eval $( ssh-agent )
+    #ssh-add
+
+    declare -i SKIP_ALL_CUSTOM_ARGS=1 ;
+
+    ## Cygwin encloses executable file in parentheses.
+    ## Note many of the options added herein will probably not work with non-xterm x-terminal-emulators.
+    ## Should encapsulate this in a function.
+    declare xtermExe=$( type x-terminal-emulator lxterm uxterm xterm 2>/dev/null | awk '/is .* (builtin|aliased|function)/ { print $1; exit; } { print $NF; exit; }' | tr -cd 'a-zA-Z0-9_/-' ) ;
+
+    #xtermLaunchDir="$HOME/.x-terminal-emulator"
+    ##### USE ABOVE INSTEAD WHEN LOGGING IS ENABLED TO AVOID
+    ##### CLUTTERING YOUR HOME DIRECTORY!
+    ##### Empty string/undef doesn't switch directories at all.
+    declare xtermLaunchDir="" # "$HOME"
+
+    [[ -f "$HOME/.Xdefaults" ]] && xrdb $HOME/.Xdefaults
 
 
-[[ -n "$XTERM_LAUNCH_DIR" ]] && cd $XTERM_LAUNCH_DIR ;
+    [[ -n "$xtermLaunchDir" ]] && cd $xtermLaunchDir ;
 
-CMDLINE="exec nohup $XTERM_EXE $XTERM_ARGS &> /dev/null &"
+    [[ 
 
-echo -e "\n$CMDLINE\n\n" > /dev/stderr
+    declare cmdline="exec nohup $xtermExe $xtermArgs &> /dev/null &"
 
-#read -p "[ENTER] "
+    echo -e "\n$cmdline\n\n" > /dev/stderr
 
-eval $CMDLINE
+    #read -p "[ENTER] "
+
+    eval $cmdline
+} ;
+
+( __main $* ; )
 
