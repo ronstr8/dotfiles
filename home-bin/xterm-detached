@@ -170,7 +170,7 @@ function __main() {
 #   ssh-add
     eval $( keychain --eval --quiet ) ;
 
-    declare -i SKIP_ALL_CUSTOM_ARGS=1 ;
+    declare -i SKIP_ALL_CUSTOM_ARGS=0 ;
 
     ## Cygwin encloses executable file in parentheses.
     ## Note many of the options added herein will probably not work with non-xterm x-terminal-emulators.
@@ -183,18 +183,20 @@ function __main() {
     ##### Empty string/undef doesn't switch directories at all.
     declare xtermLaunchDir="" # "$HOME"
 
-    [[ -f "$HOME/.Xdefaults" ]] && xrdb $HOME/.Xdefaults
+    [[ -d "$xtermLaunchDir" ]] && cd $xtermLaunchDir ;
 
+    declare xResources="$HOME/.Xdefaults" ;
+    declare xResourcesDotD="${xResources}.d/" ;
 
-    [[ -n "$xtermLaunchDir" ]] && cd $xtermLaunchDir ;
+    [[ -f "$xResources"     ]] && xrdb -I$HOME -I$xResourcesDotD $xResources ;
 
-    declare xtermArgs ;
-    (( SKIP_ALL_CUSTOM_ARGS )) || xtermArgs=$( __configureXtermArgs ) ;
+    declare xtermArgs=$( (( SKIP_ALL_CUSTOM_ARGS )) && __configureXtermArgs || echo ) ;
 
-    declare cmdline="exec nohup $xtermExe $xtermArgs &> /dev/null &"
+    declare commandLine="exec nohup $xtermExe $xtermArgs &> /dev/null &"
 
-    echo -e "\n\t$cmdline\n\n" > /dev/stderr
-    eval $cmdline
+    echo -e "\n\t$commandLine" > /dev/stderr
+
+    eval $commandLine
 } ;
 
 ( __main $* ; )
