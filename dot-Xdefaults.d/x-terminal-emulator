@@ -80,7 +80,7 @@ XTerm.toolBar: false
 
 *.fontMenu*fontdefault*Label: Default - SourceCodePro10
 *.VT100.faceName: SourceCodePro
-*.VT100.faceSize: 10.0
+*.VT100.faceSize: 8.0
 *.VT100.geometry: 132x32
 *.VT100.faceAntialias: true
 
@@ -123,15 +123,15 @@ XTerm.toolBar: false
 !*.vt100.faceSize6: 8
 !*.vt100.geometry6: 190x50
 
-*fontMenu*font1*Label: SourceCodePro
-*VT100*faceName1: SourceCodePro
-*VT100*font1: SourceCodePro
-*fontMenu*font3*Label: Consolas
-*VT100*faceName3: Consolas
-*VT100*font3: Consolas
-*fontMenu*font5*Label: DejaVuSansMono
-*VT100*faceName5: DejaVuSansMono
-*VT100*font5: DejaVuSansMono
+!*fontMenu*font1*Label: SourceCodePro
+!*VT100*faceName1: SourceCodePro
+!*VT100*font1: SourceCodePro
+!*fontMenu*font3*Label: Consolas
+!*VT100*faceName3: Consolas
+!*VT100*font3: Consolas
+!*fontMenu*font5*Label: DejaVuSansMono
+!*VT100*faceName5: DejaVuSansMono
+!*VT100*font5: DejaVuSansMono
 
 ! bogosity enables a funny little alien pointer.
 !*.vt100.pointerShape: bogosity
