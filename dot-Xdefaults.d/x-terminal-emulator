@@ -29,7 +29,7 @@ XTerm.hold:                false
 !XTerm.menuLocale:          C
 
 ! Goal: Color!
-XTerm.termName: xterm-256color
+XTerm*termName: xterm-256color
 
 ! Goal: We need no stinking toolbar.
 XTerm.toolBar: false
@@ -78,9 +78,9 @@ XTerm.toolBar: false
 !*.vt100.geometry: 120x40
 !*.vt100.faceName: DejaVuSansMono
 
-*.fontMenu*fontdefault*Label: Default - SourceCodePro10
+*.fontMenu*fontdefault*Label: Default - SourceCodePro
 *.VT100.faceName: SourceCodePro
-*.VT100.faceSize: 8.0
+*.VT100.faceSize: 8
 *.VT100.geometry: 132x32
 *.VT100.faceAntialias: true
 
@@ -137,7 +137,7 @@ XTerm.toolBar: false
 !*.vt100.pointerShape: bogosity
 
 ! saveLines!
-*.vt100.saveLines:       40000
+*.vt100.saveLines:       65536
 *.vt100.scrollBar:       false
 *.vt100.scrollTtyOutput: false
 *.vt100.scrollKey:       true
