@@ -1,7 +1,8 @@
 
 export EDITOR='vim'
 
-export GREP_OPTIONS=' --exclude=.#* '
+## DEPRECATED
+#export GREP_OPTIONS=' --exclude=.#* '
 
 export LESSCHARSET="utf-8" ## Was "latin1", utf-8 fixes problems with perldoc/man
 export LESS="--RAW-CONTROL-CHARS --ignore-case"
