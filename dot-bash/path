@@ -6,6 +6,8 @@ for dn in $( ls -d $HOME/src/perl/*/lib $MYROOT/{lib,share,}/perl/5.[0123456789]
 	pathmunge PERL5LIB $dn after
 done
 
+[[ -f ~/perl5/perlbrew/etc/bashrc ]] && . ~/perl5/perlbrew/etc/bashrc
+
 for dn in /sbin /usr/sbin $HOME/bin $MYROOT/sbin $MYROOT/bin $MYWORK/bin ; do
 	[ -d "$dn" ] && pathmunge PATH "$dn" after
 done

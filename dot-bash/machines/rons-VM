@@ -20,6 +20,10 @@ if ( pgrep 'gnome-terminal' &> /dev/null ) ; then
     echo '*vt100.italicULMode: false' | xrdb -merge
 fi
 
+if [[ "$TERM" == 'xterm' ]] ; then
+    export TERM='xterm-256color' ;
+fi
+
 #ssh-agent-sync
 
 # vim: ft=sh
