@@ -10,8 +10,8 @@
 set nocompatible
 
 set incsearch
-set ignorecase
-"set smartcase
+"set ignorecase
+set smartcase
 set showmatch
 set hlsearch
 
