@@ -9,3 +9,5 @@
 
 /def key_esc_pgup = /fg -<
 /def key_esc_pgdn = /fg ->
+/def key_nkpEnt = /dokey NEWLINE
+
