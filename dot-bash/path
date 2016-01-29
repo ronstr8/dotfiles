@@ -8,7 +8,7 @@ done
 
 [[ -f ~/perl5/perlbrew/etc/bashrc ]] && . ~/perl5/perlbrew/etc/bashrc
 
-## source ~/.bash/path && perlbrew switch perl-5.22.0 && perl -v
+## source ~/perl5/perlbrew/etc/bashrc && perl -v && perlbrew switch perl-5.22.0 && perl -v
 
 for dn in /sbin /usr/sbin $HOME/bin $MYROOT/sbin $MYROOT/bin $MYWORK/bin ; do
 	[ -d "$dn" ] && pathmunge PATH "$dn" after
