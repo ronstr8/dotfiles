@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ROOTDIR='/av/video/TV/Britcoms'
+ROOTDIR='/av/Television/Britcoms'
 cd $ROOTDIR
 
 
@@ -9,9 +9,9 @@ ROTATABLES=$( find -maxdepth 1 -type d -not -name '*.*' -printf '"%f" \n'  |  ze
 
 
 #PLAYER='xine --loop=shuffle+'
-#PLAYER='vlc --random'
+PLAYER='vlc --random'
 #PLAYER='mplayer --shuffle --geometry=0+0 --profile=stereo'
-PLAYER="mplayer --shuffle --profile=stereo --geometry='+0+0' --fs"
+#PLAYER="mplayer --shuffle --profile=stereo --geometry='+0+0' --fs"
 
 
 eval find $ROTATABLES -name '*.avi' -or -name '*.mkv' -not -path '*Extras*' -exec $PLAYER {} +

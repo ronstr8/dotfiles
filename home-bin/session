@@ -650,7 +650,7 @@ function __echoStatus() {
         titleFile="$winDir/$TITLE_BASENAME" ;
         title=$( cat "$titleFile" ) ;
 
-        statusLine=$( printf "%s AKA %-12s %s   %s" "$subDir" "${title:-$wtf}" "${histTime:-$wtf}" "${cwd:-$wtf}" ) ;
+        statusLine=$( printf "%s AKA %-18s %s   %s" "$subDir" "${title:-$wtf}" "${histTime:-$wtf}" "${cwd:-$wtf}" ) ;
         __whinge "$statusLine" ;
     done
 
