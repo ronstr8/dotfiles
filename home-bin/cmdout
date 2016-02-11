@@ -80,4 +80,6 @@ exit 0
 #        exit_underline_mode           rmul       ue        exit underline mode
 # 2016-02-04 11:41:24 «««« /srv/code.adiant.com/industrybrains
 #  rons@rons-VM$ termModes="blink;bold;dim;reverse/rev;shadow/sshm/rshm;standout/smso/rmso;underline/smul/rmul;italics/sitm/ritm;" ; echo $termModes | ( IFS='/' ; while read -d ';' tmName tmEnter tmExit ; do echo "$( tput ${tmEnter:-$tmName} )$tmName$( tput ${tmExit:-sgr0} )" ; done )
+# 2016-02-11 11:03:10 × ~
+#  root@crunch2# export PS1='\[\e[38;4;249m\]\n\D{%F %T} \[\e[38;5;101m\]×\[\e[38;0;249m\] \w\n \[\e[38;4;33m\]\u\[\e[38;5;249m\]@\[\e[0;4m\]\h\[\e[38;5;33m\]\$\[\e[0m\] '
 
