@@ -112,15 +112,17 @@ set laststatus=2
 "highlight BufTabInactive cterm=NONE ctermbg=LightGray ctermfg=White
 let g:buftabs_in_statusline=1
 let g:buftabs_only_basename=1
-let g:buftabs_active_highlight_group="User1"
+"let g:buftabs_active_highlight_group="User1"
 "let g:buftabs_inactive_highlight_group="BufTabInactive"
 "let g:buftabs_separator = ":«"
 "let g:buftabs_separator = "┤ "
 let g:buftabs_separator = ": "
-let g:buftabs_marker_start = "["
+"let g:buftabs_marker_start = "["
+let g:buftabs_marker_start = "→"
 "let g:buftabs_marker_end = "┌┤"
 "let g:buftabs_marker_end = "»┐"
-let g:buftabs_marker_end = " ]"
+"let g:buftabs_marker_end = "]"
+let g:buftabs_marker_end = "←"
 let g:buftabs_marker_modified = "≠"
 
 " →  ←  ±  ·  «  »  ≠  ‽ ₍  ₎  ╠  ╣  ├─  ─┤  ┌  ┐
