@@ -50,5 +50,13 @@ unset -f dush ; function dush() {
 #   du -s * | sort -nr | awk '{ print $2 }' | xargs du -sh | awk '{ printf("%7.2f%c %s\n", substr($1, 0, length($1)-1), substr($1, length($1)), $NF); }'
 } ;
 
+## df
+##      df, but always properly columnized.
+#
+##
+unset -f df ; function df() {
+    command df -P $@ | perl -a -n -e 'push(@rows, [@F]); for (0..$#F) { $ll = length($F[$_]); $cm[$_] = $ll if $ll > ($cm[$_] // 0); } ; END { printf("%-$cm[0]s %$cm[1]s %$cm[2]s %$cm[3]s %$cm[4]s %s\n", @{$_}) for @rows; }' ;
+} ;
+
 touchLib ${BASH_SOURCE[0]} ; fi ;
 
