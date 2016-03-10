@@ -81,7 +81,7 @@ XTerm.toolBar: false
 *.fontMenu*fontdefault*Label: Default - SourceCodePro
 *.VT100.faceName: SourceCodePro
 *.VT100.faceSize: 10
-*.VT100.geometry: 132x32
+*.VT100.geometry: 168x42
 *.VT100.faceAntialias: true
 
 !*.fontMenu*font1*Label: FaceSize 9
