@@ -146,7 +146,6 @@ XTerm.toolBar: false
 ! The wideBoldFont resource causes problems with CentOS 5.11/xterm-215-8.el5_4.1
 !*.vt100.wideBoldFont:       true
 
-
 ! MobaXterm does not appear to respect a true italicULMode.
 *.vt100.italicULMode: true
 
