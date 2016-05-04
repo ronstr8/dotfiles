@@ -1,14 +1,3 @@
 
-Solaris Terminal Issues
-=======================
-
-## @see /usr/share/lib/terminfo
-## @see http://vim.wikia.com/wiki/Getting_colors_to_work_on_solaris
-## @see man curses
-
-    export TERM='xterm-256color' ;
-    export TERMINFO="$HOME/.terminfo" ;
-
-Without the custom TERMINFO caps imported, use export TERM='xtermc', but it
-displays artifacts at times, e.g. when exiting vim.
+Set TERMINFO="$HOME/.terminfo" (this directory) to use TERM not available on the target system.
 
