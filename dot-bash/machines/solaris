@@ -1,0 +1,24 @@
+
+if [ -x /usr/sfw/bin/ggrep ] ; then
+    alias grep='/usr/sfw/bin/ggrep' ;
+fi
+
+function __SetPaths() {
+    local repoDir="$HOME/dev/adcopy" ;
+    local subDir pathDir gnuDir ;
+
+    __pathMunge 'PATH' "$HOME/bin" "$HOME/.local/bin" /usr/local/bin /sbin /usr/sbin /usr/local/sbin ;
+
+    for subDir in bin sbin tools ; do
+        pathDir="$HOME/dev/adcopy/$subDir" ;
+        [ -d "$pathDir" ] && __pathMunge 'PATH' "$pathDir" ;
+    done
+
+    for gnuDir in xpg4 sfw ; do
+        for subDir in "/usr/$gnuDir/bin" "/usr/$gnuDir/sbin" ; do
+            [ -d "$subDir" ] && __pathMunge 'PATH' "$subDir" ;
+        done
+    done
+} ; __SetPaths ; unset -f __SetPaths ;
+
+# vim: ft=sh
