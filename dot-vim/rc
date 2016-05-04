@@ -226,6 +226,7 @@ let g:airline_section_warning = '' " (syntastic, whitespace)
 let g:airline_section_b = '%{getcwd()}'
 let g:airline_section_c = '%t'
 
+set clipboard=unnamedplus
 
 " vim: filetype=vim:
 
