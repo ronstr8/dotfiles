@@ -64,7 +64,7 @@ unset -f __canonicalPath ; function __canonicalPath() {
 unset -f __bashPrompt ; function __bashPrompt() {
     local fg="${1:-$((RANDOM%15+1))}" ;
     fg=$(( fg % 256 )) ;
-    export PS1='\n\[\e[38;5;'$fg'm\]\D{%F %T} :: \w\n \[\e[38;5;'$fg'm\]\u@\h$\[\e[0m\] ' ;
+    export PS1='\n\[\e[38;5;'$fg'm\]\D{%F %T} :: \w\n \[\e[38;5;'$fg'm\]\u@\h\$\[\e[0m\] ' ;
 } ;
 
 unset -f __machinePrompt ; function __machinePrompt() {
