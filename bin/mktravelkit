@@ -1,14 +1,14 @@
+#!/bin/bash
+
 export SHRC_HOME_REL=".bash" ; 
-export SHRC_HOME="$HOME/.bash" ;
 export SHRC_RUN_REL="${SHRC_HOME_REL}/rc" ;
 export SHRC_RCD_REL="${SHRC_HOME_REL}/rc.d" ;
-export SHRC_RUN="${SHRC_HOME}/${SHRC_RUN_REL}" ;
-export SHRC_RCD="${SHRC_HOME}/${SHRC_RCD_REL}" ;
+
+export SHRC_HOME="$HOME/$SHRC_HOME_REL" ;
+export SHRC_RUN="$HOME/${SHRC_RUN_REL}" ;
+export SHRC_RCD="$HOME/${SHRC_RCD_REL}" ;
 export SHRC_LIB="${SHRC_RCD}/00-stdlib.bash" ;
 export SHRC_FUN="${SHRC_RCD}/10-custom.bash" ;
-export SHRC_PRV="${SHRC_RCD}/99-local.bash" ;
-
-export SHRC_CLOBBER='' ;
 
 unset -f __initBriefcase ; function __initBriefcase() {
     local hookedSuffix=" # Load settings from briefcase bashrc at ${SHRC_RC}." ;
@@ -17,23 +17,25 @@ unset -f __initBriefcase ; function __initBriefcase() {
     mkdir -p "$SHRC_RCD"  || { echo "Failed to create $SHRC_RCD."  ; return ; }
 
     if ! grep "$hookedSuffix\$" "$HOME/.bashrc" &>/dev/null ; then
-        cat <<-EOT > "$HOME/.bashrc" ;
-            [ -x "\$HOME/$SHRC_RUN_REL" ] && . "\$HOME/$SHRC_RUN_REL" ; $hookedSuffix
-        EOT
+        cat <<EOT > "$HOME/.bashrc" ;
+
+[ -x "\$HOME/$SHRC_RUN_REL" ] && . "\$HOME/$SHRC_RUN_REL" ; $hookedSuffix
+
+EOT
     fi
 
-    cat <<-EOT > $SHRC_RUN ;
+    cat <<EOT > $SHRC_RUN ;
 
-    unset -f __runParts ; function __runParts() {
-        local xFn ;
+unset -f __runParts ; function __runParts() {
+    local xFn ;
 
-        for xFn in \$HOME/${SHRC_RCD_REL}/*.bash ; do
-            if [ -x \$xFn ] ; then . \$xFn ;
-        fi ; done
-    } ;
-    __runParts ; unset -f __runParts ;
+    for xFn in \$HOME/${SHRC_RCD_REL}/*.bash ; do
+        if [ -x \$xFn ] ; then . \$xFn ;
+    fi ; done
+} ;
+__runParts ; unset -f __runParts ;
 
-    EOT
+EOT
 
     chmod 0755 "$SHRC_RUN" ;
 
@@ -44,8 +46,7 @@ unset -f __fileMunge ; function __fileMunge() {
     [ ! "$SHRC_CLOBBER" -a -f "$xFn" ] && echo "$xFn exists." || sed 's/^\s\{8\}//;' > "$xFn" ;
 } ;
 
-
-SHRC_CLOBBER='yes' ; __fileMunge "$SHRC_LIB" <<-'EOT' ; chmod 0755 "$SHRC_LIB" ;
+__fileMunge "$SHRC_LIB" <<'EOT' ; chmod 0755 "$SHRC_LIB" ;
 
 unset -f __fileMunge ; function __fileMunge() {
     local xFn="${1:?Need name of file to munge}" ;
@@ -100,120 +101,122 @@ EOT
 
 # echo '[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc" ;' > ~/.bash_profile
 
-SHRC_CLOBBER='yes' ; __fileMunge "$SHRC_FUN" <<-'EOT' ; chmod 0755 "$SHRC_FUN" ;
+__fileMunge "$SHRC_FUN" <<'EOT' ; chmod 0755 "$SHRC_FUN" ;
 
-    shopt -s histreedit histappend checkwinsize ;
+shopt -s histreedit histappend checkwinsize ;
 
-    set -o ignoreeof ;             # No logout w/^D.
-    stty stop undef >& /dev/null ; # Is "flow control" obsolete?  Yes.
+set -o ignoreeof ;             # No logout w/^D.
+stty stop undef >& /dev/null ; # Is "flow control" obsolete?  Yes.
 
-    export EDITOR='vim' ;
-    export HISTTIMEFORMAT="[%FT%T%z] " ;
+export EDITOR='vim' ;
 
-    __pathMunge 'PATH' "$HOME/bin" "$HOME/.local/bin" /usr/local/bin /sbin /usr/sbin /usr/local/sbin ;
+export HISTTIMEFORMAT="[%FT%T%z] " ;
+export HISTSIZE=4096
 
-    function __addGnuPaths() {
-        local gnuDir subDir ;
+export GIT_PAGER=cat
 
-        for gnuDir in xpg4 sfw ; do
-            for subDir in "/usr/$gnuDir/bin" "/usr/$gnuDir/sbin" ; do
-                [ -d "$subDir" ] && __pathMunge 'PATH' "$subDir" ;
-            done
+__pathMunge 'PATH' "$HOME/bin" "$HOME/.local/bin" /usr/local/bin /sbin /usr/sbin /usr/local/sbin ;
+
+function __addGnuPaths() {
+    local gnuDir subDir ;
+
+    for gnuDir in xpg4 sfw ; do
+        for subDir in "/usr/$gnuDir/bin" "/usr/$gnuDir/sbin" ; do
+            [ -d "$subDir" ] && __pathMunge 'PATH' "$subDir" ;
         done
-    } ; __addGnuPaths ; unset -f __addGnuPaths ;
+    done
+} ; __addGnuPaths ; unset -f __addGnuPaths ;
 
-    __findJavaHome  ; unset -f __findJavaHome ;
-    __machinePrompt ; # unset -f __machinePrompt ;
+__findJavaHome  ; unset -f __findJavaHome ;
+__machinePrompt ; # unset -f __machinePrompt ;
 
-    alias ll='ls -lF' ; # --color is not universal.
-    alias cp='cp -i' ; # Force confirmation of cp, rm, mv.
-    alias rm='rm -i' ;
-    alias mv='mv -i' ;
+alias ll='ls -lF' ; # --color is not universal.
+alias cp='cp -i' ; # Force confirmation of cp, rm, mv.
+alias rm='rm -i' ;
+alias mv='mv -i' ;
 
-    alias colortest='(for i in {0..255};do tput setab $i;tput setaf $(((i/3)%8));printf "%5d  `tput op`" $i;[ $(((i+1)%8)) -eq 0 ]&&echo "$(tput setab 0)$(tput setaf 7)";done)' ;
-    alias urldecode="perl -p -e 's/%([0-9A-F]{2})/chr(hex(\$1))/gie;'" ;
+# alias colortest='(for i in {0..255};do tput setab $i;tput setaf $(((i/3)%8));printf "%5d  `tput op`" $i;[ $(((i+1)%8)) -eq 0 ]&&echo "$(tput setab 0)$(tput setaf 7)";done)' ;
+alias urldecode="perl -p -e 's/%([0-9A-F]{2})/chr(hex(\$1))/gie;'" ;
 
 EOT
-unset SHRC_CLOBBER ;
 
-[ ! -f "$SHRC_PRV" ] && echo "## Put your own customizations here." >> "$SHRC_PRV" && chmod 0755 "$SHRC_PRV" ;
+SHRC_CLOBBER='' __fileMunge "$HOME/.vimrc" <<'EOT' ;
 
-SHRC_CLOBBER='yes' ; __fileMunge "$HOME/.vimrc" <<-'EOT' ;
+set nocompatible
 
-    set nocompatible
-    set background=dark
+set ruler
 
-    set ruler
+set incsearch
+set hlsearch
+set smartcase
 
-    set incsearch
-    set hlsearch
-    set smartcase
+syntax on
+set background=dark
 
-    syntax on
+set autoindent
+set expandtab
+set tabstop=4
+set shiftwidth=4
 
-    set autoindent
-    set expandtab
-    set tabstop=4
-    set shiftwidth=4
+set t_Co=256
+set t_ZH="^[[3m"
+set t_ZR="^[[23m"
 
-    set t_Co=256
-    set t_ZH="^[[3m"
-    set t_ZR="^[[23m"
+colorscheme slate
 
-    colorscheme slate
+if has("conceal") | set conceallevel=0 | endif | " JSON edits w/conceal give me a headache.
 
-    if has("conceal") | set conceallevel=0 | endif | " JSON edits w/conceal give me a headache.
+noremap <C-Left>  :bprev<CR> " Ctrl-Left goes to previous buffer.
+noremap <C-Right> :bnext<CR> " Ctrl-Right goes to next buffer.
 
-    noremap <C-Left>  :bprev<CR> " Ctrl-Left goes to previous buffer.
-    noremap <C-Right> :bnext<CR> " Ctrl-Right goes to next buffer.
+set statusline=%<%f%h%m%r%=Col\ %c\ Line\ %l/%L\ %P
 
-    set statusline=%<%f%h%m%r%=Col\ %c\ Line\ %l/%L\ %P
+" Copy VIM selection to both X11 clipboard and selection.
+" set clipboard=unnamedplus
 
-    " Copy VIM selection to both X11 clipboard and selection.
-    set clipboard=unnamedplus
 EOT
-unset SHRC_CLOBBER ;
 
-export SHRC_CLOBBER='yes' ; __fileMunge "$HOME/.screenrc" <<-'EOT' ;
-    # @see http://dotfiles.org/.screenrc
-    # @see http://www.softpanorama.org/Utilities/Screen/tips.shtml
+SHRC_CLOBBER='' __fileMunge "$HOME/.screenrc" <<'EOT' ;
 
-    startup_message off
-    msgwait         1
+# @see http://dotfiles.org/.screenrc
+# @see http://www.softpanorama.org/Utilities/Screen/tips.shtml
 
-    defwrap         on
-    defflow         off
-    defscrollback   16384
+startup_message off
+msgwait         1
 
-    vbell   off
-    nethack on
-    # zombie  onerror
+defwrap         on
+defflow         off
+defscrollback   16384
 
-    ignorecase on
+vbell   off
+nethack on
+# zombie  onerror
 
-    # @see https://bbs.archlinux.org/viewtopic.php?id=55618&p=2
-    hardstatus on
-    hardstatus alwayslastline
-    hardstatus string '%{= w}%-w%{+b r}%n*%t%{-b r}%{w}%+w %= %{+d c}[%D %Y-%m-%d %0c]'
+ignorecase on
 
-    bindkey "^[[1;3D" prev # Alt+Left  to previous window.
-    bindkey "^[[1;3C" next # Alt+Right to next window.
+# @see https://bbs.archlinux.org/viewtopic.php?id=55618&p=2
+hardstatus on
+hardstatus alwayslastline
+hardstatus string '%{= w}%-w%{+b r}%n*%t%{-b r}%{w}%+w %= %{+d c}[%D %Y-%m-%d %0c]'
 
-    defbce  "on"
-    defutf8 "on"
+bindkey "^[[1;3D" prev # Alt+Left  to previous window.
+bindkey "^[[1;3C" next # Alt+Right to next window.
 
-    attrcolor b ".I"
+defbce  "on"
+defutf8 "on"
 
-    termcapinfo xterm* 'cc:'
-    termcapinfo xterm* 'Sb@:Sf@:'
-    termcapinfo xterm* 'bc@:bs@'
-    termcapinfo xterm* 'OL=10000'
-    termcapinfo xterm* 'ti@:te@'
-    termcapinfo xterm* 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+attrcolor b ".I"
+
+termcapinfo xterm* 'cc:'
+termcapinfo xterm* 'Sb@:Sf@:'
+termcapinfo xterm* 'bc@:bs@'
+termcapinfo xterm* 'OL=10000'
+termcapinfo xterm* 'ti@:te@'
+termcapinfo xterm* 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+
 EOT
-unset SHRC_CLOBBER ;
 
-export SHRC_CLOBBER='yes' ; __fileMunge "$HOME/.inputrc" <<-'EOT' ;
+SHRC_CLOBBER='' __fileMunge "$HOME/.inputrc" <<'EOT' ;
 
 "\e[1~": beginning-of-line
 "\e[4~": end-of-line
@@ -236,7 +239,6 @@ $endif
 set horizontal-scroll-mode off
 
 EOT
-unset SHRC_CLOBBER ;
 
-# vim: clipboard=unnamedplus tabstop=4 shiftwidth=4 filetype=sh
+# vim: tabstop=4 shiftwidth=4 filetype=sh
 
