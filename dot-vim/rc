@@ -108,11 +108,11 @@ set laststatus=2
 "  using %{buftabs#statusline()} e.g.:
 "set statusline=%=buffers:\ %{buftabs#statusline()}
 "set statusline="%{buftabs#statusline()}\ %=\ Col\ %c\ Line\ %l/%L\ %P"
-"highlight BufTabActive   cterm=NONE ctermbg=Green     ctermfg=Black
-"highlight BufTabInactive cterm=NONE ctermbg=LightGray ctermfg=White
+highlight BufTabActive   cterm=NONE ctermbg=Green     ctermfg=Black
+highlight BufTabInactive cterm=NONE ctermbg=LightGray ctermfg=White
 let g:buftabs_in_statusline=1
 let g:buftabs_only_basename=1
-"let g:buftabs_active_highlight_group="User1"
+let g:buftabs_active_highlight_group="User1"
 "let g:buftabs_inactive_highlight_group="BufTabInactive"
 "let g:buftabs_separator = ":«"
 "let g:buftabs_separator = "┤ "
