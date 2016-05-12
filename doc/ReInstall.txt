@@ -1,0 +1,301 @@
+
+Installation
+============
+
+# Usual name for work laptop: latitude-e5430-res
+
+# Work home directory encrypoed backup passphrase:
+# Passphrase: 887e7fb7e2603b8612422a4604d40f3b
+
+# Printers -> Add -> Network/Choose Brother w/IP address, then defaults.
+
+# xterm geometry at size 10 font: 180x42?
+# Mysql "root" user: M0nkeySqueal!
+
+Setup User Groups and Special Powers
+====================================
+
+sudo usermod -aG root,sys,adm,mysql ronstra
+
+echo 'Defaults env_reset,timestamp_timeout=-1,passwd_timeout=0,insults,timestamp_timeout=-1,editor=/usr/bin/vim' | sudo tee /etc/sudoers.d/ronstra-defaults
+
+Essential Packages and Configuration
+====================================
+
+sudo apt-get install git screen vim vpnc gparted ipcalc sipcalc lftp xterm keychain x11-xserver-utils ack-grep nmap
+
+sudo update-alternatives --set x-terminal-emulator /usr/bin/uxterm 
+    update-alternatives: using /usr/bin/uxterm to provide /usr/bin/x-terminal-emulator (x-terminal-emulator) in manual mode
+
+Encrypted Userdir Recovery
+==========================
+
+# @see https://bbs.archlinux.org/viewtopic.php?id=181183
+
+2016-05-12 12:55:23 ««««« ~
+ ronstra@latitude-e5430-res$ sudo apt-get install ecryptfs-utils
+
+# Connect old drive to USB port, enabled in VirtualBox.  If LVM, should show up under /dev/mapper/.
+
+2016-05-12 12:57:50 ««««« ~
+ ronstra@latitude-e5430-res$ sudo mount /dev/mapper/xubuntu--vg-root /mnt/
+
+2016-05-12 12:57:57 ««««« /mnt/home/.ecryptfs/ronstra/.ecryptfs
+ ronstra@latitude-e5430-res$ sudo ecryptfs-unwrap-passphrase ./wrapped-passphrase
+Passphrase:
+887e7fb7e2603b8612422a4604d40f3b
+
+2016-05-12 12:58:25 ««««« /mnt/home/.ecryptfs/ronstra/.ecryptfs
+ ronstra@latitude-e5430-res$ sudo ecryptfs-add-passphrase --fnek
+Passphrase:
+Inserted auth tok with sig [ee3b09b3a748925f] into the user session keyring
+Inserted auth tok with sig [f338c9bb61b3c48f] into the user session keyring
+
+2016-05-12 13:00:51 ««««« /mnt/home/.ecryptfs/ronstra/.ecryptfs
+ ronstra@latitude-e5430-res$ mkdir /tmp/ecryptfs-ronstra
+
+2016-05-12 13:01:34 ««««« /mnt/home/.ecryptfs/ronstra/.ecryptfs
+ ronstra@latitude-e5430-res$ sudo mount -t ecryptfs /mnt/home/.ecryptfs/ronstra/.Private /tmp/ecryptfs-ronstra
+Passphrase:
+Select cipher:
+ 1) aes: blocksize = 16; min keysize = 16; max keysize = 32
+ 2) blowfish: blocksize = 8; min keysize = 16; max keysize = 56
+ 3) des3_ede: blocksize = 8; min keysize = 24; max keysize = 24
+ 4) twofish: blocksize = 16; min keysize = 16; max keysize = 32
+ 5) cast6: blocksize = 16; min keysize = 16; max keysize = 32
+ 6) cast5: blocksize = 8; min keysize = 5; max keysize = 16
+Selection [aes]:
+Select key bytes:
+ 1) 16
+ 2) 32
+ 3) 24
+Selection [16]:
+Enable plaintext passthrough (y/n) [n]:
+Enable filename encryption (y/n) [n]: y ## Only non-default option.
+Filename Encryption Key (FNEK) Signature [ee3b09b3a748925f]: f338c9bb61b3c48f
+Attempting to mount with the following options:
+  ecryptfs_unlink_sigs
+  ecryptfs_fnek_sig=f338c9bb61b3c48f
+  ecryptfs_key_bytes=16
+  ecryptfs_cipher=aes
+  ecryptfs_sig=ee3b09b3a748925f
+WARNING: Based on the contents of [/root/.ecryptfs/sig-cache.txt],
+it looks like you have never mounted with this key
+before. This could mean that you have typed your
+passphrase wrong.
+
+Would you like to proceed with the mount (yes/no)? : yes
+Would you like to append sig [ee3b09b3a748925f] to
+[/root/.ecryptfs/sig-cache.txt]
+in order to avoid this warning in the future (yes/no)? : no ## Adding seems to cause problems with remounts.
+Not adding sig to user sig cache file; continuing with mount.
+Mounted eCryptfs
+
+2016-05-12 13:32:04 ««««« ~
+ ronstra@latitude-e5430-res$ sudo umount /tmp/ecryptfs-ronstra
+
+2016-05-12 13:32:49 ««««« ~
+ ronstra@latitude-e5430-res$ sudo umount /mnt
+
+Dotfiles
+========
+
+git clone ssh://ronstra@home.fazigu.org/~/src/repos/dotfiles.git
+
+cd $HOME ; for dn in .local/dotfiles/dot-* ; do ln=$( basename $ln ) ; ln="${dn/*dot-/.}" ; if [[ -e "$ln" ]] ; then echo "# Skipping: $dn -> $ln" ; continue ; fi ; cmdline="ln -s $dn $ln" ; read -p "# \"$cmdline\" OK? " ; if [[ $REPLY =~ ^(YES|yes|y|n)$ ]] ; then eval "$cmdline" ; else echo "# Aborted $dn -> $ln." ; fi ; done
+
+for app in screen bash vim mutt ; do src=".$app/rc" ; dst=".${app}rc" ; if [[ ! -e "$src" ]] ; then echo "# No source $src." ; else cmdline="ln --verbose --suffix='-dist' -s $src $dst" ; echo $cmdline ; fi ; done
+
+Copying Essential Windows Data
+==============================
+
+# FAILED: mount -t "ntfs" -o "ro,uhelper=udisks2,nodev,nosuid,uid=1000,gid=1000" "/dev/sdb3" "/media/ronstra/OS"
+
+mkdir ~/FromWin10
+
+rsync --dry-run --archive --exclude opt/ --exclude audiout/ --exclude .vim/ --exclude .aptcyg/ --exclude .emacs.d/ --exclude .bash-static/ --exclude com.bethsoft.falloutshelter/ --exclude public_html/ --exclude rotation-files/ --exclude vm/media/[a-z]*.iso --exclude .git/ --exclude vm/Manjaro/ --exclude vm/Tails/ --exclude vm/Elementary\ OS/ /mnt/Users/rons/Home /home/ronstra/FromWin10/ --verbose
+
+sudo mount -o ro /dev/sdb3 /mnt
+
+SSH Setup
+=========
+
+sudo cp -av ~/FromVM/home/rons/.ssh/ ~
+sudo chown -R ronstra ~/.ssh/ && chmod -R go-rwX ~/.ssh
+eval `keychain --eval` && ssh-add ~/.ssh/keyfiles/autoload/*.key
+
+Copying Essential Linux Data From VM Drive Image
+================================================
+
+sudo apt-get install qemu-kvm kpartx && sudo modprobe nbd
+sudo qemu-nbd -c /dev/nbd0 ~/FromWin10/Home/vm/media/rons-vm-20151204-resizable.hdd.vdi
+
+sudo fdisk -l /dev/nbd0
+
+#    Disk /dev/nbd0: 64 GiB, 68719476736 bytes, 134217728 sectors
+#    Units: sectors of 1 * 512 = 512 bytes
+#    Sector size (logical/physical): 512 bytes / 512 bytes
+#    I/O size (minimum/optimal): 512 bytes / 512 bytes
+#    Disklabel type: dos
+#    Disk identifier: 0x00047289
+#
+#    Device      Boot  Start       End   Sectors  Size Id Type
+#    /dev/nbd0p1 *        63    208844    208782  102M 83 Linux
+#    /dev/nbd0p2      208845 134217727 134008883 63.9G 8e Linux LVM
+
+# @see https://www.redhat.com/archives/linux-lvm/2008-June/msg00045.html
+
+
+sudo kpartx -av /dev/nbd0
+
+#    add map nbd0p1 (252:3): 0 208782 linear /dev/nbd0 63
+#    add map nbd0p2 (252:4): 0 134008883 linear /dev/nbd0 208845
+
+sudo lvm lvs
+
+#	  LV       VG         Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+#	  LogVol00 VolGroup00 -wi-ao----  60.06g
+#	  LogVol01 VolGroup00 -wi-a-----   3.81g
+#	  root     xubuntu-vg -wi-ao---- 103.66g
+#	  swap_1   xubuntu-vg -wi-ao----   7.89g
+
+sudo mount -o ro /dev/mapper/VolGroup00-LogVol00 /mnt/
+
+#	mount: /dev/mapper/VolGroup00-LogVol00 is already mounted or /mnt busy
+#	       /dev/mapper/VolGroup00-LogVol00 is already mounted on /media/ronstra/43d62760-f4cf-4414-9111-97d10424cd3a
+
+# Guess it's already mounted.  Huh.
+
+mkdir ~/FromVM
+cd /media/ronstra/43d62760-f4cf-4414-9111-97d10424cd3a
+sudo rsync --archive etc home opt root srv var /home/ronstra/FromVM/
+sudo umount /media/ronstra/43d62760-f4cf-4414-9111-97d10424cd3a
+
+sudo kpartx -d /dev/nbd0
+#	device-mapper: remove ioctl on nbd0p2 failed: Device or resource busy
+
+sudo qemu-nbd -d /dev/nbd0
+#	/dev/nbd0 disconnected
+
+sudo qemu-nbd -c /dev/nbd0 ~/FromWin10/Home/vm/media/rons-vm-20151204-resizable.hdd.vdi
+
+ls -l /dev/mapper/
+
+#	total 0
+#	crw------- 1 root root 10, 236 Feb 26 09:32 control
+#	lrwxrwxrwx 1 root root       7 Feb 26 09:32 cryptswap1 -> ../dm-2
+#	lrwxrwxrwx 1 root root       7 Feb 26 11:48 nbd0p2 -> ../dm-4
+#	lrwxrwxrwx 1 root root       7 Feb 26 11:48 VolGroup00-LogVol00 -> ../dm-5
+#	lrwxrwxrwx 1 root root       7 Feb 26 11:48 VolGroup00-LogVol01 -> ../dm-6
+#	lrwxrwxrwx 1 root root       7 Feb 26 09:32 xubuntu--vg-root -> ../dm-0
+#	lrwxrwxrwx 1 root root       7 Feb 26 09:32 xubuntu--vg-swap_1 -> ../dm-1
+
+sudo kpartx -dv /dev/nbd0p2
+sudo kpartx -dv /dev/nbd0p1
+
+# Gave up trying to properly unmount/remove the volume and just rebooted.
+
+Setting GNOME/UI Defaults
+=========================
+
+# @see http://stackoverflow.com/questions/16808231/how-do-i-set-default-terminal-to-terminator
+
+# First went to Settings -> Preferred Applications -> Utilities and set
+# Terminal to /usr/bin/uxterm.  After that:
+
+gsettings get org.gnome.desktop.default-applications.terminal exec 'x-terminal-emulator'
+gsettings get org.gnome.desktop.default-applications.terminal exec-arg '-e'
+
+# So, could probably have done it like so, as another stackoverflower suggested:
+
+gsettings set org.gnome.desktop.default-applications.terminal exec 'x-terminal-emulator'
+gsettings set org.gnome.desktop.default-applications.terminal exec-arg '-e'
+
+VPN Client Setup
+================
+
+cat <<EOT | sudo tee /etc/vpnc/default.conf
+IPSec gateway 66.70.39.147
+IPSec ID datapipe-auth-tunnelgroup
+IPSec secret Ebjo3&b!eb3k
+Xauth username straight@adiant.com
+EOT
+
+Datapipe Network Fixes
+======================
+
+## Nothing below works.
+# @see https://help.ubuntu.com/lts/serverguide/network-configuration.html"
+# ( ifconfig -a | awk '/^[a-z]/ && !/encap:Local/ { print $1 }' | xargs printf '\niface %s\n\tdns-domain adblade.com\n\tdns-search adblade.com adiant.com congoo.com datapipe.net\n\n' ) | sudo tee /etc/network/interfaces.d/datapipe-fixes
+# @see /etc/network/if-up.d/000resolvconf
+# printf 'IF_DNS_DOMAIN=adblade.com\nIF_DNS_SEARCH='adblade.com adiant.com congoo.com\n' | sudo tee -a /etc/default/networking
+
+## Adding the following to the "enp0s3" entry in /etc/network/interfaces did, after a `service networking restart`:
+    dns-domain adblade.com
+    dns-search adblade.com adiant.com congoo.com datapipe.net
+
+# Apparently, setting the domain name to *.adblade.com in /etc/hostname and `sudo service NetworkManager restart` also worked at one point.
+
+Java
+====
+
+# @see http://tecadmin.net/install-oracle-java-8-jdk-8-ubuntu-via-ppa/#
+
+sudo add-apt-repository ppa:webupd8team/java
+sudo apt-get update
+sudo apt-get install oracle-java8-installer
+sudo apt-get install oracle-java8-set-default
+
+# source /etc/profile.d/jdk.sh
+
+Redis
+=====
+
+sudo apt-get install redis-server redis-tools
+
+Dict!
+=====
+
+sudo apt-get install dict dictd dict-foldoc dict-gcide dict-jargon dict-wn
+
+Building Bleeding-Edge Screen
+=============================
+
+# Build screen from scratch for latest features, including xterm-256color support.
+# @see http://askubuntu.com/questions/87169/using-gnu-screen-with-256-colors
+
+mkdir -p ~/src && cd ~/src && git clone git://git.savannah.gnu.org/screen.git
+sudo apt-get install libncurses5-dev ncurses-doc
+./autogen.sh && ./configure --prefix=/usr/local && make
+
+Enabling ~ronstra User Dirs in Apache
+=====================================
+
+sudo a2enmod userdir && sudo service apache2 restart
+
+Misc. Sysadmin Tools
+====================
+
+sudo apt-get install tmpreaper
+
+SASS
+====
+
+sudo su -c "gem install sass"
+
+Pretty-Print CSS
+================
+
+sudo apt-get install csstidy
+sudo apt-get install highlight
+sass resources/sass/zones/zone11317.scss | csstidy - --template=low  | highlight --syntax=css --out-format=ansi
+
+Node.js and cssunminifier
+=========================
+
+sudo apt-get --install-suggests install npm node
+sudo ln -s /usr/bin/nodejs /usr/bin/node
+sudo npm install -g cssunminifier
+
+
+
