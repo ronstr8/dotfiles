@@ -215,7 +215,7 @@ function __echoScreenRc() {
 
 
     local promptCommand='eval `session --checkpoint`' ;
-    ## Below is checkoing PROMPT_COMMAND when `session` is run and not necessarily when screenrc is executed.
+    ## Below is checking PROMPT_COMMAND when `session` is run and not necessarily when screenrc is executed.
     # echo "$PROMPT_COMMAND" | fgrep -v 'session --checkpoint' && promptCommand="$PROMPT_COMMAND ; $promptCommand" ;
 
     ## TODO: Don't overwrite some of these options (defwrap, hardcopy_append)
@@ -229,6 +229,7 @@ function __echoScreenRc() {
     sessionname '$sessionName'
     
     setenv SESSION_NAME '$sessionName'
+    setenv SESSION_HOME '$sessionDir'
     setenv PROMPT_COMMAND '$promptCommand'
 
     ## Hmm-- will wordwrap fuck our hardcopies?
