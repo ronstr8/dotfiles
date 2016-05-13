@@ -22,7 +22,7 @@ echo 'Defaults env_reset,timestamp_timeout=-1,passwd_timeout=0,insults,timestamp
 Essential Packages and Configuration
 ====================================
 
-sudo apt-get install git screen vim vpnc gparted ipcalc sipcalc lftp xterm keychain x11-xserver-utils ack-grep nmap
+sudo apt-get install git screen vim vpnc gparted ipcalc sipcalc lftp xterm keychain x11-xserver-utils ack-grep nmap bc
 
 sudo update-alternatives --set x-terminal-emulator /usr/bin/uxterm 
     update-alternatives: using /usr/bin/uxterm to provide /usr/bin/x-terminal-emulator (x-terminal-emulator) in manual mode
