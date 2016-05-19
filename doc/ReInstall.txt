@@ -248,6 +248,8 @@ sudo apt-get install oracle-java8-set-default
 
 # source /etc/profile.d/jdk.sh
 
+sudo apt-get install ant
+
 Redis
 =====
 
