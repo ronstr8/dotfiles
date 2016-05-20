@@ -4,7 +4,6 @@ autocmd BufNewFile,BufRead *
     \ let s:emacsre = '^.*-\*-\s*\(\S\+\)\s*-\*-$' |
     \ let s:line1 = getline(1) |
     \ if s:line1 =~ s:emacsre |
-    \   let s:emacsmode = substitute(s:line1, s:emacsre, '\1', 'g') |
-    \   let &filetype = s:emacsmode |
+    \   let &filetype = substitute(s:line1, s:emacsre, '\1', 'g') |
     \ fi
 
