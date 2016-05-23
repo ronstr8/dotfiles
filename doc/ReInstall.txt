@@ -117,6 +117,21 @@ rsync --dry-run --archive --exclude opt/ --exclude audiout/ --exclude .vim/ --ex
 
 sudo mount -o ro /dev/sdb3 /mnt
 
+Disabling IPv6
+==============
+
+## IPv6 support is troublesome for DMP /i/ access control from localhost.
+
+cat <<EOT | sudo tee /etc/sysctl.d/99-ipv6-disable.conf
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+EOT
+
+sudo sysctl -p /etc/sysctl.d/99-ipv6-disable.conf || sudo service procps reload
+
+cat /proc/sys/net/ipv6/conf/all/disable_ipv6
+
 SSH Setup
 =========
 
@@ -248,12 +263,10 @@ sudo apt-get install oracle-java8-set-default
 
 # source /etc/profile.d/jdk.sh
 
-sudo apt-get install ant
+Redis, Mysql, other Work Stuff
+==============================
 
-Redis
-=====
-
-sudo apt-get install redis-server redis-tools
+sudo apt-get install redis-server redis-tools mysql-client ant
 
 Dict!
 =====
