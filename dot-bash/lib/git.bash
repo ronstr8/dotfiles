@@ -74,17 +74,15 @@ function git-publish() {
     ## TODO Refactor the confirmation prompt logic into a reusable function.
 
     while read -p "$promptMsg" ; do
-        if [[ -z "$REPLY" ]] ; then
-            echo -e "${FUNCNAME}: Please enter YES or NO." 1>&2 ;
-
-        elif [[ "$REPLY" =~ ^[yY]([eE][sS])?$ ]] ; then
-            break ;
-
-        else
-            echo -e "${FUNCNAME}: Confirmation \"$REPLY\" was not YES.  Aborting." 1>&2 ;
-
-            return $RV_NOOP ;
-        fi
+        case "$REPLY" in
+            YES)
+                break ;;
+            NO)
+                echo "Aborting." >&2 ;
+                return $RV_NOOP ;;
+            *)
+                echo -e "${FUNCNAME}: Please enter YES or NO." 1>&2 ;
+        esac
     done
 
     ## XXX The implied --prune option here might be presumptious.
