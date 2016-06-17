@@ -18,18 +18,22 @@ function __SetPaths() {
     local repoDir="$HOME/dev/adcopy" ;
     local subDir pathDir gnuDir ;
 
-    __pathMunge 'PATH' "$HOME/bin" "$HOME/.local/bin" /usr/local/bin /sbin /usr/sbin /usr/local/sbin ;
+    pathmunge 'PATH' "$HOME/bin" "$HOME/.local/bin" /usr/local/bin /sbin /usr/sbin /usr/local/sbin ;
 
     for subDir in bin sbin tools ; do
         pathDir="$HOME/dev/adcopy/$subDir" ;
-        [ -d "$pathDir" ] && __pathMunge 'PATH' "$pathDir" ;
+        [ -d "$pathDir" ] && pathmunge 'PATH' "$pathDir" ;
     done
 
     for gnuDir in xpg4 sfw ; do
         for subDir in "/usr/$gnuDir/bin" "/usr/$gnuDir/sbin" ; do
-            [ -d "$subDir" ] && __pathMunge 'PATH' "$subDir" ;
+            [ -d "$subDir" ] && pathmunge 'PATH' "$subDir" ;
         done
     done
 } ; __SetPaths ; unset -f __SetPaths ;
+
+## We aren't setting MANPATH anywhere in ~/.bash, but without unsetting it, we
+## lose most man pages.
+unset MANPATH ;
 
 # vim: ft=sh
