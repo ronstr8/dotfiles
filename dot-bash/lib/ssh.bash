@@ -41,7 +41,7 @@ function ssh-env-slurp() {
 unset __ssh_agent_knows_key
 function __ssh_agent_knows_key() {
 	local keyFileName="$1" ;
-	ssh-add -l 2>&1 | fgrep --silent "$keyFileName"
+	ssh-add -l 2>&1 | fgrep -s "$keyFileName"
 }
 
 unset __process_ssh_discovery_result
@@ -80,7 +80,7 @@ unset -f ssh-agent-sync
 function ssh-agent-sync() {
 	if [ "$SSH_AGENT_PID" -a -r "$SSH_AUTH_SOCK" ] ; then
 #			echo "- DEBUG ssh-agent: SSH_AGENT_PID=$SSH_AGENT_PID ; SSH_AUTH_SOCK=$SSH_AUTH_SOCK" 1>&2
-		if ( pgrep ssh-agent | egrep --silent '\<'$SSH_AGENT_PID'\>' ) ; then
+		if ( pgrep ssh-agent | egrep -s '\<'$SSH_AGENT_PID'\>' ) ; then
 #			echo "→ OK ssh-agent: SSH_AGENT_PID=$SSH_AGENT_PID ; SSH_AUTH_SOCK=$SSH_AUTH_SOCK" 1>&2
 			__process_ssh_discovery_result 'EXISTING'
 			return 0
