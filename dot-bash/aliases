@@ -1,5 +1,10 @@
 
-alias ll='ls -lF --color'
+if ls --color >&/dev/null ; then
+    alias ll='ls -lF --color' ;
+else
+    alias ll='ls -lF' ;
+fi
+
 alias cp='cp -i'
 alias rm='rm -i'
 alias mv='mv -i'

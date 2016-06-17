@@ -200,8 +200,10 @@ unset -f __ldinit ; function __ldinit() {
 
     declare -a loadable ;
     while read -d '' ; do
-        loadable[${#loadable[@]}]="$REPLY" ;
-    done  < <( find $bashLib -type f -perm /u+x -name '*.bash' -printf '%p\0'  ) ;
+        if [[ -x "$REPLY" ]] ; then
+            loadable[${#loadable[@]}]="$REPLY" ;
+        fi
+    done  < <( find $bashLib -type f -name '*.bash' | xargs printf '%s\0' ) ;
 
     declare file ;
     for file in "${loadable[@]}" ; do requireLib "$file" ; done

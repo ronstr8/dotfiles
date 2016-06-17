@@ -1,13 +1,13 @@
 
-BASHLOCAL="$BASHDIR/machines/"
-SHORTHOST=$( hostname -s )
+BASHLOCAL="$BASHDIR/machines/" ;
+SHORTHOST=$( hostname | cut -d. -f1 ) ;
 
-LOCALSPEC="$BASHLOCAL/$SHORTHOST"
+LOCALSPEC="$BASHLOCAL/$SHORTHOST" ;
 
-if [ ! -r "$LOCALSPEC" ] ; then
-	LOCALSPEC="$BASHLOCAL/DEFAULT"
+if [ ! -f "$LOCALSPEC" ] ; then
+	LOCALSPEC="$BASHLOCAL/DEFAULT" ;
 fi
 
-[ -r "$LOCALSPEC" ] && source "$LOCALSPEC"
+[ -f "$LOCALSPEC" ] && source "$LOCALSPEC" ;
 
 # vim: ft=sh
