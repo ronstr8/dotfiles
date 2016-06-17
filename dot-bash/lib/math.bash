@@ -112,20 +112,22 @@ Usage: $FUNCNAME [options]
     declare powerLabel ;
 
     if [[ -n "$unitLabel" ]] ; then
-        if [[ ! "$unitLabel" =~ ^([kKmMgGtT])?((i)?([Bb]))?$ ]] ; then
-            echo -ne "Invalid unit \"$unitLabel\". Try [KMGT]i?[Bb]\n\t" >&2 ;
-            echo     "Example: KB/Kb/KiB/Kib == 1024/128/1000/125 bytes" >&2 ;
+        case "$unitLabel" in
+            *b) bitMultiplier=8 ;;
+        esac
 
-            return 2 ;
-        fi
+        case "$unitLabel" in 
+            *i*) unitBase=1000 ;;
+        esac
 
-        powerLabel=${BASH_REMATCH[1]} ;
+        case "$unitLabel" in
+            [kKmMgGtT]*) powerLabel=${unitLabel:0:1} ;; ## STOP!
+            *)
+                echo -ne "Invalid unit \"$unitLabel\". Try [KMGT]i?[Bb]\n\t" >&2 ;
+                echo     "Example: KB/Kb/KiB/Kib == 1024/128/1000/125 bytes" >&2 ;
 
-#       printf '%s\n' "${BASH_REMATCH[@]}" ;
-
-        [[ -n "${BASH_REMATCH[3]}" ]] && unitBase=1000 ;
-        [[ -n "${BASH_REMATCH[4]}" && ${BASH_REMATCH[4]} == 'b' ]] && bitMultiplier=8 ;
-
+                return 2 ;
+        esac
     elif (( prettyPrint > 0 )) ; then
         if   (( bytes < 1024*1024 )) ; then
             powerLabel='KB' ;
