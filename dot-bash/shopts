@@ -46,7 +46,7 @@ unset -f __updatePromptCommand ; function __updatePromptCommand() {
 
 	if [ ! "$PROMPT_COMMAND" ] ; then
 		newPromptCommand="$customPromptCommand" ;
-	elif ( echo "$PROMPT_COMMAND" | grep --silent "$customPromptCommand" ) ; then
+	elif ( echo "$PROMPT_COMMAND" | grep -s "$customPromptCommand" ) ; then
 		newPromptCommand="$PROMPT_COMMAND" ;
 	else 
 		newPromptCommand="$PROMPT_COMMAND ; $customPromptCommand"
