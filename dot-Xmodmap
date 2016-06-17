@@ -28,3 +28,19 @@ keycode 89=3
 keycode 90=0
 keycode 91=period
 keycode 86=plus
+keycode 108=Return
+
+
+!KeyRelease event, serial 32, synthetic NO, window 0xa00001,
+!root 0x6f, subw 0xa00002, time 619242312, (49,55), root:(3070,141),
+!state 0x0, keycode 36 (keysym 0xff0d, Return), same_screen YES,
+!"   XLookupString gives 1 bytes: (0d) "
+!XFilterEvent returns: False
+!
+!KeyPress event, serial 32, synthetic NO, window 0xa00001,
+!root 0x6f, subw 0xa00002, time 619243484, (49,55), root:(3070,141),
+!state 0x0, keycode 108 (keysym 0xff8d, KP_Enter), same_screen YES,
+!"   XLookupString gives 1 bytes: (0d) "
+!"   XmbLookupString gives 1 bytes: (0d) "
+!XFilterEvent returns: False
+

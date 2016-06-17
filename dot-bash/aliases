@@ -44,6 +44,7 @@ alias psthr='ps axms'
 
 alias xdaliclock='xdaliclock -builtin3 -bg wheat -fg brown -noseconds -cycle -geometry +950+40'
 
+alias bc='bc -q'
 
 # vim: ft=sh
 
