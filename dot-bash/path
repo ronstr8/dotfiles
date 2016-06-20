@@ -20,7 +20,11 @@ export PERL5LIB ;
 ###### PATH
 ######
 
-for dn in /sbin /usr/sbin $HOME/bin $MYROOT/sbin $MYROOT/bin $MYWORK/bin ; do
+for dn in /usr/local/bin ; do
+	[ -d "$dn" ] && pathmunge PATH "$dn" after ;
+done
+
+for dn in /sbin /usr/sbin /usr/local/sbin $HOME/bin $MYROOT/sbin $MYROOT/bin $MYWORK/bin ; do
 	[ -d "$dn" ] && pathmunge PATH "$dn" after ;
 done
 
