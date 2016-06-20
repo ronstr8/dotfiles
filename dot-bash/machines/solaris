@@ -6,13 +6,20 @@
 #   export TERM='xterm-256color' ;
 #   export TERMINFO="$HOME/.terminfo" ;
 
+# @see /usr/share/lib/terminfo
+# @see http://vim.wikia.com/wiki/Getting_colors_to_work_on_solaris
+# @see man curses
+export TERM='xterm-256color' ;
+export TERMINFO="$HOME/.terminfo" ;
+# Without the custom TERMINFO caps imported, use export TERM='xtermc', but it
+# displays artifacts at times, e.g. when exiting vim.
 ## Without the custom TERMINFO caps imported, use export TERM='xtermc', but it
 ## displays artifacts at times, e.g. when exiting vim.
 
-
-if [ -x /usr/sfw/bin/ggrep ] ; then
-    alias grep='/usr/sfw/bin/ggrep' ;
-fi
+[ -x /usr/sfw/bin/ggrep        ] && alias grep='/usr/sfw/bin/ggrep' ;
+[ -x /usr/sfw/bin/gegrep       ] && alias egrep='/usr/sfw/bin/gegrep' ;
+[ -x /usr/sfw/bin/gfgrep       ] && alias fgrep='/usr/sfw/bin/gfgrep' ;
+[ -x /usr/local/pgsql/bin/psql ] && alias psql='/usr/local/pgsql/bin/psql' ;
 
 function __SetPaths() {
     local repoDir="$HOME/dev/adcopy" ;
