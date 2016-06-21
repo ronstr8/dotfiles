@@ -55,15 +55,7 @@ unset -f dush ; function dush() {
 #
 ##
 unset -f df ; function df() {
-    command df -P $@ | perl -a -n -e 'push(@rows, [@F]); for (0..$#F) { $ll = length($F[$_]); $cm[$_] = $ll if $ll > ($cm[$_] // 0); } ; END { printf("%-$cm[0]s %$cm[1]s %$cm[2]s %$cm[3]s %$cm[4]s %s\n", @{$_}) for @rows; }' ;
-} ;
-
-## df
-##      df, but always properly columnized.
-#
-##
-unset -f df ; function df() {
-        command df -P $@ | perl -a -n -e 'push(@rows, [@F]); for (0..$#F) { $ll = length($F[$_]); $cm[$_] = $ll if $ll > ($cm[$_] // 0); } ; END { printf("%-$cm[0]s %$cm[1]s %$cm[2]s %$cm[3]s %$cm[4]s %s\n", @{$_}) for @rows; }' ;
+    command df -P $@ | perl -a -n -e 'push(@rows, [@F]); for (0..$#F) { $ll = length($F[$_]); $cm[$_] = $ll if $ll > ($cm[$_] || 0); } ; END { printf("%-$cm[0]s %$cm[1]s %$cm[2]s %$cm[3]s %$cm[4]s %s\n", @{$_}) for @rows; }' ;
 } ;
 
 
