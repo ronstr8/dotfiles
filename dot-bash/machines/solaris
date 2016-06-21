@@ -16,10 +16,25 @@ export TERMINFO="$HOME/.terminfo" ;
 ## Without the custom TERMINFO caps imported, use export TERM='xtermc', but it
 ## displays artifacts at times, e.g. when exiting vim.
 
+## Fix some other bad choices for environment variables.
+
+export PAGER='less' ;
+
+## Aliases to GNU versions of grep.
+
 [ -x /usr/sfw/bin/ggrep        ] && alias grep='/usr/sfw/bin/ggrep' ;
 [ -x /usr/sfw/bin/gegrep       ] && alias egrep='/usr/sfw/bin/gegrep' ;
 [ -x /usr/sfw/bin/gfgrep       ] && alias fgrep='/usr/sfw/bin/gfgrep' ;
-[ -x /usr/local/pgsql/bin/psql ] && alias psql='/usr/local/pgsql/bin/psql' ;
+
+## Alias psql to most recent available version.
+
+for subDir in /usr/local/pgsql-* ; do
+    if [ -x "$subDir/bin/psql" ] ; then
+        alias psql="LESS='-iMSx4 -FX' $subDir/bin/psql" ; 
+    fi
+done
+
+## Add development tools to PATH.
 
 function __SetPaths() {
     local repoDir="$HOME/dev/adcopy" ;
