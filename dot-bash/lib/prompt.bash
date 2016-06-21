@@ -12,21 +12,21 @@ if ! pingLib ${BASH_SOURCE[0]} ; then
 unset -f __machineColor ; function __machineColor() {
     ## Permutation of alphas in hostname, so all in a server
     ## group share the same prompt color.
-    declare colorseedstr="$( hostname | cut -d. -f1 | tr -cd 'A-Za-z' )" ;
+    declare colorseedstr="$( hostname | cut -d. -f1 | tr -cd '[:alpha:]' )" ;
 
 #   declare MD5SUM="$( which md5sum 2> /dev/null )" ;
 #   : ${MD5SUM:=md5} ;
 
     ## Strip all non-digits.
-    declare colorseedint="$( echo $colorseedstr | sum | tr -cd '0-9' )" ;
+    declare colorseedint="$( echo $colorseedstr | sum | tr -cd '[:digit:]' )" ;
     colorseedint=${colorseedint##0} ;
 
     ## Specify how many colors made available for the prompt.
-    declare -i colorcount=88 ;
+    declare -i colorcount=255 ; # 88 ;
 
     [[ $TERM =~ 256 ]] && colorcount=176
 
-    declare maybecolor=$(( colorseedint % colorcount )) ;
+    declare maybecolor=$(( 7 + ( colorseedint % (colorcount-8) ) )) ;
 
     echo "${maybecolor#-}" ; ## Ersatz abs().
 }
