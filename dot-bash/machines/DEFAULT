@@ -1,6 +1,7 @@
 
-#echo "colorseedstr=$colorseedstr; colorseedint=$colorint; colorcount=$colorcount; maybecolor=$maybecolor;" 1>&2
+if hostname | grep 'adcopy-inc.com' >& /dev/null ; then
+    source $HOME/.bash/machines/adcopy-inc.com ;
+fi
 
-# echo "$TERM" | fgrep xterm && bashprompt || export PS1="\\u@\\h\\$ " ;
-
+# vim: ft=sh
 

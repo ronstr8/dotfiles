@@ -38,7 +38,7 @@ done
 
 function __SetPaths() {
     local repoDir="$HOME/dev/adcopy" ;
-    local subDir pathDir gnuDir ;
+    local subDir pathDir gnuDir x11dir ;
 
     pathmunge 'PATH' "$HOME/bin" "$HOME/.local/bin" /usr/local/bin /sbin /usr/sbin /usr/local/sbin ;
 
@@ -52,6 +52,12 @@ function __SetPaths() {
             [ -d "$subDir" ] && pathmunge 'PATH' "$subDir" ;
         done
     done
+
+    if [ "$DISPLAY" ] ; then
+        pathmunge 'PATH' /usr/openwin/demo ;
+        pathmunge 'PATH' /usr/openwin/bin ;
+        pathmunge 'PATH' /usr/X11R6/bin ;
+    fi
 } ; __SetPaths ; unset -f __SetPaths ;
 
 ## We aren't setting MANPATH anywhere in ~/.bash, but without unsetting it, we
