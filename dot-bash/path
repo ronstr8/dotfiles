@@ -1,6 +1,10 @@
 
-MYROOT="$HOME/.local"
-MYWORK="$HOME/work/adblade"
+MYROOT="$HOME/.local" ;
+MYWORK="$HOME/work/adblade" ;
+
+#####
+##### PERL5LIB/perlbrew
+#####
 
 for dn in $( ls -d $HOME/src/perl/*/lib $MYROOT/{lib,share,}/perl/5.[0123456789]*/{,auto} $MYROOT/perl5 $MYROOT/site_perl 2> /dev/null ) ; do
 	pathmunge PERL5LIB $dn after
@@ -10,8 +14,18 @@ done
 
 ## source ~/perl5/perlbrew/etc/bashrc && perl -v && perlbrew switch perl-5.22.0 && perl -v
 
-for dn in /sbin /usr/sbin $HOME/bin $MYROOT/sbin $MYROOT/bin $MYWORK/bin ; do
-	[ -d "$dn" ] && pathmunge PATH "$dn" after
+export PERL5LIB ; 
+
+######
+###### PATH
+######
+
+for dn in /usr/local/bin ; do
+	[ -d "$dn" ] && pathmunge PATH "$dn" after ;
+done
+
+for dn in /sbin /usr/sbin /usr/local/sbin $HOME/bin $MYROOT/sbin $MYROOT/bin $MYWORK/bin ; do
+	[ -d "$dn" ] && pathmunge PATH "$dn" after ;
 done
 
 if [ -d "/opt/gradle" ] ; then
@@ -19,19 +33,25 @@ if [ -d "/opt/gradle" ] ; then
     pathmunge PATH "$GRADLE_HOME/bin" ;
 fi
 
-[ -d "/opt/genymotion" ] && pathmunge PATH "/opt/genymotion"
-[ -d "/opt/perl5/bin"  ] && pathmunge PATH "/opt/perl5/bin"
-[ -d "$JAVA_HOME"      ] && pathmunge PATH "$JAVA_HOME/bin" after
+if [ -d "/opt/maven" ] ; then
+    export MAVEN_HOME="/opt/maven" ;
+    pathmunge PATH "$MAVEN_HOME/bin" ;
+fi
+
+[ -d "/opt/genymotion" ] && pathmunge PATH "/opt/genymotion" ;
+[ -d "/opt/perl5/bin"  ] && pathmunge PATH "/opt/perl5/bin" ;
+[ -d "$JAVA_HOME"      ] && pathmunge PATH "$JAVA_HOME/bin" after ;
+
+export PATH ;
+
+######
+###### MANPATH
+######
 
 ## for dn in $HOME/man $HOME/perl/man ; do
-##     pathmunge MANPATH $dn after
+##     pathmunge MANPATH $dn after ;
 ## done
 
-## export WORK_CVS_CHECKOUTS="$HOME/work/kanoodle/checkouts"
-## pathmunge PERL5LIB $WORK_CVS_CHECKOUTS/libkanoodle
-## pathmunge PATH     $WORK_CVS_CHECKOUTS/kdev/prod/scripts
-## pathmunge PERL5LIB $HOME/lib/perl
-
-export PERL5LIB PATH MANPATH
+## export MANPATH
 
 # vim: ft=sh

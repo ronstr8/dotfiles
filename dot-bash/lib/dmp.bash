@@ -51,8 +51,8 @@ function dmp-benchmark() {
     for server in "${servers[@]}" ; do
         serverPort=$wwwPort ;
         
-        if [[  $server =~ :([0-9]+)$ ]] ; then
-            serverPort=${BASH_REMATCH[1]} ;
+        if [[  $server =~ :[0-9]+$ ]] ; then
+            serverPort=$( echo $server | cut -d: -f2 ) ;
         else
             serverPort=$wwwPort ;
             serverPort="${server}:${serverPort}" ;

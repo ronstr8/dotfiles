@@ -13,7 +13,7 @@ declare -i LD_FORCE=$(( 0 + 1 )) ; ## XXX Ditto. XXX
 #
 # @param $resource the resource provided by some library.
 # @param $fileName provider of $resource.
-# @param $lastLoadedAt last (epoch seconds) time the resource was loaded.
+# @param $lastLoadedAt last (%Y%m%d%H%M%S) time the resource was loaded.
 #
 # @stdout null
 # @stderr pass
@@ -85,8 +85,8 @@ unset -f __ldd ; function __ldd() {
 #  __ld 'FUNK' $LD_FORCE "$HOME/.bash/lib/funk.bash"
 #   Force the unconditional reload of the given file.
 #
-#  __ld 'FUNK' $( date +%s )
-#   Update the last-loaded time in __LIBINFO to the given epoch seconds, but do _not_ reload the file.
+#  __ld 'FUNK' $( date +%Y%m%d%H%M%S )
+#   Update the last-loaded time in __LIBINFO to the given timestamp, but do _not_ reload the file.
 #
 # @param $resource the resource provided by some library.
 # @param $lastLoaded new load time of resource if -ge mtime of provider file.
@@ -111,7 +111,7 @@ unset -f __ld ; function __ld() {
     [[ -f "$fileName" ]] || return 1 ;
 
     declare -i lastLoadedAt=${actionCode:-${resourceInfo[1]}} ;
-    declare -i lastModified=$( date +%s -r "$fileName" ) ;
+    declare -i lastModified=$( date +%Y%m%d%H%M%S -r "$fileName" ) ;
 
 #   echo "resource=$resource;fileName=$fileName;lastLoadedAt=$lastLoadedAt;lastModified=$lastModified" >&2;
 
@@ -127,7 +127,7 @@ unset -f __ld ; function __ld() {
     fi
 
     if (( shouldReload )) ; then
-        source "$fileName" && lastLoadedAt=$( date +%s ) ; ## XXX Die on fail?
+        source "$fileName" && lastLoadedAt=$( date +%Y%m%d%H%M%S ) ; ## XXX Die on fail?
     fi
 
     __ldupdate "$resource" "$fileName" $lastLoadedAt ;
@@ -192,7 +192,7 @@ unset -f forceLib ; function forceLib() { reloadLib "$@" ; } ;
 unset -f touchLib ; function touchLib() {
 #   echo "touchLib $@ ..." >&2;
     declare resource="${1:?${FUNCNAME[0]}: Missing 'resource'}" ;
-    __ld $resource $( date +%s ) ;
+    __ld $resource $( date +%Y%m%d%H%M%S ) ;
 } ;
 
 unset -f __ldinit ; function __ldinit() {
@@ -200,8 +200,10 @@ unset -f __ldinit ; function __ldinit() {
 
     declare -a loadable ;
     while read -d '' ; do
-        loadable[${#loadable[@]}]="$REPLY" ;
-    done  < <( find $bashLib -type f -perm /u+x -name '*.bash' -printf '%p\0'  ) ;
+        if [[ -x "$REPLY" ]] ; then
+            loadable[${#loadable[@]}]=$REPLY ;
+        fi
+    done  < <( find $bashLib -type f -name '*.bash' | xargs printf '%s\0' ) ;
 
     declare file ;
     for file in "${loadable[@]}" ; do requireLib "$file" ; done

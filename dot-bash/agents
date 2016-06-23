@@ -1,5 +1,5 @@
 
-if tty --silent && type keychain &> /dev/null ; then
+if tty -s && type keychain &> /dev/null ; then
 ##	keychain --nogui --quiet $( find $HOME/.ssh/keyfiles/autoload/ -type f -not -name '*.pub' )
 	eval `keychain --quiet --nogui --eval # ~/.ssh/keyfiles/autoload/*.key`
 

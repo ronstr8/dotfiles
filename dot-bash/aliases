@@ -1,5 +1,10 @@
 
-alias ll='ls -lF --color'
+if ls --color >&/dev/null ; then
+    alias ll='ls -lF --color' ;
+else
+    alias ll='ls -lF' ;
+fi
+
 alias cp='cp -i'
 alias rm='rm -i'
 alias mv='mv -i'
@@ -7,9 +12,9 @@ alias mv='mv -i'
 alias pmd='/opt/pmd/bin/run.sh pmd'
 
 alias qcal='gcal -x -o -cdl15+'
-alias gr='java -jar /usr/local/Gallery_Remote/GalleryRemote.jar'
-alias wmls='wmctrl -lpGx'
-alias wmup='wmctrl -r :SELECT: -e 0,0,0,640,480'
+#alias gr='java -jar /usr/local/Gallery_Remote/GalleryRemote.jar'
+#alias wmls='wmctrl -lpGx'
+#alias wmup='wmctrl -r :SELECT: -e 0,0,0,640,480'
 alias dict='dict --pager=-'
 
 #alias chrome='/opt/google/chrome/google-chrome'
@@ -21,10 +26,11 @@ export HL_FORMAT='ansi' ; ## 'xterm256' has invisible colors on rons-VM.
 alias hldiff="highlight --syntax=diff --out-format=$HL_FORMAT"
 alias hlperl="highlight --syntax=perl --out-format=$HL_FORMAT"
 
-alias distclean='make realclean 2>&1 ; perl Makefile.PL && \rm -f MANIFEST *META.yml && make manifest'
-alias cleantest='make realclean ; perl Makefile.PL ; make test'
+#alias distclean='make realclean 2>&1 ; perl Makefile.PL && \rm -f MANIFEST *META.yml && make manifest'
+#alias cleantest='make realclean ; perl Makefile.PL ; make test'
 
-alias unicode='export LANG="en_US.UTF-8"'
+#alias unicode='export LANG="en_US.UTF-8"'
+
 alias man='LANG=C man'
 
 if ( ! type ack &>/dev/null ) ; then
@@ -34,11 +40,16 @@ if ( ! type ack &>/dev/null ) ; then
 fi
 
 alias biosinfo='sudo dmidecode | head'
-alias pstop='ps axo pid,user,priority,nice,vsz,rsz,share,stat,pcpu,pmem,time,cmd' ## PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND
+#alias pstop='ps axo pid,user,priority,nice,vsz,rsz,share,stat,pcpu,pmem,time,cmd' ## PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND
+alias pstop='ps -a -o user,pid,ppid,pri,nice,pcpu,pmem,etime,args'
 alias psthr='ps axms'
 
-alias xdaliclock='xdaliclock -builtin3 -bg wheat -fg brown -noseconds -cycle -geometry +950+40'
+#alias xdaliclock='xdaliclock -builtin3 -bg wheat -fg brown -noseconds -cycle -geometry +950+40'
 
+alias bc='bc -q'
+
+# Avoid connection to X server even if we have a DISPLAY.
+alias vim='vim -X' ;
 
 # vim: ft=sh
 

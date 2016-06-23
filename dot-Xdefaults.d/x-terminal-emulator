@@ -74,33 +74,27 @@ XTerm.toolBar: false
 
 !*.vt100.faceName: Consolas
 !*.vt100.faceName: DejaVuSansMono
-!*.vt100.faceSize: 8
-!*.vt100.geometry: 120x40
-!*.vt100.faceName: DejaVuSansMono
+!*.vt100.faceName: Source Code Pro
 
 *.fontMenu*fontdefault*Label: Default - SourceCodePro
 *.VT100.faceName: SourceCodePro
 *.VT100.faceSize: 10
 *.VT100.geometry: 150x40
-!*.VT100.geometry: 80x24
 *.VT100.faceAntialias: true
 
-!*.fontMenu*font1*Label: FaceSize 9
+*.fontMenu*font1*Label: Unreadable
 !*.vt100.faceName1: Source Code Pro
-!*.vt100.faceSize1: 9
-!*.fontMenu*font2*Label: FaceSize 11
-!*.vt100.faceName2: Source Code Pro
-!*.vt100.faceSize2: 11
-!*.fontMenu*font3*Label: FaceSize 13
-!*.vt100.faceName3: Source Code Pro
-!*.vt100.faceSize3: 13
-!*.fontMenu*font4*Label: FaceSize 15
-!*.vt100.faceName4: Source Code Pro
-!*.vt100.faceSize4: 15
-!*.fontMenu*font5*Label: Consolas
-!*.vt100.faceName5: Consolas
-!*.fontMenu*font6*Label: Source Code Pro
-!*.vt100.faceName6: SourceCodePro
+*.vt100.faceSize1: 6
+*.fontMenu*font2*Label: Tiny
+*.vt100.faceSize2: 8
+*.fontMenu*font3*Label: Small
+*.vt100.faceSize3: 10
+*.fontMenu*font4*Label: Medium
+*.vt100.faceSize4: 12
+*.fontMenu*font5*Label: Large
+*.vt100.faceSize5: 14
+*.fontMenu*font6*Label: Huge
+*.vt100.faceSize6: 16
 
 ! Consolas slashes its zeroes.  SourceCodePro and DejaVuSansMono use dots.
 
@@ -146,7 +140,6 @@ XTerm.toolBar: false
 
 ! The wideBoldFont resource causes problems with CentOS 5.11/xterm-215-8.el5_4.1
 !*.vt100.wideBoldFont:       true
-
 
 ! MobaXterm does not appear to respect a true italicULMode.
 *.vt100.italicULMode: true

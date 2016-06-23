@@ -1,0 +1,3 @@
+
+Set TERMINFO="$HOME/.terminfo" (this directory) to use TERM not available on the target system.
+

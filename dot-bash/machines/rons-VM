@@ -11,7 +11,7 @@
 ## fi
 
 
-if ( tty --silent ) ; then
+if ( tty -s ) ; then
 	eval `keychain --quiet --nogui` # --eval ~/.ssh/keyfiles/autoload/*.key`
 fi
 

@@ -20,6 +20,9 @@ set -o ignoreeof
 ## fails to recognize them and plunk me back into my proper directory.
 #export PROMPT_DIRTRIM=3 ;
 
+## Get rid of > prompts for heredocs to allow easier saving to scratch pads.
+export PS2='' ;
+
 bashprompt ;
 
 unset -f __dotBashPrompt ; function __dotBashPrompt() {
@@ -43,7 +46,7 @@ unset -f __updatePromptCommand ; function __updatePromptCommand() {
 
 	if [ ! "$PROMPT_COMMAND" ] ; then
 		newPromptCommand="$customPromptCommand" ;
-	elif ( echo "$PROMPT_COMMAND" | grep --silent "$customPromptCommand" ) ; then
+	elif echo "$PROMPT_COMMAND" | grep "$customPromptCommand" >& /dev/null ; then
 		newPromptCommand="$PROMPT_COMMAND" ;
 	else 
 		newPromptCommand="$PROMPT_COMMAND ; $customPromptCommand"

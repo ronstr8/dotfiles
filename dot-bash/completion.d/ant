@@ -42,7 +42,7 @@ _ant()
         # find which buildfile to use
         buildfile=build.xml
         for (( i=1; i < COMP_CWORD; i++ )); do
-            if [[ "${COMP_WORDS[i]}" == -@(?(build)file|f) ]]; then
+            if [[ "${COMP_WORDS[i]}" = '-f' ]] ; then # -@(?(build)file|f) ]]; then
                 buildfile=${COMP_WORDS[i+1]}
                 break
             fi

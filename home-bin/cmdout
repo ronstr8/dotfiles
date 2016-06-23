@@ -1,0 +1,85 @@
+#!/bin/sh -
+#
+# cmdout program args...
+#
+# Wrapper to label the commands output as being from 'stdout' or 'stderr'
+# channels And report the final 'exit status' of the comannd.
+#
+#
+#
+# @see http://www.ict.griffith.edu.au/anthony/software/#cmdout
+
+declare -r OUT_PREFIX="" OUT_SUFFIX="" ;
+declare -r ERR_PREFIX="$( tput setaf 1 )«ERR» $( tput sgr0 )" ERR_SUFFIX="" ;
+declare -r RET_PREFIX="$( tput smul )«RET» $( tput bold )" RET_SUFFIX="$( tput sgr0 )" ;
+declare -r CMD_PREFIX=${RET_PREFIX/RET/CMD} CMD_SUFFIX=$RET_SUFFIX ;
+
+function pipeCmd() {
+    sed -e "s/^/$CMD_PREFIX/; s/\$/$CMD_SUFFIX/;" ;
+}
+
+function pipeOut() {
+    sed -e "s/^/$OUT_PREFIX/; s/\$/$OUT_SUFFIX/;" ;
+} ;
+
+function pipeErr() {
+    sed -e "s/^/$ERR_PREFIX/; s/\$/$ERR_SUFFIX/;" ;
+} ;
+
+function pipeRet() {
+    sed -e "s/^/$RET_PREFIX/; s/\$/$RET_SUFFIX/;" ;
+} ;
+
+echo "$@" | pipeCmd ;
+
+exec 9>&1
+( exec 3>&1;
+  ( exec 2>&1;
+    ( "$@"; echo $? >&3
+    ) | pipeOut >&9
+  ) | pipeErr >&9
+) | pipeRet ;
+
+exit 0
+
+
+## @see terminfo(5)
+#    Color       #define       Value       RGB
+#    black     COLOR_BLACK       0     0, 0, 0
+#    red       COLOR_RED         1     max,0,0
+#    green     COLOR_GREEN       2     0,max,0
+#    yellow    COLOR_YELLOW      3     max,max,0
+#    blue      COLOR_BLUE        4     0,0,max
+#    magenta   COLOR_MAGENTA     5     max,0,max
+#    cyan      COLOR_CYAN        6     0,max,max
+#    white     COLOR_WHITE       7     max,max,max
+#
+#    tparm parameter   attribute    escape sequence
+#    none              none         \E[0m
+#    p1                standout     \E[0;1;7m
+#    p2                underline    \E[0;4m
+#    p3                reverse      \E[0;7m
+#    p4                blink        \E[0;5m
+#    p5                dim          not available
+#    p6                bold         \E[0;1m
+#    p7                invis        \E[0;8m
+#    p8                protect      not used
+#    p9                altcharset   ^O (off) ^N (on)
+#
+# 2016-02-04 11:11:01 «««« /srv/code.adiant.com/valuescore/java/dmp
+#  rons@rons-VM$ man 5 terminfo | egrep '(enter|exit)_(standout|underline|reverse|blink|dim|bold|invis|shadow)'
+#        enter_blink_mode              blink      mb        turn on blinking
+#        enter_bold_mode               bold       md        turn on bold (extra
+#        enter_dim_mode                dim        mh        turn on half-bright
+#        enter_reverse_mode            rev        mr        turn on reverse
+#        enter_shadow_mode             sshm       ZM        Enter shadow-print
+#        enter_standout_mode           smso       so        begin standout mode
+#        enter_underline_mode          smul       us        begin underline mode
+#        exit_shadow_mode              rshm       ZU        End shadow-print
+#        exit_standout_mode            rmso       se        exit standout mode
+#        exit_underline_mode           rmul       ue        exit underline mode
+# 2016-02-04 11:41:24 «««« /srv/code.adiant.com/industrybrains
+#  rons@rons-VM$ termModes="blink;bold;dim;reverse/rev;shadow/sshm/rshm;standout/smso/rmso;underline/smul/rmul;italics/sitm/ritm;" ; echo $termModes | ( IFS='/' ; while read -d ';' tmName tmEnter tmExit ; do echo "$( tput ${tmEnter:-$tmName} )$tmName$( tput ${tmExit:-sgr0} )" ; done )
+# 2016-02-11 11:03:10 × ~
+#  root@crunch2# export PS1='\[\e[38;4;249m\]\n\D{%F %T} \[\e[38;5;101m\]×\[\e[38;0;249m\] \w\n \[\e[38;4;33m\]\u\[\e[38;5;249m\]@\[\e[0;4m\]\h\[\e[38;5;33m\]\$\[\e[0m\] '
+
