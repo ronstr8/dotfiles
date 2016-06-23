@@ -3,7 +3,7 @@
 if [ "$*" ] ; then
     titleText="$*" ;
 else
-    titleText="${USER}@${HOSTNAME}" ;
+    titleText="${USER}@${HOSTNAME}:${PWD}" ;
 fi
 
 echo -ne "\033]0;$titleText\007\n";
