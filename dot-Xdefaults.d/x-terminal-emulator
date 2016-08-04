@@ -76,11 +76,11 @@ XTerm.toolBar: false
 !*.vt100.faceName: DejaVuSansMono
 !*.vt100.faceName: Source Code Pro
 
-*.fontMenu*fontdefault*Label: Default
-*.vt100.faceName: Source Code Pro
-*.vt100.faceSize: 10
-*.vt100.geometry: 126x42
-*.vt100.faceAntialias: true
+*.fontMenu*fontdefault*Label: Default - SourceCodePro
+*.VT100.faceName: SourceCodePro
+*.VT100.faceSize: 10
+*.VT100.geometry: 150x40
+*.VT100.faceAntialias: true
 
 *.fontMenu*font1*Label: Unreadable
 !*.vt100.faceName1: Source Code Pro
