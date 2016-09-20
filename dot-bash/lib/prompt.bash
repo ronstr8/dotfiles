@@ -12,13 +12,15 @@ if ! pingLib ${BASH_SOURCE[0]} ; then
 unset -f __machineColor ; function __machineColor() {
     ## Permutation of alphas in hostname, so all in a server
     ## group share the same prompt color.
-    declare colorseedstr="$( hostname | cut -d. -f1 | tr -cd '[:alpha:]' )" ;
+    ## Not using [:alpha:] for compat on Solaris.
+    declare colorseedstr="$( hostname | cut -d. -f1 | tr -cd '[a-z][A-Z]' )" ;
 
 #   declare MD5SUM="$( which md5sum 2> /dev/null )" ;
 #   : ${MD5SUM:=md5} ;
 
     ## Strip all non-digits.
-    declare colorseedint="$( echo $colorseedstr | sum | tr -cd '[:digit:]' )" ;
+    ## Not using [:digit:] for compat on Solaris.
+    declare colorseedint="$( echo $colorseedstr | sum | tr -cd '[0-9]' )" ;
     colorseedint=${colorseedint##0} ;
 
     ## Specify how many colors made available for the prompt.
