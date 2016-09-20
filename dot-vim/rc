@@ -6,6 +6,9 @@
 " @see http://got-ravings.blogspot.com/2008/08/vim-pr0n-making-statuslines-that-own.html
 " @see https://github.com/bling/vim-airline
 " @see https://amix.dk/vim/vimrc.html
+" @see https://www.linux.com/learn/vim-tips-working-external-commands
+" : r ! ls -l
+" %!sort
 
 set nocompatible
 
@@ -20,6 +23,8 @@ set ruler
 set expandtab
 set tabstop=4
 set shiftwidth=4
+"for phrack submissions
+"set textwidth=75
 
 filetype plugin on
 
