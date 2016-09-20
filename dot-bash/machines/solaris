@@ -1,4 +1,18 @@
 
+## Give us a more recent locally-installed version of perl,
+## and wrap an `ack' command around `beyondgrep'.
+
+declare BEST_PERL='/usr/local/bin/perl' ;
+declare BEYONDGREP="$HOME/bin/beyondgrep" ;
+
+if [ -x $BEST_PERL ] ; then
+    alias perl="$BEST_PERL" ;
+
+    if [ -f $BEYONDGREP ] ; then
+        function ack() { $BEST_PERL $BEYONDGREP "$@" ; }
+    fi
+fi
+
 ## @see /usr/share/lib/terminfo
 ## @see http://vim.wikia.com/wiki/Getting_colors_to_work_on_solaris
 ## @see man curses
@@ -20,11 +34,12 @@ export TERMINFO="$HOME/.terminfo" ;
 
 export PAGER='less' ;
 
-## Aliases to GNU versions of grep.
+## Aliases to GNU versions of common utilities.
 
 [ -x /usr/sfw/bin/ggrep        ] && alias grep='/usr/sfw/bin/ggrep' ;
 [ -x /usr/sfw/bin/gegrep       ] && alias egrep='/usr/sfw/bin/gegrep' ;
 [ -x /usr/sfw/bin/gfgrep       ] && alias fgrep='/usr/sfw/bin/gfgrep' ;
+[ -x /usr/sfw/bin/gmake        ] && alias make='/usr/sfw/bin/gmake' ;
 
 ## Alias psql to most recent available version.
 
