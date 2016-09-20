@@ -1,0 +1,19 @@
+#!/bin/bash
+
+declare -r CURL_WFMT='http_code:%{http_code}\t time_connect=%{time_connect}s\t time_redirect=%{time_redirect}s\t time_pretransfer=%{time_pretransfer}s\t time_starttransfer=%{time_starttransfer}s\t time_total=%{time_total}s\n' ;
+
+unset -f __Main ; function __Main() {
+    declare    host=${1?Missing required argument of URI to ping.} ;
+#   declare    addr=${2:-54.237.169.36} ;
+    declare -i count=${2:-10} ;
+
+    declare -i ii ;
+
+    echo "## Pinging $host ..." >&2 ;
+
+    for (( ii = 0 ; ii < $count ; ii++ )) ; do
+        curl --write-out "$CURL_WFMT" --output /dev/null --insecure --silent "$host" ;
+    done
+
+} ; __Main "$@" ; unset -f __Main ;
+
