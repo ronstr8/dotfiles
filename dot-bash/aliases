@@ -40,13 +40,16 @@ if ( ! type ack &>/dev/null ) ; then
 fi
 
 alias biosinfo='sudo dmidecode | head'
-#alias pstop='ps axo pid,user,priority,nice,vsz,rsz,share,stat,pcpu,pmem,time,cmd' ## PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND
-alias pstop='ps -a -o user,pid,ppid,pri,nice,pcpu,pmem,etime,args'
+#alias psfull='ps axo pid,user,priority,nice,vsz,rsz,share,stat,pcpu,pmem,time,cmd' ## PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND
+alias psarg='ps -a -o user,pid,ppid,pri,nice,pcpu,pmem,etime,args'
 alias psthr='ps axms'
 
 #alias xdaliclock='xdaliclock -builtin3 -bg wheat -fg brown -noseconds -cycle -geometry +950+40'
 
-alias bc='bc -q'
+## Only pass the -q option if we have the -q option for --quiet.
+## Checking if --version fails (as it does on Solaris) works.
+## The -l gives us a scale of 20.
+( bc --version >& /dev/null ) && alias bc='bc -lq' || alias bc='bc -l' ;
 
 # Avoid connection to X server even if we have a DISPLAY.
 alias vim='vim -X' ;
