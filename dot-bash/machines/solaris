@@ -58,7 +58,7 @@ function __SetPaths() {
 
     pathmunge 'PATH' "$HOME/bin" "$HOME/.local/bin" /usr/local/bin /sbin /usr/sbin /usr/local/sbin after ;
 
-    for subDir in bin sbin tools ; do
+    for subDir in bin sbin tools bin/test ; do
         pathDir="$HOME/dev/adcopy/$subDir" ;
         [ -d "$pathDir" ] && pathmunge 'PATH' "$pathDir" after ;
     done
