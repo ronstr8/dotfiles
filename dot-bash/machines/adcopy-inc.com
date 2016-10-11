@@ -36,6 +36,7 @@ export PAGER='less' ;
 [ -x /usr/sfw/bin/gegrep       ] && alias egrep='/usr/sfw/bin/gegrep' ;
 [ -x /usr/sfw/bin/gfgrep       ] && alias fgrep='/usr/sfw/bin/gfgrep' ;
 [ -x /usr/sfw/bin/gmake        ] && alias make='/usr/sfw/bin/gmake' ;
+[ -x /usr/sfw/bin/gtar         ] && alias tar='/usr/sfw/bin/gtar' ;
 
 ## Alias psql to most recent available version.
 
