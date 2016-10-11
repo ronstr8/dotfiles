@@ -1,1 +1,84 @@
-solaris
+
+## Give us a more recent locally-installed version of perl,
+## and wrap an `ack' command around `beyondgrep'.
+
+declare BEST_PERL='/usr/local/bin/perl' ;
+declare BEYONDGREP="$HOME/bin/beyondgrep" ;
+
+if [ -f $BEYONDGREP ] ; then
+    function ack() { $BEST_PERL $BEYONDGREP "$@" ; }
+fi
+
+## @see /usr/share/lib/terminfo
+## @see http://vim.wikia.com/wiki/Getting_colors_to_work_on_solaris
+## @see man curses
+
+#   export TERM='xterm-256color' ;
+#   export TERMINFO="$HOME/.terminfo" ;
+
+# @see /usr/share/lib/terminfo
+# @see http://vim.wikia.com/wiki/Getting_colors_to_work_on_solaris
+# @see man curses
+export TERM='xterm-256color' ;
+export TERMINFO="$HOME/.terminfo" ;
+# Without the custom TERMINFO caps imported, use export TERM='xtermc', but it
+# displays artifacts at times, e.g. when exiting vim.
+## Without the custom TERMINFO caps imported, use export TERM='xtermc', but it
+## displays artifacts at times, e.g. when exiting vim.
+
+## Fix some other bad choices for environment variables.
+
+export PAGER='less' ;
+
+## Aliases to GNU versions of common utilities.
+
+[ -x /usr/sfw/bin/ggrep        ] && alias grep='/usr/sfw/bin/ggrep' ;
+[ -x /usr/sfw/bin/gegrep       ] && alias egrep='/usr/sfw/bin/gegrep' ;
+[ -x /usr/sfw/bin/gfgrep       ] && alias fgrep='/usr/sfw/bin/gfgrep' ;
+[ -x /usr/sfw/bin/gmake        ] && alias make='/usr/sfw/bin/gmake' ;
+
+## Alias psql to most recent available version.
+
+for subDir in /usr/local/pgsql-* ; do
+    if [ -x "$subDir/bin/psql" ] ; then
+        alias psql="LESS='-iMSx4 -FX' $subDir/bin/psql" ; 
+    fi
+done
+
+## Add GNU and othertools to end of PATH, as we want the Solaris
+## tools to come first.
+
+function __SetPaths() {
+    local repoDir="$HOME/dev/adcopy" ;
+    local subDir pathDir gnuDir x11dir ;
+
+    pathmunge 'PATH' "$HOME/bin" "$HOME/.local/bin" /usr/local/bin /sbin /usr/sbin /usr/local/sbin after ;
+
+    for subDir in bin sbin tools bin/test ; do
+        pathDir="$HOME/dev/adcopy/$subDir" ;
+        [ -d "$pathDir" ] && pathmunge 'PATH' "$pathDir" after ;
+    done
+
+    for gnuDir in xpg4 sfw ; do
+        for subDir in "/usr/$gnuDir/bin" "/usr/$gnuDir/sbin" ; do
+            [ -d "$subDir" ] && pathmunge 'PATH' "$subDir" after ;
+        done
+    done
+
+    if [ "$DISPLAY" ] ; then
+        pathmunge 'PATH' /usr/openwin/demo after ;
+        pathmunge 'PATH' /usr/openwin/bin after ;
+        pathmunge 'PATH' /usr/X11R6/bin after ;
+    fi
+} ; __SetPaths ; unset -f __SetPaths ;
+
+## We aren't setting MANPATH anywhere in ~/.bash, but without unsetting it, we
+## lose most man pages.
+unset MANPATH ;
+
+## Don't reply on __machinePrompt logic.
+bashprompt 204 ;
+
+# ps -e -o user,pid,pcpu,pmem,vsz,rss,tty,s,stime,time,args
+
+# vim: ft=sh
