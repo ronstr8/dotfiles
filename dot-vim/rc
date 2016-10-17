@@ -12,6 +12,11 @@
 
 set nocompatible
 
+" @see http://stackoverflow.com/questions/12814371/conversion-error-in-vim
+" Try saving with :w ++enc=utf-8. Also, it's recommended to put scriptencoding utf-8 at the top of your .vimrc.
+set encoding=utf8
+scriptencoding utf-8
+
 set incsearch
 "set ignorecase
 set smartcase
@@ -84,8 +89,6 @@ colorscheme fazigu
 "colorscheme gardener
 "let g:solarized_termcolors=256 " If no solarized Xdefaults modifications.
 "colorscheme solarized
-
-set encoding=utf8
 
 set autoindent
 set gfn="Consolas 10"

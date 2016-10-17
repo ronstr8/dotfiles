@@ -495,7 +495,12 @@ function __validateWindowState() {
         else 
             __croak 'Cannot continue without $WINDOW_NUMBER or $WINDOW.' || return $ERR ;
         fi
-    elif [ "$WINDOW" -a "$WINDOW_NUMBER" != "$WINDOW" ] ; then
+    elif [ ! "$WINDOW" ] ; then
+        if [ "$WINDOW_NUMBER" ] ; then
+            __whinge "WINDOW unset; setting to \$WINDOW_NUMBER ($WINDOW)." ;
+            WINDOW="$WINDOW_NUMBER" ;
+        fi
+    elif [ "$WINDOW_NUMBER" != "$WINDOW" ] ; then
         __whinge "WINDOW=$WINDOW != WINDOW_NUMBER=$WINDOW_NUMBER; setting WINDOW_NUMBER=$WINDOW." ;
         WINDOW_NUMBER="$WINDOW" ;
     fi

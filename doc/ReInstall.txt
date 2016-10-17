@@ -469,5 +469,11 @@ sudo ln -s /usr/bin/nodejs /usr/bin/node
 sudo npm install -g cssunminifier
 
 
+# DotNet Platform
+# ===============
+# @see https://www.microsoft.com/net/core#ubuntu
+
+
+
 # vim: set filetype=sh:
 
