@@ -491,18 +491,18 @@ function __validateWindowState() {
     if [ ! "$WINDOW_NUMBER" ] ; then
         if [ "$WINDOW" ] ; then
             __whinge "Defaulting WINDOW_NUMBER=$WINDOW." ;
-            WINDOW_NUMBER="$WINDOW" ;
+            export WINDOW_NUMBER="$WINDOW" ;
         else 
             __croak 'Cannot continue without $WINDOW_NUMBER or $WINDOW.' || return $ERR ;
         fi
     elif [ ! "$WINDOW" ] ; then
         if [ "$WINDOW_NUMBER" ] ; then
             __whinge "WINDOW unset; setting to \$WINDOW_NUMBER ($WINDOW)." ;
-            WINDOW="$WINDOW_NUMBER" ;
+            export WINDOW="$WINDOW_NUMBER" ;
         fi
     elif [ "$WINDOW_NUMBER" != "$WINDOW" ] ; then
         __whinge "WINDOW=$WINDOW != WINDOW_NUMBER=$WINDOW_NUMBER; setting WINDOW_NUMBER=$WINDOW." ;
-        WINDOW_NUMBER="$WINDOW" ;
+        export WINDOW_NUMBER="$WINDOW" ;
     fi
 
     export WINDOW_HOME="$( __buildWindowDir "$SESSION_HOME" "$WINDOW_NUMBER" )" ;
