@@ -1,0 +1,70 @@
+#!/bin/env perl
+
+use strict;
+use warnings;
+use English qw( -no_match_vars );
+
+use Socket qw( AF_INET inet_ntop inet_pton );
+
+our $ADDR_INT_QR = qr{^\d+$};
+our $ADDR_IP4_QR = qr{^(\d{1,3})(\.\d{1,3}){3}$};
+our $ADDR_DNS_QR = qr{^\w+(\.\w+)+$};
+
+our(@addresses) = @ARGV;
+
+foreach my $addr_wtf (@addresses) {
+    my($addr_int, $addr_ip4, $addr_dns);
+
+    if ( $addr_wtf =~ $ADDR_INT_QR ) {
+        $addr_int = $addr_wtf;
+        $addr_ip4 = int2ip($addr_int);
+        $addr_dns = ip2host($addr_ip4);
+    }
+    elsif ( $addr_wtf =~ $ADDR_IP4_QR ) {
+        $addr_ip4 = $addr_wtf;
+        $addr_int = ip2int($addr_ip4);
+        $addr_dns = ip2host($addr_ip4);
+    }
+    elsif ( $addr_wtf =~ $ADDR_DNS_QR ) {
+        $addr_dns = $addr_wtf;
+        $addr_ip4 = host2ip($addr_dns);
+        $addr_int = ip2int($addr_ip4);
+    }
+    else {
+        warn "Cannot make sense of address '$addr_wtf'.\n";
+        next;
+    }
+
+    printf("%d\t%s\t%s\n", $addr_int, $addr_ip4, $addr_dns);
+}
+
+sub int2ip {
+    my $wtf = shift;
+    my $ans = inet_ntop(AF_INET, pack('N', $wtf));
+}
+
+sub ip2int {
+    my $wtf = shift;
+    my $ans = unpack('N', inet_pton(AF_INET, $wtf));
+}
+
+sub ip2host {
+    my $wtf = shift;
+
+    my $ans =  `dig +short -x $wtf`;
+       $ans =~ s/\.?\s*$//;
+
+    return $ans;
+}
+
+sub host2ip {
+    my $wtf = shift;
+
+    my $ans = `dig +short $wtf`;
+       $ans =~ s/\.?\s*$//;
+
+    return $ans;
+}
+
+# @see http://www.perlmonks.org/?node_id=786521
+#perl -MSocket=inet_ntoa -le 'print inet_ntoa(pack("N",shift||2130706433))
