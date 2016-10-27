@@ -7,8 +7,12 @@
 ## Ronald E. Straight <straightre@gmail.com>
 
 ## @see http://ipinfo.io/developers/full-ip-details
+
+# dig +short myip.opendns.com @resolver1.opendns.com
+# curl https://4.ifcfg.me/cpe-104-228-128-159.buffalo.res.rr.com/json
+# curl http://checkip.amazonaws.com/
+# dig +short . @ifcfg.me
 ## @see http://unix.stackexchange.com/questions/22615/how-can-i-get-my-external-ip-address-in-a-shell-script
-## $ dig +short myip.opendns.com @resolver1.opendns.com
 
 ## Bash script boilerplate variables.
 
