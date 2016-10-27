@@ -1,0 +1,101 @@
+#!/bin/bash
+## ipinfo [ipaddr...]
+##
+##      Get IP address info from ipinfo.io.  Address defaults to current.
+##
+##  --help     Show this message.
+##
+## -- 
+## Ronald E. Straight <straightre@gmail.com>
+
+## @see http://ipinfo.io/developers/full-ip-details
+
+## Bash script boilerplate variables.
+
+declare -r    SCRIPT_NAME=$( basename "$0" ) ;
+
+declare -r -i TRUE=1 FALSE=0 ;
+declare -r -i RV_SUCCESS=0 RV_FAILURE=1  RV_NOOP=$RV_SUCCESS ;
+
+declare -r    DEFAULT_SHORT_OPTS='hvn' DEFAULT_LONG_OPTS='help,verbose,dry-run,debug,trace' ;
+
+declare    -i VERBOSITY=0 DRY_RUN=$FALSE VERBOSE=$FALSE DEBUG=$FALSE TRACE=$FALSE ;
+declare       WHINGEE='' ;
+declare       GFX_EM="$( tput setaf 1 2>/dev/null )" GFX_RS="$( tput sgr0 2 2>/dev/null )" ;
+
+## Boilerplate functions.
+
+function __isTrue()  { [[ $# -gt 0 ]] || return $RV_FAILURE ; declare value=$1 ; (( value > value/2 )) ; }
+function __isEmpty() { [[ -z "$1" ]] ; } ;
+
+function __isInt()   {
+    declare str=${1?Missing required argument of string to be checked.} ;
+    declare alt=${2:-NaN} ;
+
+    ## @TODO(ronstra): Use `expr' and check for $? of 2?
+
+    if [[ "$1" =~ ^-?[0-9]+$ ]] ; then
+        echo $str ; return $RV_SUCCESS ;
+    else
+        echo $alt ; return $RV_FAILURE ;
+    fi
+} ;
+
+function __Whinge()  { declare -i rv ; rv=$( __isInt "$1" ) && shift ; echo "[$( date -Is )]${WHINGEE:- }$@" 1>&2 ; return $rv ; }
+function __Croak()   { __Whinge "$@" ; exit ; } ;
+
+## Application variables.
+
+declare -i HAS_DRY_RUN=$FALSE ;
+declare    APP_OPTIONS='' ;
+
+declare -r CURL_EXE='curl' ;
+declare -r IPINFO_URL_FMT='http://ipinfo.io/%s' ;
+
+## Main logic.
+
+unset -f __Main ; function __Main() {
+    declare -a targets=( $@ ) ;
+    declare    ipaddr url ;
+
+    if (( ! $# )) ; then
+        targets=( '' ) ;
+    fi
+
+    for ipaddr in "${targets[@]}" ; do
+        url=$( printf "$IPINFO_URL_FMT" "$ipaddr" ) ;
+        (( VERBOSE )) && __Whinge "# $CURL_EXE $url ..." ;
+        $CURL_EXE "$url" ; echo ;
+    done
+} ;
+
+## Runtime.
+
+declare GOPT ;
+GOPT=$( getopt -o "${DEFAULT_SHORT_OPTS}" -l "${DEFAULT_LONG_OPTS},$APP_OPTIONS" --name "$0" -- "$@" ) || exit $? ;
+
+eval set -- "$GOPT" ;
+
+while true ; do case "$1" in
+    --help|-h )
+        awk '/^## -- $/ { exit } !/^#!/ { gsub("^#+ ?", "") ; print }' "$0" ;
+        exit $RV_NOOP ;
+    ;;
+
+    --verbose|-v ) VERBOSITY+=1   ; shift ;;
+    --debug      ) VERBOSITY+=10  ; shift ;;
+    --trace      ) VERBOSITY+=100 ; shift ;;
+
+    -- ) shift ; break ;;
+esac ; done
+
+(( DRY_RUN && !HAS_DRY_RUN )) && __Croak "$SCRIPT_NAME does not implement the --dry-run/-n option." ;
+
+(( TRACE   = ( VERBOSITY >= 100 ) )) && WHINGEE=' «trace» ' ;
+(( DEBUG   = ( VERBOSITY >= 10  ) )) && : ${WHINGEE:= «debug» } ; 
+(( DRY_RUN                        )) && WHINGEE=" «dry-run»${WHINGEE:- }" ;
+(( VERBOSE = ( VERBOSITY >= 1   ) )) && : ${WHINGEE:= «verbose» } ;
+
+__Main "$@" ; unset -f __Main ;
+
+
