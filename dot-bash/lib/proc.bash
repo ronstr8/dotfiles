@@ -96,7 +96,7 @@ unset -f readArgs ; function readArgs() {
 
     if (( expectInput )) ; then
         declare readCommand='read ' ;
-        isRedirected && readCommand+=' -u0' ;
+        isRedirected && readCommand="$readCommand -u0" ;
 
         while $readCommand ; do gotInput=1 ;
             args[${#args[@]}]="$REPLY" ;

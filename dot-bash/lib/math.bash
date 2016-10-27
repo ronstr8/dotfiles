@@ -21,12 +21,13 @@ if ! pingLib ${BASH_SOURCE[0]} ; then
 
 unset -f numSum ; function numSum() {
     declare -i answer=0 ;
-    declare    mapper='answer+="$arg"' ;
+    declare    mapper='(( answer+="$arg" ))' ;
 
     declare -a args=() ;
     read -a args < <( readArgs "$@" ) ;
     declare arg ;
     for arg in "${args[@]}" ; do eval $mapper ; done # answer+=$arg ; done
+
 #    while read arg ; do
 #        eval $mapper ;
 #    done < <( readArgs "$@" ) ;
