@@ -63,38 +63,17 @@ unset -f __Main ; function __Main() {
     fi
 
     for ipaddr in "${targets[@]}" ; do
-        url=$( printf "$IPINFO_URL_FMT" "$ipaddr" ) ;
-        (( VERBOSE )) && __Whinge "# $CURL_EXE $url ..." ;
-        $CURL_EXE "$url" ; echo ;
+        if [[ "$ipaddr" ]] && [[ ! "$ipaddr" =~ [0-9]+(\.[0-9]+){3} ]] ; then
+            __Whinge "Unrecognized IP address '$ipaddr'." ;
+        else
+            url=$( printf "$IPINFO_URL_FMT" "$ipaddr" ) ;
+            __Whinge "# $CURL_EXE $url ..." ;
+            $CURL_EXE "$url" ; echo ;
+        fi
     done
 } ;
 
 ## Runtime.
-
-declare GOPT ;
-GOPT=$( getopt -o "${DEFAULT_SHORT_OPTS}" -l "${DEFAULT_LONG_OPTS},$APP_OPTIONS" --name "$0" -- "$@" ) || exit $? ;
-
-eval set -- "$GOPT" ;
-
-while true ; do case "$1" in
-    --help|-h )
-        awk '/^## -- $/ { exit } !/^#!/ { gsub("^#+ ?", "") ; print }' "$0" ;
-        exit $RV_NOOP ;
-    ;;
-
-    --verbose|-v ) VERBOSITY+=1   ; shift ;;
-    --debug      ) VERBOSITY+=10  ; shift ;;
-    --trace      ) VERBOSITY+=100 ; shift ;;
-
-    -- ) shift ; break ;;
-esac ; done
-
-(( DRY_RUN && !HAS_DRY_RUN )) && __Croak "$SCRIPT_NAME does not implement the --dry-run/-n option." ;
-
-(( TRACE   = ( VERBOSITY >= 100 ) )) && WHINGEE=' «trace» ' ;
-(( DEBUG   = ( VERBOSITY >= 10  ) )) && : ${WHINGEE:= «debug» } ; 
-(( DRY_RUN                        )) && WHINGEE=" «dry-run»${WHINGEE:- }" ;
-(( VERBOSE = ( VERBOSITY >= 1   ) )) && : ${WHINGEE:= «verbose» } ;
 
 __Main "$@" ; unset -f __Main ;
 
