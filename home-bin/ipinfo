@@ -56,8 +56,17 @@ declare    APP_OPTIONS='' ;
 declare -r IPADDR_RE='^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' ;
 declare -r CURL_EXE='curl' ;
 declare -r IPINFO_URL_FMT='http://ipinfo.io/%s' ;
+declare -r ARIN_IP_URL_FMT='https://whois.arin.net/rest/ip/%s' ;
 
 ## Main logic.
+
+## @see https://www.arin.net/resources/whoisrws/whois_api.html#whoisrws
+unset -f __Arin ; function __Arin() {
+    declare addr=${1?Missing required argument of address for ARIN REST query.} ;
+    declare url=$( printf "$ARIN_IP_URL_FMT" "$ipaddr" ) ;
+
+    $CURL_EXE -H "Accept: text/plain" "$url" ;
+} ;
 
 unset -f __Main ; function __Main() {
     declare -a targets=( $@ ) ;
@@ -76,7 +85,10 @@ unset -f __Main ; function __Main() {
         url=$( printf "$IPINFO_URL_FMT" "$ipaddr" ) ;
 
         __Whinge "# $CURL_EXE $url ..." ;
+
         $CURL_EXE "$url" ; echo ;
+
+        [[ "$ipinfo" ]] && __Arin "$ipaddr" ;
     done
 } ;
 
