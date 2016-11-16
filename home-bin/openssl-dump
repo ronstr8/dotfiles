@@ -13,7 +13,8 @@ case "$fn" in
         # openssl x509 -checkend $(( 60 * 60 * 24 * 14 ))
         # openssl x509 -noout -enddate
         # openssl x509 -noout -dates
-         echo | openssl s_client -connect "$( cut -d/ -f3 <<< "$fn" ):443" ;;
+         echo | openssl s_client -connect "$( cut -d/ -f3 <<< "$fn" ):443" | openssl x509 -text -noout ;;
+        # sed -e 's/^[[:space:]]\+\(\([0-9a-f]\{2\}\)\(:\|$\)\)\+//g' | grep -v '^$'
     *)
         echo "unsupported filetype for file $fn" > /dev/stderr ;
 esac
