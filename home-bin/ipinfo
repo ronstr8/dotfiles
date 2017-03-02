@@ -62,10 +62,11 @@ declare -r ARIN_IP_URL_FMT='https://whois.arin.net/rest/ip/%s' ;
 
 ## @see https://www.arin.net/resources/whoisrws/whois_api.html#whoisrws
 unset -f __Arin ; function __Arin() {
-    declare addr=${1?Missing required argument of address for ARIN REST query.} ;
+    declare ipaddr=${1?Missing required argument of address for ARIN REST query.} ;
     declare url=$( printf "$ARIN_IP_URL_FMT" "$ipaddr" ) ;
 
-    $CURL_EXE -H "Accept: text/plain" "$url" ;
+    __Whinge "# <$ipaddr> $CURL_EXE -H 'Accept: text/plain'  $CURL_EXE $url ..." ;
+    $CURL_EXE -H 'Accept: text/plain' "$url" ; echo ;
 } ;
 
 unset -f __Main ; function __Main() {
@@ -84,11 +85,10 @@ unset -f __Main ; function __Main() {
 
         url=$( printf "$IPINFO_URL_FMT" "$ipaddr" ) ;
 
-        __Whinge "# $CURL_EXE $url ..." ;
-
+        __Whinge "# <$ipaddr> $CURL_EXE $url ..." ;
         $CURL_EXE "$url" ; echo ;
 
-        [[ "$ipinfo" ]] && __Arin "$ipaddr" ;
+        [[ "$ipaddr" ]] && __Arin "$ipaddr" ;
     done
 } ;
 
