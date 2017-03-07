@@ -1,6 +1,14 @@
 ## Customizations to the appearance and behavior of shell prompts,
 ## history, etc.
 
+## Turn off ^s flow control
+
+stty stop  undef >& /dev/null
+
+## Turn off ^q flow control
+
+stty start undef >& /dev/null
+
 ## History
 
 ## XXX The trailing dollar-sign is detected by ~/.vim/syntax/historyrl.

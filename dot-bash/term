@@ -48,10 +48,5 @@ function __findTermType() {
 	fi
 }
 
-## Turn off ^s flow control
-stty stop  undef >& /dev/null
-## Turn off ^q flow control
-stty start undef >& /dev/null
-
 # vim: ft=sh
 

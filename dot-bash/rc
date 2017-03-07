@@ -9,7 +9,6 @@ BASHDIR="$HOME/.bash" ;
 [ -f "$BASHDIR/stdlib" ] && source "$BASHDIR/stdlib" ;
 
 if (( BASHRC_MINIMAL > 0 )) ; then
-    requireLib files ;
     requireLib prompt ;
 fi
 
@@ -18,9 +17,7 @@ RCFILES=(
     aliases
     completion
     path
-    term
     shopts
-    secret
 ) ;
 
 for rcFile in ${RCFILES[@]} ; do

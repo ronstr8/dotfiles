@@ -109,7 +109,7 @@ unset -f bashprompt ; function bashprompt() {
     declare depthMarker='' ;
     (( depth > 0 )) && depthMarker=${depth:+ [$depth]} ;
 
-    export PS1="${coloresc}\n\D{${datetimef}} \w${depthMarker}\n${coloresc}\u@\h\$\[\e[${xcFF_NONE}m\] " ;
+    export PS1="${coloresc}\n\D{${datetimef}} \w${depthMarker}\n${coloresc} \u@\h\$\[\e[${xcFF_NONE}m\] " ;
 }
 
 touchLib ${BASH_SOURCE[0]} ; fi ;
