@@ -106,7 +106,8 @@ unset -f bashprompt ; function bashprompt() {
 ##  declare coloresc="\[\e[38;5;${fgint}m\]\[\e[${fontWeight}m\]"
     declare coloresc="\[\e[${fgint}${fontWeight:+;$fontWeight}${fontStyle:+;$fontStyle}m\]"
 
-    declare -i depth=$(( STY ? SHLVL-2 : SHLVL-1 )) ; # [[ "$STY" ]] && let SHLVL-- ;
+    declare -i depth=$(( SHLVL - 1 )) ; ## "1" is first level w/no subshells.
+    [[ "$STY" ]] && let depth-- ;
     declare    depthMarker=${depth+ [$depth]} ;
 
     export PS1="${coloresc}\n\D{${datetimef}} \w${depthMarker}\n${coloresc}\u@\h\$\[\e[${xcFF_NONE}m\] "
