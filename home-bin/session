@@ -105,7 +105,7 @@ function __rtparam() {
 } ;
 
 function __getOptions() {
-    local allOptions=(
+    declare -a allOptions=(
         debug
         trace
         terse
@@ -123,13 +123,15 @@ function __getOptions() {
     ) ;
 
     local pristineArgs="$*" ;
-
-    local longOpts="$( echo "${allOptions[*]}" | sed -e 's/[[:space:]]+/,/gm' )"
-
+    local longOpts="$( echo "${allOptions[*]}" | tr -s ' ' ',' )" ;
     local getoptOutput=$( getopt -o hvn --long "help,verbose,dry-run,$longOpts" --name "$0" -- "$@" ) \
         && eval set -- "$getoptOutput" || return $NOOP ;
 
 #    getOpt="$( getopt -o hvn --long 'help,verbose,dry-run,debug,trace,terse,eval,screenrc,commit,vivify,session:,title:,renumber-to:,restore-window:,checkpoint' --name "$0" -- "$@" )" && eval set -- "$getOpt" || exit 1 ;
+
+#   __whinge "\$pristineArgs=«$pristineArgs»;" ;
+#   __whinge "\$longOpts=«$longOpts»;" ;
+#   __whinge "\$getoptOutput=«$getoptOutput»;" ;
 
     while true ; do case "$1" in
             --status )
@@ -143,11 +145,13 @@ function __getOptions() {
             --commit )
                 COMMIT_SESSION='yes' ; shift ;;
             --vivify )
+#               __whinge "\$1=$1" ;
                 VIVIFY='yes' ; shift ;;
 
             --checkpoint )
                 CHECKPOINT_WAIT_SECONDS=1800 ; shift ;;
             --session )
+#               __whinge "\$1=$1; \$2=$2;" ;
                 OPT_SESSION="$2" ; shift 2 ;;
             --title )
                 RETITLE_TO="$2" ; shift 2 ;;
@@ -180,7 +184,7 @@ function __getOptions() {
 
 function __whinge() {
     ## Prefix shell comment markers before all whinging so as not to interfere with --eval.
-    echo "# [$( date -Is )] $*" 1>&2 ;
+    echo "# [$( date +%Y-%m-%dT%H:%M:%S )] $*" 1>&2 ;
 } ;
 
 function __croak() {
