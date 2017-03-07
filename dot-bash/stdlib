@@ -199,14 +199,17 @@ unset -f __ldinit ; function __ldinit() {
     declare bashLib=${__BASHLIB:-$DEFAULT_BASHLIB} ;
 
     declare -a loadable ;
-    while read -d '' ; do
-        if [[ -x "$REPLY" ]] ; then
-            loadable[${#loadable[@]}]=$REPLY ;
+    declare    file ;
+
+    while read -d '' file ; do
+        if [[ -x "$file" ]] ; then
+            loadable[${#loadable[@]}]=$file ;
         fi
     done  < <( find $bashLib -type f -name '*.bash' | xargs printf '%s\0' ) ;
 
-    declare file ;
-    for file in "${loadable[@]}" ; do requireLib "$file" ; done
+    for file in "${loadable[@]}" ; do
+        requireLib "$file" ;
+    done
 } ; __ldinit ; unset -f __ldinit ;
 
 # vim: ft=sh
