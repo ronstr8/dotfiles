@@ -1,8 +1,6 @@
 
 if ! pingLib ${BASH_SOURCE[0]} ; then
 
-requireLib 'status' ;
-
 function git-current-branch() {
 	git rev-parse --abbrev-ref HEAD 2>/dev/null
 ##	git branch --no-color 2> /dev/null | awk '/^\*/ { print $2 }'

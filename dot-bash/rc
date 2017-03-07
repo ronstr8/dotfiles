@@ -1,19 +1,25 @@
 ## ln -s ~/.bash/rc ~/.bashrc
 ##      User specific aliases and functions.  Invoked for all shells.
 
-[ -f /etc/bashrc ] && . /etc/bashrc ;
+[ -f '/etc/bashrc' ] && . /etc/bashrc ;
 
 BASHDIR="$HOME/.bash" ;
+
+[ -f "$BASHDIR/init"   ] && source "$BASHDIR/init" ;
+[ -f "$BASHDIR/stdlib" ] && source "$BASHDIR/stdlib" ;
+
+if (( BASHRC_MINIMAL > 0 )) ; then
+    requireLib files ;
+    requireLib prompt ;
+fi
+
 RCFILES=(
-    stdlib
     environment
     aliases
-#   completion
+    completion
     path
     term
     shopts
-#   x11
-#   agents
     secret
 ) ;
 
@@ -25,7 +31,10 @@ done
 
 ## This `local' call source should always be last, allowing override of
 ## everything set above.
-
-[ -f $BASHDIR/local ] && source $BASHDIR/local ;
+if   [ -f "$BASHRC_LOCALRC" ] ; then
+    source "$BASHRC_LOCALRC" ;
+elif [ -f "$BASHDIR/local" ] ; then
+    source "$BASHDIR/local" ;
+fi
 
 # vim: ft=sh

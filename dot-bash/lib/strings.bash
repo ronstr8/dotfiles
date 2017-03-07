@@ -5,7 +5,13 @@ if ! pingLib ${BASH_SOURCE[0]} ; then
 #       Convert %XX hex codes into the ASCII characters they represent.
 ##
 unset -f urldecode ; function urldecode() {
-    perl -p -e 's/%([0-9A-F]{2})/chr(hex($1))/gie;' ;
+    declare expr='s/%([0-9A-F]{2})/chr(hex($1))/gie;' ;
+
+    if (( $# )) ; then ## Encoded string on cmdline.
+        echo "$@" | perl -p -e "$expr" ;
+    else
+        perl -p -e "$expr" ;
+    fi
 } ;
 
 ## tablify

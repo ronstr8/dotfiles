@@ -7,9 +7,6 @@
 if ! pingLib ${BASH_SOURCE[0]} ; then
 
 needsLib 'portability' ;
-needsLib 'proc' ;
-needsLib 'status' ;
-needsLib 'truth' ;
 
 unset -f __digitOr ; function __digitOr() {
     declare ifNot=$1 ;

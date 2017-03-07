@@ -1,7 +1,7 @@
 
-if hostname | grep 'adcopy-inc.com' >& /dev/null ; then
-    source $HOME/.bash/machines/adcopy-inc.com ;
-fi
+#if hostname | grep 'adcopy-inc.com' >& /dev/null ; then
+#    source $HOME/.bash/machines/adcopy-inc.com ;
+#fi
 
 # vim: ft=sh
 

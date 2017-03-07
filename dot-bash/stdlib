@@ -1,6 +1,92 @@
 
 [[ "$__LIBINFO" ]] || declare __LIBINFO='' ;
 
+## pathmunge() formerly from lib/files.bash.
+
+unset -f pathmunge ; function pathmunge() {
+        ## . ~/.bash/lib/files.bash ; echo $PATH ; pathmunge PATH +$HOME/work/bin after ; echo $PATH
+        local varName="$1" ;
+        local actionFlag="${2:0:1}" ;
+        local whatDir="${2#[+-]}" ;
+        local action=$( [ "$actionFlag" = '-' ] && echo 'remove' || echo "${3:-before}" ) ;
+
+        local originalPath="${!varName}" ;
+        local pathWithoutWhatDir="$( echo "$originalPath" | sed 's#\(^\|:\)'$whatDir'\($\|:\)#\1\2#g' )" ;
+        local changedPath='' ;
+
+        if   [ "$action" = 'before' ] ; then
+            changedPath="${whatDir}:${pathWithoutWhatDir}" ;
+        elif [ "$action" = 'after'  ] ; then
+            changedPath="${pathWithoutWhatDir}:${whatDir}:" ;
+        elif [ "$action" = 'remove' ] ; then
+            changedPath="${pathWithoutWhatDir}" ;
+        fi
+
+        [ "$changedPath" ] && changedPath=$( echo "$changedPath" | sed 's/^://; s/:$//; s/:\+/:/g;' ) ;
+        [ "$changedPath" ] && eval "$varName='$changedPath'" ; 
+} ;
+
+## $TRUE and $FALSE formerly from lib/truth.bash.
+##      Do I really need these?
+
+[[ -z "${TRUE:-}"  ]] && declare -r -i TRUE=1 ;
+[[ -z "${FALSE:-}" ]] && declare -r -i FALSE=0 ;
+
+## More kinda silly constants formerly from lib/status.bash.
+##      Kill them all?
+
+[[ -z "${RV_SUCCESS:-}" ]] && declare -x -i  RV_SUCCESS=0 ;
+[[ -z "${RV_FAILURE:-}" ]] && declare -x -i  RV_FAILURE=1 ;
+[[ -z "${RV_TRUE:-}"    ]] && declare -x -i  RV_TRUE=$RV_SUCCESS ;
+[[ -z "${RV_FALSE:-}"   ]] && declare -x -i  RV_FALSE=$RV_FAILURE ;
+[[ -z "${RV_NOOP:-}"    ]] && declare -x -i  RV_NOOP=$RV_SUCCESS ;
+
+declare -x -i  RV_FAILBASE=$(( RV_FAILURE+1  )) ;
+declare -x -i  RV_MISMATCH=$(( RV_FAILBASE++ )) RV_MISSING=$(( RV_FAILBASE++ )) RV_SYNTAX=$(( RV_FAILBASE++ )) ;
+
+## [[ -z "${RV_NAN:-}" ]] && export RV_NAN='NaN'; ## Not a Number, so can't "return" this "value" from a bash function.
+
+## Stub whinge() function until lib/whinge.bash gives better.
+
+if ( ! type whinge &> /dev/null ) ; then
+
+    function __digitOr() {
+        declare ifNot=$1 ;
+        declare maybe=$2 ;
+        declare hasNonDigits=${maybe:+${maybe//[0123456789]+}} ;
+
+        if [[ -z "$maybe" ]] ;then
+            echo $ifNot ;
+            return $RV_FALSE ; 
+        elif [[ -n "$hasNonDigits" ]] ; then
+            echo $ifNot ;
+            return $RV_FALSE ; 
+        else 
+            echo $maybe ;
+            return $RV_TRUE ;
+        fi
+    } ;
+
+    function whinge() {
+        declare statusCode ;
+        statusCode=$( __digitOr $? "$1" ) && shift ;
+
+        declare fmtMsg="${1:?Need a printf-style format or literal message.}" ; shift ;
+        
+        if [ "$*" ] ; then
+            fmtMsg=$( printf "$fmtMsg" "$@" ) ;
+        fi ;
+
+        echo "# [$( date +%Y-%m-%dT%H:%M:%S )] $fmtMsg" 1>&2 ;
+
+        return $statusCode ;
+    } ;
+
+fi
+
+## The bulk of this "stdlib" is composed of functions that read the
+## files which comprise our standard library.
+
 declare DEFAULT_BASHLIB="$HOME/.bash/lib" ;
 
 declare __RDELIM=':' ;
@@ -210,7 +296,12 @@ unset -f __ldinit ; function __ldinit() {
     for file in "${loadable[@]}" ; do
         requireLib "$file" ;
     done
-} ; __ldinit ; unset -f __ldinit ;
+} ;
+
+if (( BASHRC_MINIMAL < 1 )) ; then
+    __ldinit ;
+    unset -f __ldinit ;
+fi
 
 # vim: ft=sh
 

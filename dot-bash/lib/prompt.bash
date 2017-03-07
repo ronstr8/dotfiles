@@ -1,9 +1,6 @@
 
 if ! pingLib ${BASH_SOURCE[0]} ; then
 
-    requireLib 'status' ;
-    requireLib 'whinge' ;
-
 ### __machineColor
 #       Echo integer representing an xterm-256color color "label" for the current host.
 #

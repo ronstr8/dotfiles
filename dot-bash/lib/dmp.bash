@@ -15,8 +15,6 @@ if ! pingLib ${BASH_SOURCE[0]} ; then
 ## }
 ## EOT
 
-needsLib 'whinge' ;
-
 [[ -z "${DEFAULT_DMP_UID:-}"      ]] || declare -i -r DEFAULT_DMP_UID=12345678901234567890 ;
 [[ -z "${DEFAULT_DMP_PORT_WWW:-}" ]] || declare -i -r DEFAULT_DMP_PORT_WWW=8080 ;
 [[ -z "${DEFAULT_DMP_PORT_SSL:-}" ]] || declare -i -r DEFAULT_DMP_PORT_SSL=8443 ;
