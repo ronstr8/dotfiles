@@ -9,6 +9,10 @@ if [ -f $BEYONDGREP ] ; then
     function ack() { $BEST_PERL $BEYONDGREP "$@" ; }
 fi
 
+## Per-host history to avoid clobbering all into one over shared NFS home.
+
+export HISTFILE="${HOME}/.history/${HOSTNAME}" ;
+
 ## @see /usr/share/lib/terminfo
 ## @see http://vim.wikia.com/wiki/Getting_colors_to_work_on_solaris
 ## @see man curses
@@ -23,8 +27,6 @@ export TERM='xterm-256color' ;
 export TERMINFO="$HOME/.terminfo" ;
 # Without the custom TERMINFO caps imported, use export TERM='xtermc', but it
 # displays artifacts at times, e.g. when exiting vim.
-## Without the custom TERMINFO caps imported, use export TERM='xtermc', but it
-## displays artifacts at times, e.g. when exiting vim.
 
 ## Fix some other bad choices for environment variables.
 
@@ -37,6 +39,7 @@ export PAGER='less' ;
 [ -x /usr/sfw/bin/gfgrep       ] && alias fgrep='/usr/sfw/bin/gfgrep' ;
 [ -x /usr/sfw/bin/gmake        ] && alias make='/usr/sfw/bin/gmake' ;
 [ -x /usr/sfw/bin/gtar         ] && alias tar='/usr/sfw/bin/gtar' ;
+#[ -x /opt/csw/bin/screen       ] && alias screen='/opt/csw/bin/screen' ;
 
 ## Alias psql to most recent available version.
 
@@ -72,6 +75,17 @@ function __SetPaths() {
         pathmunge 'PATH' /usr/X11R6/bin after ;
     fi
 } ; __SetPaths ; unset -f __SetPaths ;
+
+## Rough alternatives to GNU functionality.
+
+if ! type -a stat &> /dev/null ; then
+    # @see http://www.linuxquestions.org/questions/solaris-opensolaris-20/stat-command-on-solaris-934442/
+    function stat() {
+        ## Omits the actual output of `ls', showing only
+        ## the stderr stats from `truss'.
+        truss -t lstat64 -v lstat64 ls "$@" > /dev/null ;
+    } ;
+fi
 
 ## We aren't setting MANPATH anywhere in ~/.bash, but without unsetting it, we
 ## lose most man pages.
