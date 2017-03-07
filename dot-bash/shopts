@@ -55,7 +55,7 @@ unset -f __updatePromptCommand ; function __updatePromptCommand() {
 	[ "$newPromptCommand" ] && export PROMPT_COMMAND="$newPromptCommand" ;
 }
 
-__updatePromptCommand ;
+#__updatePromptCommand ;
 
 # vim: ft=sh
 
