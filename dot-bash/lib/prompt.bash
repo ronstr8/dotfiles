@@ -2,7 +2,6 @@
 if ! pingLib ${BASH_SOURCE[0]} ; then
 
     requireLib 'status' ;
-    requireLib 'termcap' ;
     requireLib 'whinge' ;
 
 ### __machineColor
@@ -33,24 +32,6 @@ unset -f __machineColor ; function __machineColor() {
     echo "${maybecolor#-}" ; ## Ersatz abs().
 }
 
-    export xcFF_NONE=0 ;
-    export xcFF_BOLD=1 ;
-    export xcFF_NORMAL=2 ;
-    export xcFF_UNDERLINE=4 ;
-    export xcFF_BLINK=5 ;
-    export xcFF_REVERSE=7 ;
-    export xcFF_INVISIBLE=8 ;
-    export xcFF_GRAY=30 ;
-    export xcFF_RED=31 ;
-    export xcFF_GREEN=32 ;
-    export xcFF_YELLOW=33 ;
-    export xcFF_BLUE=34 ;
-    export xcFF_MAGENTA=35 ;
-    export xcFF_CYAN=36 ;
-    export xcFF_WHITE=37 ;
-    export xcFF_ORANGE=172 ;
-    export xcFF_OLIVE_DRAB=65 ;
-
 
 ### bashprompt [NONE|GRAY|RED|GREEN|YELLOW|BLUE|CYAN|WHITE|{0..255}|...]
 #       Set the primary color of the main command prompt.
@@ -67,6 +48,27 @@ unset -f bashprompt ; function bashprompt() {
     declare fgname="${1:-$( __machineColor )}" ;
     declare datetimef='%F %T' ; ## 'T' is ugly, '%z' unnecessary
     declare fgint fontWeight fontStyle ;
+
+    # These are interpolated into raw code sequences such as:
+    #   [<ESC>[38;5;${xcFF_RED}m][<ESC>[${xcFF_BOLD}m]]
+    declare xcFF_NONE=0 ;
+    declare xcFF_BOLD=1 ;
+    declare xcFF_NORMAL=2 ;
+    declare xcFF_UNDERLINE=4 ;
+    declare xcFF_BLINK=5 ;
+    declare xcFF_REVERSE=7 ;
+    declare xcFF_INVISIBLE=8 ;
+    declare xcFF_GRAY=30 ;
+    declare xcFF_RED=31 ;
+    declare xcFF_GREEN=32 ;
+    declare xcFF_YELLOW=33 ;
+    declare xcFF_BLUE=34 ;
+    declare xcFF_MAGENTA=35 ;
+    declare xcFF_CYAN=36 ;
+    declare xcFF_WHITE=37 ;
+    declare xcFF_ORANGE=172 ;
+    declare xcFF_OLIVE_DRAB=65 ;
+
 
     ## Bold if name is (a) all caps or (b) ends in a bang.
 
@@ -103,10 +105,10 @@ unset -f bashprompt ; function bashprompt() {
 ##  declare coloresc="\[\e[38;5;${fgint}m\]\[\e[${fontWeight}m\]"
     declare coloresc="\[\e[${fgint}${fontWeight:+;$fontWeight}${fontStyle:+;$fontStyle}m\]"
 
-#   declare -i depth=$SHLVL ; [[ "$STY" ]] && let SHLVL+=2 ;
-    declare    depthMarker=' ' ; # " $( printf '«%0.0s' $( seq 1 $depth ) ) " ;
+    declare -i depth=$(( STY ? SHLVL-2 : SHLVL-1 )) ; # [[ "$STY" ]] && let SHLVL-- ;
+    declare    depthMarker=${depth+ [$depth]} ;
 
-    export PS1="${coloresc}\n\D{${datetimef}}${depthMarker}\w\n ${coloresc}\u@\h\$\[\e[${xcFF_NONE}m\] "
+    export PS1="${coloresc}\n\D{${datetimef}} \w${depthMarker}\n${coloresc}\u@\h\$\[\e[${xcFF_NONE}m\] "
 }
 
 touchLib ${BASH_SOURCE[0]} ; fi ;
