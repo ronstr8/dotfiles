@@ -218,7 +218,7 @@ function __echoScreenRc() {
     [ "$sessionName" ] || __croak "echoScreenRc needs a currentWinNumber." || return $ERR ;
 
 
-    local promptCommand='eval `session --checkpoint`' ;
+    local promptCommand='eval `session --checkpoint --eval`' ;
     ## Below is checking PROMPT_COMMAND when `session` is run and not necessarily when screenrc is executed.
     # echo "$PROMPT_COMMAND" | fgrep -v 'session --checkpoint' && promptCommand="$PROMPT_COMMAND ; $promptCommand" ;
 
