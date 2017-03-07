@@ -28,6 +28,10 @@ for dn in /sbin /usr/sbin /usr/local/sbin $HOME/bin $MYROOT/sbin $MYROOT/bin $MY
 	[ -d "$dn" ] && pathmunge PATH "$dn" after ;
 done
 
+for dn in $HOME/.rakudobrew/bin ; do
+	[ -d "$dn" ] && pathmunge PATH "$dn" after ;
+done
+
 if [ -d "/opt/gradle" ] ; then
     export GRADLE_HOME="/opt/gradle" ;
     pathmunge PATH "$GRADLE_HOME/bin" ;
