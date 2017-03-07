@@ -107,7 +107,8 @@ unset -f bashprompt ; function bashprompt() {
     declare coloresc="\[\e[${fgint}${fontWeight:+;$fontWeight}${fontStyle:+;$fontStyle}m\]"
 
     declare -i depth=$(( STY ? SHLVL-2 : SHLVL-1 )) ; # [[ "$STY" ]] && let SHLVL-- ;
-    declare    depthMarker=${depth+ [$depth]} ;
+    declare    depthMarker='' ;
+    (( depth )) && depthMarker=${depth:+ [$depth]} ;
 
     export PS1="${coloresc}\n\D{${datetimef}} \w${depthMarker}\n${coloresc}\u@\h\$\[\e[${xcFF_NONE}m\] "
 }
