@@ -108,9 +108,11 @@ unset -f bashprompt ; function bashprompt() {
 
     declare -i depth=$(( SHLVL - 1 )) ; ## "1" is first level w/no subshells.
     [[ "$STY" ]] && let depth-- ;
-    declare    depthMarker=${depth+ [$depth]} ;
 
-    export PS1="${coloresc}\n\D{${datetimef}} \w${depthMarker}\n${coloresc}\u@\h\$\[\e[${xcFF_NONE}m\] "
+    declare depthMarker='' ;
+    (( depth > 0 )) && depthMarker=${depth:+ [$depth]} ;
+
+    export PS1="${coloresc}\n\D{${datetimef}} \w${depthMarker}\n${coloresc}\u@\h\$\[\e[${xcFF_NONE}m\] " ;
 }
 
 touchLib ${BASH_SOURCE[0]} ; fi ;
