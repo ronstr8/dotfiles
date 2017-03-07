@@ -6,6 +6,7 @@
 
 if ! pingLib ${BASH_SOURCE[0]} ; then
 
+needsLib 'portability' ;
 needsLib 'proc' ;
 needsLib 'status' ;
 needsLib 'truth' ;
@@ -54,7 +55,7 @@ unset -f whinge ; function whinge() {
         fmtMsg=$( printf "$fmtMsg" "$@" ) ;
     fi ;
 
-    echo "# [$( date -Is )] $fmtMsg" 1>&2 ;
+    echo "# [$( date-Is )] $fmtMsg" 1>&2 ;
 
     return $statusCode ;
 }
