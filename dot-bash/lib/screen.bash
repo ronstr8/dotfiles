@@ -10,6 +10,10 @@ function screen-stuff() {
     screen -X at \# stuff "$*\015" ;
 } ;
 
+function session-window-title() {
+    eval $( session --eval --title="$1" ) ;
+} ;
+
 function session-checkpoint() {
     if [[ ! "$SESSION_HOME" ]] ; then
         echo "${FUNCNAME}: No \$SESSION_HOME defined.  Aborting." >&2 ;
