@@ -532,7 +532,14 @@ function __maybeRetitleWindow() {
     fi
     
     screen -X title "$RETITLE_TO" ;
+
     export WINDOW_TITLE="$RETITLE_TO" ;
+
+    if [ "$WINDOW_TITLE_FILE" ] ; then
+        echo "$RETITLE_TO" > "$WINDOW_TITLE_FILE" ;
+    else
+        __whinge "WINDOW_TITLE_FILE is empty!" ;
+    fi
 
     return $OK ;
 } ;
@@ -582,6 +589,8 @@ function __saveWindowState() {
     [ "$WRITE_SCREENRC" ] && __echoScreenRc "$SESSION_NAME" "$SESSION_HOME" "$WINDOW_NUMBER" > "$SESSION_HOME/screenrc" ;
     [ "$COMMIT_SESSION" ] && __commitSessionToVcs "$SESSION_HOME" ;
     [ "$EVAL" ] && __echoExports ;
+
+    return $OK ;
 } ;
 
 function __loadWindowState() {
@@ -604,6 +613,12 @@ function __loadWindowState() {
     export WINDOW_HOME="$winDir" ;
     export WINDOW_TITLE="${winTitle:-win$winNumber}" ;
     export HISTFILE="$winHistoryFile"
+
+    declare -x WINDOW_HISTORY_FILE="$WINDOW_HOME/$HISTORY_BASENAME" ;
+    declare -x WINDOW_TITLE_FILE="$WINDOW_HOME/$TITLE_BASENAME" ;
+    declare -x WINDOW_CHDIR_FILE="$WINDOW_HOME/$CHDIR_BASENAME" ;
+    declare -x WINDOW_HARDCOPY_FILE="$WINDOW_HOME/$HARDCOPY_BASENAME" ;
+    declare -x WINDOW_ENV_FILE="$WINDOW_HOME/$ENV_BASENAME" ;
 
     [ "$EVAL" ] && __echoExports ;
 
@@ -725,41 +740,43 @@ function __main() {
 
     mkdir -p $WINDOW_HOME ;
 
+    declare -x WINDOW_HISTORY_FILE="$WINDOW_HOME/$HISTORY_BASENAME" ;
+    declare -x WINDOW_TITLE_FILE="$WINDOW_HOME/$TITLE_BASENAME" ;
+    declare -x WINDOW_CHDIR_FILE="$WINDOW_HOME/$CHDIR_BASENAME" ;
+    declare -x WINDOW_HARDCOPY_FILE="$WINDOW_HOME/$HARDCOPY_BASENAME" ;
+    declare -x WINDOW_ENV_FILE="$WINDOW_HOME/$ENV_BASENAME" ;
+
+    if [ "$RETITLE_TO" ] ; then
+        __maybeRetitleWindow  || return $ERR ;
+        WINDOW_TITLE="$RETITLE_TO" ;
+    fi
+
     if [ "$CHECKPOINT_WAIT_SECONDS" ] ; then
         __readyForCheckpoint || return $ERR ;
     fi
 
-    __maybeRetitleWindow  || return $ERR ;
     __maybeRenumberWindow || return $ERR ;
 
     if [ "$RESTORE_FROM" ] ; then
-        if __loadWindowState "$SESSION_NAME" "$SESSION_HOME" "$RESTORE_FROM" ; then
-            return $OK ;
-        else
+        if ! __loadWindowState "$SESSION_NAME" "$SESSION_HOME" "$RESTORE_FROM" ; then
             return $ERR ;
         fi
     fi
 
-    WINDOW_HISTORY_FILE="$WINDOW_HOME/$HISTORY_BASENAME" ;
-    WINDOW_TITLE_FILE="$WINDOW_HOME/$TITLE_BASENAME" ;
-    WINDOW_CHDIR_FILE="$WINDOW_HOME/$CHDIR_BASENAME" ;
-#    WINDOW_SCREENLOG_FILE="$WINDOW_HOME/$SCREENLOG_BASENAME" ;
-    WINDOW_HARDCOPY_FILE="$WINDOW_HOME/$HARDCOPY_BASENAME" ;
-    WINDOW_ENV_FILE="$WINDOW_HOME/$ENV_BASENAME" ;
-
     export HISTFILE="$WINDOW_HISTORY_FILE" ;
+
     export SESSION_HOME SESSION_NAME  ;
     export WINDOW_HOME WINDOW_NUMBER WINDOW_TITLE ;
 
-    if [ "$DO_STATUS" ] ; then
-        __echoStatus ; return $OK ;
-    fi
-
     if [ "$DO_HARDCOPY_DUMP" ] ; then
-        __dumpHardcopyFiles ${WINDOW_HOME}/${HARDCOPY_BASENAME}.* $WINDOW_HARDCOPY_FILE ; return $OK ;
+        __dumpHardcopyFiles ${WINDOW_HOME}/${HARDCOPY_BASENAME}.* $WINDOW_HARDCOPY_FILE ; # return $OK ;
     fi
 
     __saveWindowState || return $ERR ;
+
+    if [ "$DO_STATUS" ] ; then
+        __echoStatus ; # return $OK ;
+    fi
 } ;
 
 ## Run in a subshell so any `exit' thrown by the called functions will not
