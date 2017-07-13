@@ -2,10 +2,10 @@
 declare -x -i BASHRC_MINIMAL=0 ;
 declare -x    BASHRC_LOCALRC ;
 
-if [[ $HOSTNAME =~ 'adcopy-inc.com$' ]] ; then
+if [[ $HOSTNAME =~ adcopy-inc.com$ ]] ; then
     BASHRC_LOCALRC="$HOME/.bash/machines/adcopy-inc.com" ;
 
-    if [[ $HOSTNAME =~ '\.qtssjc|savchi\.' ]] ; then
+    if [[ $HOSTNAME =~ \.qtssjc\|savchi\. ]] ; then
         BASHRC_MINIMAL=1 ;
     fi
 fi
