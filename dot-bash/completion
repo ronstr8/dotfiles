@@ -129,8 +129,11 @@ EXT_BASH_COMPLETION="$HOME/.bash/completion.d"
 SYS_BASH_COMPLETION="/etc/bash_completion"
 #OPT_BASH_COMPLETION="/usr/share/bash-completion"
 
-for compfn in $SYS_BASH_COMPLETION $( find $EXT_BASH_COMPLETION/ -type f 2> /dev/null ) ; do
-	[ -f "$compfn" ] && . "$compfn"
+[ -f "$SYS_BASH_COMPLETION" ] && . $SYS_BASH_COMPLETION ;
+
+for compfn in $( find $EXT_BASH_COMPLETION/ -type f 2> /dev/null ) ; do
+	[ -x "$compfn" ] && . "$compfn"
 done
 
 ## vim: ft=sh
+
