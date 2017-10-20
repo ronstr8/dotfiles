@@ -14,6 +14,9 @@
 #
 # Dmitry V Golovashkin <Dmitry.Golovashkin@sas.com>
 
+# @see https://stackoverflow.com/questions/687948/timeout-a-command-in-bash-without-unnecessary-delay
+# @see http://www.bashcookbook.com/bashinfo/source/bash-4.0/examples/scripts/timeout3
+
 scriptName="${0##*/}"
 
 declare -i DEFAULT_TIMEOUT=9

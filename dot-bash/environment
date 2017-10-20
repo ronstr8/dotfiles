@@ -48,4 +48,8 @@ export CISCO_DEF_DOMAIN="adblade.com"
 ## @see http://consttype.blogspot.com/2007/08/mysql-command-line-tricks.html
 export MYSQL_PS1="\\d@\\h> "
 
+## Use Perl's Term::ReadLine::Gnu when available.
+export PERL_RL='Gnu'
+
 ## vim: ft=sh
+

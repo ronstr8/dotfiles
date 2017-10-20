@@ -129,4 +129,12 @@ bashprompt 204 ;
 
 # ps -e -o user,pid,pcpu,pmem,vsz,rss,tty,s,stime,time,args
 
+function achosts() {
+    local hostType="${1:?missing required argument of host type}" ;
+
+    hostType=$( sed 's/[^a-zA-Z0-9_-]//g;' <<< $hostType ) ;
+    gsed -e 's/#.*$//g;' -e "s/\s//g;" $HOME/.achosts/$hostType | grep -v '^$';
+}
+
+
 # vim: ft=sh
