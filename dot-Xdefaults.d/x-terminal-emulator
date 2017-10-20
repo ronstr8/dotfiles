@@ -74,11 +74,11 @@ XTerm.toolBar: false
 
 !*.vt100.faceName: Consolas
 !*.vt100.faceName: DejaVuSansMono
-!*.vt100.faceName: Source Code Pro
+!*.vt100.faceName: SourceCodePro
 
-*.fontMenu*fontdefault*Label: Default - SourceCodePro
-*.VT100.faceName: SourceCodePro
-*.VT100.faceSize: 10
+*.fontMenu*fontdefault*Label: Default - Consolas12
+*.VT100.faceName: Consolas12
+*.VT100.faceSize: 12
 *.VT100.geometry: 150x40
 *.VT100.faceAntialias: true
 
