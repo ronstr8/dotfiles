@@ -44,6 +44,11 @@ alias biosinfo='sudo dmidecode | head'
 alias psarg='ps -a -o user,pid,ppid,pri,nice,pcpu,pmem,etime,args'
 alias psthr='ps axms'
 
+if [[ -d $HOME/dev/adcopy/lib && -x /usr/local/bin/perl ]] ; then
+    alias acperl='/usr/local/bin/perl -I $HOME/dev/adcopy/lib ' ;
+    alias acperldoc='/usr/local/bin/perldoc ' ;
+fi
+
 #alias xdaliclock='xdaliclock -builtin3 -bg wheat -fg brown -noseconds -cycle -geometry +950+40'
 
 ## Only pass the -q option if we have the -q option for --quiet.
