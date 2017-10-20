@@ -19,10 +19,10 @@ unset -f xPostMortem ; function xPostMortem() {
     return $rv ;
 } ;
 
-## __hh2fd
+## __std2fd $hh
 #
 # @param hh is either a name (e.g. "stdin") or a file descriptor  (e.g. 0)
-# @return the file descriptor described by the given word.
+# @echo the file descriptor described by the given word.
 ##
 unset -f __std2fd ; function __std2fd() {
     declare hh=$1 ;
@@ -36,7 +36,7 @@ unset -f __std2fd ; function __std2fd() {
     return 1 ;
 } ;
 
-## isPiped
+## isPiped $hh
 #
 # @param hh is the handle to check: stdin/0 (default), also stdout/1, stderr/2)
 # @return true if handle is connected to a pipe.
@@ -46,7 +46,7 @@ unset -f isPiped ; function isPiped() {
     [[ -p /dev/fd/$fd ]] ;
 } ;
 
-## isInteractive
+## isInteractive $hh
 #
 # @param hh is the handle to check: stdin/0 (default), also stdout/1, stderr/2)
 # @return true if handle is from a terminal/interactive input.
@@ -56,7 +56,7 @@ unset -f isInteractive ; function isInteractive() {
     [[ -t $fd ]] ;
 } ;
 
-## isRedirected
+## isRedirected $hh
 #
 # @param hh is the handle to check: stdin/0 (default), also stdout/1, stderr/2)
 # @return true if handle is from a redirection.
@@ -110,5 +110,26 @@ unset -f readArgs ; function readArgs() {
 
     echo ${args[@]} ;
 } ;
+
+## awkp $index1 $indexN
+#
+#  Reduction of the awk '{ print $1 }' idiom.  Multiple positions
+#  will be separated by tabs.
+##
+unset -f awkp ; function awkp() {
+    declare printstr='' arg ;
+
+    for arg in "$@" ; do
+        if [ -n "$printstr" ] ; then
+            printstr+=' "\t" ';
+        fi
+        printstr+="\$$arg" ;
+    done
+
+    awk "{ print $printstr }" ;
+} ;
+
+
+
 
 touchLib ${BASH_SOURCE[0]} ; fi ;
