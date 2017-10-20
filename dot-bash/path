@@ -6,7 +6,7 @@ MYWORK="$HOME/work/adblade" ;
 ##### PERL5LIB/perlbrew
 #####
 
-for dn in $( ls -d $HOME/src/perl/*/lib $MYROOT/{lib,share,}/perl/5.[0123456789]*/{,auto} $MYROOT/perl5 $MYROOT/site_perl 2> /dev/null ) ; do
+for dn in $( ls -d $HOME/src/perl/*/lib $MYROOT/{lib,share,}/perl/5.[0123456789]*/{,auto} $MYROOT/perl5 $MYROOT/site_perl $MYROOT/lib/perl 2> /dev/null ) ; do
 	pathmunge PERL5LIB $dn after
 done
 
