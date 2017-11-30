@@ -54,7 +54,7 @@ declare -i HAS_DRY_RUN=$FALSE ;
 declare    APP_OPTIONS='' ;
 
 declare -r IPADDR_RE='^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' ;
-declare -r CURL_EXE='curl' ;
+declare -r CURL_EXE='curl --silent' ;
 declare -r IPINFO_URL_FMT='http://ipinfo.io/%s' ;
 declare -r ARIN_IP_URL_FMT='https://whois.arin.net/rest/ip/%s' ;
 
@@ -71,15 +71,22 @@ unset -f __Arin ; function __Arin() {
 
 unset -f __Main ; function __Main() {
     declare -a targets=( $@ ) ;
-    declare    ipaddr url ;
+    declare    host ipaddr url doIpcalc cidr ;
+    declare    hasIpcalc=$( type ipcalc 2> /dev/null ) ;
 
     if (( ! $# )) ; then
         targets=( '' ) ;
     fi
 
-    for ipaddr in "${targets[@]}" ; do
-        if [[ "$ipaddr" ]] && [[ ! $ipaddr =~ $IPADDR_RE ]] ; then
-            __Whinge "Malformed IP address '$ipspec'." ;
+    for host in "${targets[@]}" ; do
+        if [[ "$host" ]] && [[ $host =~ $IPADDR_RE ]] ; then
+            ipaddr=$host ;
+        else
+            ipaddr=$( host $host | awk '{ print $NF }' 2>/dev/null ) ;
+        fi
+
+        if [[ ! "$ipaddr" ]] ; then
+            __Whinge "Malformed host or IP address '$host'." ;
             continue ;
         fi
 
@@ -88,7 +95,17 @@ unset -f __Main ; function __Main() {
         __Whinge "# <$ipaddr> $CURL_EXE $url ..." ;
         $CURL_EXE "$url" ; echo ;
 
-        [[ "$ipaddr" ]] && __Arin "$ipaddr" ;
+        doIpcalc=''
+
+        __Arin "$ipaddr" && doIpcalc="$hasIpcalc" ;
+        
+        if [[ "$doIpcalc" ]] ; then
+            cidr=$( __Arin "$ipaddr" 2>/dev/null | awk '/CIDR/ { print $2 }' ) ;
+            echo ; 
+            __Whinge "# ipcalc --nocolor $cidr" ...;
+            echo ;
+            ipcalc --nocolor $cidr ;
+        fi
     done
 } ;
 
