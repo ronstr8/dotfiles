@@ -10,8 +10,8 @@ for dn in $( ls -d $HOME/src/perl/*/lib $MYROOT/{lib,share,}/perl/5.[0123456789]
 	pathmunge PERL5LIB $dn after
 done
 
-[[ -f ~/perl5/perlbrew/etc/bashrc ]] && . ~/perl5/perlbrew/etc/bashrc
-
+## 2017-11-14 17:47:27 <ronstra> Different arch cause problems when unconditionally doing this.
+## [[ -f ~/perl5/perlbrew/etc/bashrc ]] && . ~/perl5/perlbrew/etc/bashrc
 ## source ~/perl5/perlbrew/etc/bashrc && perl -v && perlbrew switch perl-5.22.0 && perl -v
 
 export PERL5LIB ; 
