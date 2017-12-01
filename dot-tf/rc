@@ -22,7 +22,7 @@
 /load mcp-negotiate.tf
 /load simpleedit.tf
 /load local-edit.tf
-/load idler.tf
+;; /load idler.tf
 
 /def WORLDFILE	= ~/.tf/worlds.tf
 /def BINDFILE	= ~/.tf/bind.tf
