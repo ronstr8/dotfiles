@@ -79,21 +79,27 @@ unset -f __Main ; function __Main() {
     fi
 
     for host in "${targets[@]}" ; do
-        if [[ "$host" ]] && [[ $host =~ $IPADDR_RE ]] ; then
+        if [[ ! "$host" ]] ; then
+            ipaddr='' ;
+        elif [[ $host =~ $IPADDR_RE ]] ; then
             ipaddr=$host ;
         else
             ipaddr=$( host $host | awk '{ print $NF }' 2>/dev/null ) ;
-        fi
-
-        if [[ ! "$ipaddr" ]] ; then
-            __Whinge "Malformed host or IP address '$host'." ;
-            continue ;
         fi
 
         url=$( printf "$IPINFO_URL_FMT" "$ipaddr" ) ;
 
         __Whinge "# <$ipaddr> $CURL_EXE $url ..." ;
         $CURL_EXE "$url" ; echo ;
+
+        if [[ ! "$ipaddr" ]] ; then
+            ipaddr=$( $CURL_EXE "$url" | awk -F\" '/"ip"/ { print $4 }' ) ;
+        fi
+
+        if [[ ! "$ipaddr" ]] ; then
+            __Whinge "# Failed to parse IP address." ;
+            continue ;
+        fi
 
         doIpcalc=''
 
