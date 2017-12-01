@@ -14,7 +14,7 @@ fugitive-helptags: vim-fugitive
 gitgutter-helptags: vim-gitgutter
 	vim -u NONE -c "helptags vim-gitgutter/doc" -c q
 
-clone: tabular vim-fugitive vim-json vim-gitgutter
+clone: tabular vim-fugitive vim-json vim-gitgutter cisco.vim
 
 tabular:
 	git clone git://github.com/godlygeek/tabular.git
@@ -27,3 +27,6 @@ vim-json:
 
 vim-gitgutter:
 	git clone git://github.com/airblade/vim-gitgutter.git
+
+cisco.vim:
+	git clone git://github.com/momota/cisco.vim
