@@ -3,7 +3,7 @@ if ! pingLib ${BASH_SOURCE[0]} ; then
 
 PERLBREW_BASHRC="$HOME/perl5/perlbrew/etc/bashrc" ;
 
-[ -f "$HOME/perl5/perlbrew/etc/bashrc" ] && . "$HOME/perl5/perlbrew/etc/bashrc"
+[ -f "$PERLBREW_BASHRC" ] && . "$PERLBREW_BASHRC"
 
 RAKUDOBREW_BIN="$HOME/.rakudobrew/bin/rakudobrew" ;
 
