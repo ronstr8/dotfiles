@@ -133,7 +133,7 @@ function achosts() {
     local hostType="${1:?missing required argument of host type}" ;
 
     hostType=$( sed 's/[^a-zA-Z0-9_-]//g;' <<< $hostType ) ;
-    gsed -e 's/#.*$//g;' -e "s/\s//g;" $HOME/.achosts/$hostType | grep -v '^$';
+    gsed -e 's/#.*$//g;' -e "s/\s//g;" $HOME/.achosts/$hostType | grep -v '^$' | grep -v 'qtssjc' ;
 }
 
 
