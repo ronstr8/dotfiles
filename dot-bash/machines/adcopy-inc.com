@@ -129,12 +129,12 @@ bashprompt 204 ;
 
 # ps -e -o user,pid,pcpu,pmem,vsz,rss,tty,s,stime,time,args
 
-function achosts() {
+unset -f achosts ; function achosts() {
     local hostType="${1:?missing required argument of host type}" ;
 
     hostType=$( sed 's/[^a-zA-Z0-9_-]//g;' <<< $hostType ) ;
-    gsed -e 's/#.*$//g;' -e "s/\s//g;" $HOME/.achosts/$hostType | grep -v '^$' | grep -v 'qtssjc' ;
-}
+    perl -pe 's/#.*$//; s/[ \t]//g;' $HOME/.achosts/$hostType | grep -v '^$' | grep -v 'qtssjc\|savchi' ;
+} ;
 
 
 # vim: ft=sh
