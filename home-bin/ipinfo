@@ -66,13 +66,14 @@ unset -f __Arin ; function __Arin() {
     declare url=$( printf "$ARIN_IP_URL_FMT" "$ipaddr" ) ;
 
     __Whinge "# <$ipaddr> $CURL_EXE -H 'Accept: text/plain' $url ..." ;
-    $CURL_EXE -H 'Accept: text/plain' "$url" ; echo ;
+    $CURL_EXE -H 'Accept: text/plain' "$url" | grep -v '^#' ;
+    echo ;
 } ;
 
 unset -f __Main ; function __Main() {
     declare -a targets=( $@ ) ;
     declare    host ipaddr url doIpcalc cidr ;
-    declare    hasIpcalc=$( type ipcalc 2> /dev/null ) ;
+    declare    hasIpcalc='' ; # $( type ipcalc 2> /dev/null ) ; # Too much noise/signal.
 
     if (( ! $# )) ; then
         targets=( '' ) ;
