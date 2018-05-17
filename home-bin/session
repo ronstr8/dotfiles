@@ -234,7 +234,8 @@ function __echoScreenRc() {
     
     setenv SESSION_NAME '$sessionName'
     setenv SESSION_HOME '$sessionDir'
-    setenv PROMPT_COMMAND '$promptCommand'
+    ## PROMPT_COMMAND can really slow down a VM.
+#   setenv PROMPT_COMMAND '$promptCommand'
 
     ## Hmm-- will wordwrap fuck our hardcopies?
     defwrap on
