@@ -65,7 +65,7 @@ unset -f __Arin ; function __Arin() {
     declare ipaddr=${1?Missing required argument of address for ARIN REST query.} ;
     declare url=$( printf "$ARIN_IP_URL_FMT" "$ipaddr" ) ;
 
-    __Whinge "# <$ipaddr> $CURL_EXE -H 'Accept: text/plain' $url ..." ;
+    (( VERBOSE )) && __Whinge "# <$ipaddr> $CURL_EXE -H 'Accept: text/plain' $url ..." ;
     $CURL_EXE -H 'Accept: text/plain' "$url" | grep -v '^#' ;
     echo ;
 } ;
@@ -90,7 +90,7 @@ unset -f __Main ; function __Main() {
 
         url=$( printf "$IPINFO_URL_FMT" "$ipaddr" ) ;
 
-        __Whinge "# <$ipaddr> $CURL_EXE $url ..." ;
+        (( VERBOSE )) && __Whinge "# <$ipaddr> $CURL_EXE $url ..." ;
         $CURL_EXE "$url" ; echo ;
 
         if [[ ! "$ipaddr" ]] ; then
