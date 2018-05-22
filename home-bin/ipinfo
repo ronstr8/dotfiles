@@ -66,8 +66,7 @@ unset -f __Arin ; function __Arin() {
     declare url=$( printf "$ARIN_IP_URL_FMT" "$ipaddr" ) ;
 
     (( VERBOSE )) && __Whinge "# <$ipaddr> $CURL_EXE -H 'Accept: text/plain' $url ..." ;
-    $CURL_EXE -H 'Accept: text/plain' "$url" | grep -v '^#' ;
-    echo ;
+    $CURL_EXE -H 'Accept: text/plain' "$url" | grep -v '^#' | grep -v '^$' ;
 } ;
 
 unset -f __Main ; function __Main() {
@@ -104,8 +103,9 @@ unset -f __Main ; function __Main() {
 
         doIpcalc=''
 
+        echo ;
         __Arin "$ipaddr" && doIpcalc="$hasIpcalc" ;
-        
+
         if [[ "$doIpcalc" ]] ; then
             cidr=$( __Arin "$ipaddr" 2>/dev/null | awk '/CIDR/ { print $2 }' ) ;
             echo ; 
