@@ -1,0 +1,31 @@
+#!/bin/bash
+#   solinfo
+#       Discover Solaris system information.
+# -- 
+# straight@solvemedia.com
+
+hostname=$( hostname )
+
+system_model=$( prtdiag -v | awk -F: '/System Configuration:/ { print $2 }' )
+
+cpu_model=$( kstat cpu_info | grep brand | head -1 | cut -d' ' -f2- )
+
+cpu_speed=$( psrinfo -pv | ggrep -o 'clock [0-9]\+ MHz' | head -1 | cut -d' ' -f2- )
+
+cpu_count=$( psrinfo -p )
+
+virtual_processor_count=$( psrinfo | wc -l )
+
+memory=$( prtconf | awk -F: '/Memory size:/ { print $2 }' )
+
+function=$( [ -f /etc/adcopy ] && cat /etc/adcopy | cut -d, -f1 || echo "none" )
+
+hdd_count=$( iostat -E | grep '^Size:' | wc -l )
+
+hdd_size=$( iostat -E | perl -ne 'next unless /^Size: \S+ <(\d+) bytes>/; $totgb += $1 / (1000**3); END { printf("%.2fGB", $totgb) }' )
+
+
+system_info="$hostname,$function,$system_model,$cpu_model,$cpu_speed,$cpu_count,$virtual_processor_count,$memory,$hdd_count,$hdd_size"
+
+echo "$system_info" | perl -pe 's/.ccsphl.adcopy-inc.com//; s/\s*,\s*/,/g; tr/ //s;'
+
