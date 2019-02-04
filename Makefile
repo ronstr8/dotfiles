@@ -99,10 +99,10 @@ screen: dot-screen dot-screenrc
 
 ## tf/tinyfugue
 
-dot-tf:
+dot-tf: $(HOME)/.tf
 	$(INSTALL_LINKS) $(DOTFILES_WC)/dot-tf .tf
 
-dot-tfrc: dot-tf/rc .tfrc
+dot-tfrc: dot-tf
 	$(INSTALL_LINKS) $(HOME)/.tf/rc .tfrc
 
 tf: dot-tf dot-tfrc
@@ -120,7 +120,7 @@ top: dot-top
 dot-vim:
 	$(INSTALL_LINKS) $(DOTFILES_WC)/dot-vim    $(HOME)/.vim
 
-dot-vimrc: dot-vim/rc .vimrc
+dot-vimrc: $(HOME)/.vim
 	$(INSTALL_LINKS) $(HOME)/.vim/rc .vimrc
 
 vim: dot-vim dot-vimrc
