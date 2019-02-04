@@ -51,5 +51,10 @@ export MYSQL_PS1="\\d@\\h> "
 ## Use Perl's Term::ReadLine::Gnu when available.
 export PERL_RL='Gnu'
 
+## Point to Microk8s Docker socket.
+if [ -S /var/snap/microk8s/current/docker.sock ] ; then
+    export DOCKER_HOST="unix:///var/snap/microk8s/current/docker.sock"
+fi
+
 ## vim: ft=sh
 
