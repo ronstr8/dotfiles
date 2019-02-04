@@ -1,0 +1,8 @@
+#!/bin/bash
+# Completely reset the zm-docker build environment
+echo "Pruning..."
+docker system prune -f
+echo "Removing volumes..."
+docker volume rm $(docker volume ls | grep -E 'ZM-BUILDS|zm-docker' | awk '{print $2}')
+echo "Removing images..."
+docker rmi -f $(docker images | grep -E 'zmc-|zm-docker-build' | awk '{print $3}')
