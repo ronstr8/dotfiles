@@ -4,12 +4,15 @@ export PATH="/snap/bin:$PATH"
 
 # Start an ssh-agent if none is running.
 
-ssh-add -l &> /dev/null ; ssh_add_exit_value=$?
+if false ; then
 
-if [ $ssh_add_exit_value = 1 ] ; then
-	ssh-add ~/.ssh/keyfiles/*.key
-elif [ $ssh_add_exit_value = 2 ] ; then
-	eval $( ssh-agent -s )
-	ssh-add ~/.ssh/keyfiles/*.key
+    ssh-add -l &> /dev/null ; ssh_add_exit_value=$?
+
+    if [ $ssh_add_exit_value = 1 ] ; then
+        ssh-add ~/.ssh/keyfiles/*.key
+    elif [ $ssh_add_exit_value = 2 ] ; then
+        eval $( ssh-agent -s )
+        ssh-add ~/.ssh/keyfiles/*.key
+    fi
+
 fi
-
