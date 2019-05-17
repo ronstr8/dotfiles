@@ -1,3 +1,4 @@
+:DetectIndent	detectindent.txt	/*:DetectIndent*
 CSApprox.txt	CSApprox.txt	/*CSApprox.txt*
 _not_	CSApprox.txt	/*_not_*
 csapprox	CSApprox.txt	/*csapprox*
@@ -36,6 +37,12 @@ csapprox-xfce4-terminal	CSApprox.txt	/*csapprox-xfce4-terminal*
 csapprox-xiterm	CSApprox.txt	/*csapprox-xiterm*
 csapprox-xterm	CSApprox.txt	/*csapprox-xterm*
 csapprox.vim	CSApprox.txt	/*csapprox.vim*
+detectindent	detectindent.txt	/*detectindent*
+detectindent-changelog	detectindent.txt	/*detectindent-changelog*
+detectindent-contents	detectindent.txt	/*detectindent-contents*
+detectindent-settings	detectindent.txt	/*detectindent-settings*
+detectindent.txt	detectindent.txt	/*detectindent.txt*
+ft-gitcommit-plugin	ft-gitcommit-plugin.txt	/*ft-gitcommit-plugin*
 g:CSApprox_approximator_function	CSApprox.txt	/*g:CSApprox_approximator_function*
 g:CSApprox_attr_map	CSApprox.txt	/*g:CSApprox_attr_map*
 g:CSApprox_eterm	CSApprox.txt	/*g:CSApprox_eterm*

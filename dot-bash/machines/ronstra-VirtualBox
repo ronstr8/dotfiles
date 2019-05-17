@@ -16,3 +16,18 @@ if false ; then
     fi
 
 fi
+
+# Set the JAVA_HOME.
+
+export JAVA_HOME='/usr/lib/jvm/java-8-openjdk-amd64/' # '/usr/lib/jvm/default-java/'
+
+# Needed to get Cassandra cqlsh working.
+
+export CQLSH_NO_BUNDLED=TRUE
+
+# Remote Kubernetes control.
+
+alias kubectl-etest="kubectl --kubeconfig=$HOME/.kube/etest.config"
+alias kubectl-prod1="kubectl --kubeconfig=$HOME/.kube/prod1.config"
+
+# vim: ft=sh

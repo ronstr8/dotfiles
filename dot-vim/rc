@@ -25,10 +25,12 @@ set hlsearch
 
 set ruler
 
-set expandtab
+" Letting DetectIndent handle this.
+"set expandtab
 set tabstop=4
 set shiftwidth=4
-"for phrack submissions
+
+" For phrack submissions. Yeah, right.
 "set textwidth=75
 
 filetype plugin on
@@ -51,18 +53,18 @@ nnoremap <F11> :set invpaste<CR>
 inoremap <F11> :set invpaste<CR>
 
 " Insert date and time.
-nnoremap <F5> :=strftime("%F %T")<CR>P
-inoremap <F5> <C-R>=strftime("%F %T")<CR>
+"nnoremap <F5> :=strftime("%F %T")<CR>P
+"inoremap <F5> <C-R>=strftime("%F %T")<CR>
 
 " Next/prev buffer switching.
 noremap <F1>  :bprev<CR>
 noremap <F2>  :bnext<CR>
 
 " Clear all highligted search results.
-noremap <F8>  :nohl<CR>
+"noremap <F8>  :nohl<CR>
 
 " Toggle line numbers?
-noremap <F12> :set number!<CR>
+"noremap <F12> :set number!<CR>
 
 " unmap <C-PageUp>
 " unmap <C-PageDown>
@@ -150,17 +152,18 @@ let java_highlight_functions="style"
 let java_allow_cpp_keywords=1
 
 "" http://www.techrepublic.com/html/tr/sidebars/5054618-2.html
-set makeprg=vimAnt
-set efm=\ %#[javac]\ %#%f:%l:%c:%*\\d:%*\\d:\ %t%[%^:]%#:%m,
-    \%A\ %#[javac]\ %f:%l:\ %m,%-Z\ %#[javac]\ %p^,%-C%.%#
+"set makeprg=vimAnt
+"set efm=\ %#[javac]\ %#%f:%l:%c:%*\\d:%*\\d:\ %t%[%^:]%#:%m,
+"    \%A\ %#[javac]\ %f:%l:\ %m,%-Z\ %#[javac]\ %p^,%-C%.%#
 
 " ctags -f valuescore-main.tags --sort=yes -R
 " /srv/code.adiant.com/valuescore/java/adserv*/src
 " /srv/code.adiant.com/valuescore/java/common*/src
 " /srv/code.adiant.com/valuescore/java/dmp/src/main/java/
-autocmd Filetype java set tags=/home/rons/.vim/tags/valuescore-main.tags
-set complete=.,w,b,u,t,i
-set omnifunc=syntaxcomplete#Complete
+"autocmd Filetype java set tags=/home/rons/.vim/tags/valuescore-main.tagsa
+
+"set complete=.,w,b,u,t,i
+"set omnifunc=syntaxcomplete#Complete
 
 map <Leader>cc :cwindow<CR>:cc<CR><c-w>bz<CR><CR>
 map <Leader>cn :cwindow<CR>:cn<CR><c-w>bz<CR><CR>
@@ -182,60 +185,44 @@ elseif &encoding == "iso-8859-15"
  	digraph oe 189
 endif
 
-
-" @see http://vim.wikia.com/wiki/Create_underlines,_overlines,_and_strikethroughs_using_combining_characters
-" @see http://vim.wikia.com/wiki/Working_with_Unicode
-" modify selected text using combining diacritics
-command! -range -nargs=0 Overline        call s:CombineSelection(<line1>, <line2>, '0305')
-command! -range -nargs=0 Underline       call s:CombineSelection(<line1>, <line2>, '0332')
-command! -range -nargs=0 DoubleUnderline call s:CombineSelection(<line1>, <line2>, '0333')
-command! -range -nargs=0 Strikethrough   call s:CombineSelection(<line1>, <line2>, '0336')
-
-function! s:CombineSelection(line1, line2, cp)
-  execute 'let char = "\u'.a:cp.'"'
-  execute a:line1.','.a:line2.'s/\%V[^[:cntrl:]]/&'.char.'/ge'
-endfunction
-
 if has("conceal")
     set conceallevel=0 
     autocmd FileType json setlocal conceallevel=0 
 endif 
 
-" Airline <https://github.com/bling/vim-airline/blob/master/README.md>
-if !exists('g:airline_symbols')
-    let g:airline_symbols = {}
-endif
-
-let g:airline_extensions = [ 'buftabs' ]
-
-let g:airline_left_sep='»'
-let g:airline_right_sep='«'
-let g:airline_detect_modified=1
-let g:airline_detect_paste=1
-let g:airline_detect_iminsert=0
-let g:airline_inactive_collapse=1
-
-let g:airline_powerline_fonts=0
-
-let g:airline_mode_map = { '__' : '-', 'n'  : 'N', 'i'  : 'I', 'R'  : 'R', 'c'  : 'C', 'v'  : 'V', 'V'  : 'V', '^V' : 'V', 's'  : 'S', 'S'  : 'S', '^S' : 'S', }
-
-let g:airline_section_a       = '' " (mode, paste, iminsert)
-let g:airline_section_b       = '' " (hunks, branch)
-let g:airline_section_c       = '%n%t%m' " (bufferline or filename)
-let g:airline_section_gutter  = '' " (readonly, csv)
-let g:airline_section_x       = '' " (tagbar, filetype, virtualenv)
-let g:airline_section_y       = '' " (fileencoding, fileformat)
-let g:airline_section_z       = '' " (percentage, line number, column number)
-let g:airline_section_warning = '' " (syntastic, whitespace)
-
-
-" here is an example of how you could replace the branch indicator with
-" the current working directory, followed by the filename.
-let g:airline_section_b = '%{getcwd()}'
-let g:airline_section_c = '%t'
-
 " Doesn't work on all builds; need to find appropriate has() check?
 "set clipboard=unnamedplus
 
-" vim: filetype=vim:
+" https://github.com/artur-shaik/vim-javacomplete2
 
+autocmd FileType java setlocal omnifunc=javacomplete#Complete
+
+" To add all missing imports with F6:
+
+nmap <F6> <Plug>(JavaComplete-Imports-AddMissing)
+imap <F6> <Plug>(JavaComplete-Imports-AddMissing)
+
+" To remove all unused imports with F7:
+
+nmap <F7> <Plug>(JavaComplete-Imports-RemoveUnused)
+imap <F7> <Plug>(JavaComplete-Imports-RemoveUnused)
+
+" Try to properly sort imports.
+
+let g:JavaComplete_ImportOrder = ['java.', 'javax.', 'org.', 'com.']
+let g:JavaComplete_ImportSortType = 'packageName'
+
+" Using tabs for Java at Synacor.
+
+autocmd FileType java setlocal noexpandtab
+
+" Try autodetecting tabs or spaces.
+
+"autocmd BufReadPost * :DetectIndent 
+"let g:detectindent_preferred_expandtab = 1
+"let g:detectindent_preferred_indent = 4
+
+" Set listchars for `set list` mode.
+set listchars=eol:¬,tab:>·,trail:~,extends:>,precedes:<,space:␣
+
+" vim: filetype=vim:
