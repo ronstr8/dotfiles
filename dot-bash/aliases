@@ -59,5 +59,8 @@ fi
 # Avoid connection to X server even if we have a DISPLAY.
 alias vim='vim -X' ;
 
+# Avoid noise from /snap mounts.
+#alias df='df --human --total | grep -v /snap/'
+
 # vim: ft=sh
 

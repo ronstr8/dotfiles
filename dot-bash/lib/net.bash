@@ -24,6 +24,10 @@ unset -f necho ; function necho() {
     exec 13>&- ;
 } ;
 
+unset -f jsonhttp_pp ; function jsonhttp_pp() {
+	tee >( awk '/^(HTTP|[A-Za-z-]+:)/ { print }' > /dev/stderr ) | grep -v '^\(HTTP\|[A-Za-z-]\+:\|$\)' | json_pp ;
+} ;
+
 touchLib ${BASH_SOURCE[0]} ; fi ;
 
 ## vim: ft=sh

@@ -12,6 +12,9 @@
 
 set nocompatible
 
+" https://github.com/numirias/security/blob/master/doc/2019-06-04_ace-vim-neovim.md
+"set nomodeline
+
 " @see http://stackoverflow.com/questions/12814371/conversion-error-in-vim
 " Try saving with :w ++enc=utf-8. Also, it's recommended to put scriptencoding utf-8 at the top of your .vimrc.
 set encoding=utf8
@@ -211,6 +214,37 @@ imap <F7> <Plug>(JavaComplete-Imports-RemoveUnused)
 
 let g:JavaComplete_ImportOrder = ['java.', 'javax.', 'org.', 'com.']
 let g:JavaComplete_ImportSortType = 'packageName'
+" Put static at top, because that's how Eclipse does it by default.
+let g:JavaComplete_StaticImportsAtTop = 1
+
+let g:JavaComplete_SourcesPath = 'zcs-shared/src/main/java:zcs-shared/src/test/java:zcs-dashboard/src/main/java:zcs-dashboard/src/test/java:zcs-signup/src/main/java:zcs-signup/src/test/java'
+
+" @see https://stackoverflow.com/questions/1932604/vim-problem-with-gf-command
+
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/main/java/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/test/java/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/main/resources/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/test/resources/**
+"
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/main/java/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/test/java/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/main/resources/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/test/resources/**
+"
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/main/java/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/test/java/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/main/resources/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/test/resources/**
+
+" @see https://stackoverflow.com/questions/52123349/vim-how-to-get-path-to-search-up-and-down-a-directory-tree
+set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/**
+set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/**
+set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/**
+
+
+" Below _almost_ works, but vim doesn't recognize the inside wildcards.
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-*/src/*/java/**
+
 
 " Using tabs for Java at Synacor.
 
@@ -224,5 +258,8 @@ autocmd FileType java setlocal noexpandtab
 
 " Set listchars for `set list` mode.
 set listchars=eol:¬,tab:>·,trail:~,extends:>,precedes:<,space:␣
+
+" Proper syntax highlighting for a Jenkinsfile.
+au BufNewFile,BufRead Jenkinsfile setf groovy
 
 " vim: filetype=vim:

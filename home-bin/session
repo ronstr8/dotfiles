@@ -306,13 +306,19 @@ EOT
         fi
 
         if [ -e "$winRcFile" ] ; then
-            echo "source '$winRcFile'" ;
+            cat <<EOT
+        source '$winRcFile'
+EOT
         fi
 
-        echo "$screenCmd"
+        cat <<EOT
+        $screenCmd
+EOT
 
         if [ -e "$winHardCopyFile" -a "$LOAD_SAVED_HARDCOPY" ] ; then
-            echo "$scrollbackCmd" ;
+            cat <<EOT
+        $scrollbackCmd
+EOT
         fi
 
         cat <<'EOT' ;

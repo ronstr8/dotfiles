@@ -18,6 +18,7 @@ RCFILES=(
     completion
     path
     shopts
+	secret
 ) ;
 
 for rcFile in ${RCFILES[@]} ; do

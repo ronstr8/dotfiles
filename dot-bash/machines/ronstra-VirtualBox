@@ -1,6 +1,6 @@
 # Ensure snap aliases come first.
 
-export PATH="/snap/bin:$PATH"
+export PATH="/snap/bin:/opt/maven/bin:$PATH"
 
 # Start an ssh-agent if none is running.
 
@@ -27,7 +27,28 @@ export CQLSH_NO_BUNDLED=TRUE
 
 # Remote Kubernetes control.
 
-alias kubectl-etest="kubectl --kubeconfig=$HOME/.kube/etest.config"
-alias kubectl-prod1="kubectl --kubeconfig=$HOME/.kube/prod1.config"
+#alias kubectl-etest='ssh -qt etest -- kubectl'
+#alias kubectl-prod1='ssh -qt prod1 -- kubectl'
+alias kubectl-preprod="kubectl --kubeconfig=$HOME/.kube/oke-preprod.config"
+#alias kubectl-prod="kubectl --kubeconfig=$HOME/.kube/oke-prod.config"
+alias kubectl-uat="kubectl --kubeconfig=$HOME/.kube/cloudsuite-uat.config"
+alias kubectl-prod="kubectl --kubeconfig=$HOME/.kube/cloudsuite-prod.config"
+
+alias k9s='TERM=xterm-256color k9s --kubeconfig=/home/ronstra/.kube/oke-preprod.config'
+
+# Go and other custom path mods.
+
+export GOPATH="$HOME/go"
+export GOPRIVATE='github.com/ZimbraOS'
+export PATH="$GOPATH/bin:$GOROOT/bin:$PATH:/usr/local/kubebuilder/bin"
+
+# Oracle Cloud Infrastructure CLI.
+
+[[ -e "/home/ronstra/lib/oracle-cli/lib/python3.8/site-packages/oci_cli/bin/oci_autocomplete.sh" ]] && source "/home/ronstra/lib/oracle-cli/lib/python3.8/site-packages/oci_cli/bin/oci_autocomplete.sh"
+
+# Deno Javascript package manager/tool.
+
+export DENO_INSTALL="/home/ronstra/.deno"
+export PATH="$DENO_INSTALL/bin:$PATH"
 
 # vim: ft=sh
