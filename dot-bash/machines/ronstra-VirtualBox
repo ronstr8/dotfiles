@@ -19,7 +19,8 @@ fi
 
 # Set the JAVA_HOME.
 
-export JAVA_HOME='/usr/lib/jvm/java-8-openjdk-amd64/' # '/usr/lib/jvm/default-java/'
+#export JAVA_HOME='/usr/lib/jvm/java-8-openjdk-amd64/' # '/usr/lib/jvm/default-java/' goes to jdk11
+export JAVA_HOME='/usr/lib/jvm/java-16-openjdk-amd64'
 
 # Needed to get Cassandra cqlsh working.
 

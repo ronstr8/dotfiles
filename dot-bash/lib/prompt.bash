@@ -1,6 +1,8 @@
 
 if ! pingLib ${BASH_SOURCE[0]} ; then
 
+needsLib 'git-sh-prompt'
+
 ### __machineColor
 #       Echo integer representing an xterm-256color color "label" for the current host.
 #
@@ -43,12 +45,13 @@ unset -f __machineColor ; function __machineColor() {
 ##
 unset -f bashprompt ; function bashprompt() {
     declare fgname="${1:-$( __machineColor )}" ;
-    declare datetimef='%F %T' ; ## 'T' is ugly, '%z' unnecessary
+    declare datetimef='%F·%T' ; ## 'T' is ugly, '%z' unnecessary
     declare fgint fontWeight fontStyle ;
 
     # These are interpolated into raw code sequences such as:
     #   [<ESC>[38;5;${xcFF_RED}m][<ESC>[${xcFF_BOLD}m]]
     # TODO: Callers should be using tput or some abstraction thereof.
+
     declare xcFF_NONE=0 ;
     declare xcFF_BOLD=1 ;
     declare xcFF_NORMAL=2 ;
@@ -56,6 +59,7 @@ unset -f bashprompt ; function bashprompt() {
     declare xcFF_BLINK=5 ;
     declare xcFF_REVERSE=7 ;
     declare xcFF_INVISIBLE=8 ;
+
     declare xcFF_GRAY=30 ;
     declare xcFF_RED=31 ;
     declare xcFF_GREEN=32 ;
@@ -103,13 +107,17 @@ unset -f bashprompt ; function bashprompt() {
 ##  declare coloresc="\[\e[38;5;${fgint}m\]\[\e[${fontWeight}m\]"
     declare coloresc="\[\e[${fgint}${fontWeight:+;$fontWeight}${fontStyle:+;$fontStyle}m\]"
 
-    declare -i depth=$(( SHLVL - 1 )) ; ## "1" is first level w/no subshells.
-    [[ "$STY" ]] && let depth-- ;
+##	source ~/.bash/lib/git-sh-prompt ; export GIT_PS1_SHOWDIRTYSTATE='true' GIT_PS1_SHOWSTASHSTATE='true' GIT_PS1_SHOWUNTRACKEDFILES='true' GIT_PS1_SHOWUPSTREAM='name git' GIT_PS1_STATESEPARATOR=' ' GIT_PS1_DESCRIBE_STYLE='branch' GIT_PS1_SHOWCOLORHINTS='true' ; __git_ps1 "[%s]"
+	GIT_PS1_SHOWDIRTYSTATE='true'
+	GIT_PS1_SHOWSTASHSTATE='true'
+	GIT_PS1_SHOWUNTRACKEDFILES='true'
+	GIT_PS1_SHOWUPSTREAM='verbose name git'
+	GIT_PS1_STATESEPARATOR=' '
+	GIT_PS1_DESCRIBE_STYLE='branch'
+	GIT_PS1_SHOWCOLORHINTS='true'
+	declare gitState=""'$( __git_ps1 "\[\e[38;5;245m\] [%s]" )'
 
-    declare depthMarker='' ;
-    (( depth > 0 )) && depthMarker=${depth:+ [$depth]} ;
-
-    export PS1="${coloresc}\n\D{${datetimef}} \w${depthMarker}\n${coloresc} \u@\h\$\[\e[${xcFF_NONE}m\] " ;
+    export PS1="${coloresc}\n\D{${datetimef}} \w${gitState}\n${coloresc} \u@\h\$\[\e[${xcFF_NONE}m\] " ;
 }
 
 touchLib ${BASH_SOURCE[0]} ; fi ;

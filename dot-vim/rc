@@ -217,33 +217,18 @@ let g:JavaComplete_ImportSortType = 'packageName'
 " Put static at top, because that's how Eclipse does it by default.
 let g:JavaComplete_StaticImportsAtTop = 1
 
-let g:JavaComplete_SourcesPath = 'zcs-shared/src/main/java:zcs-shared/src/test/java:zcs-dashboard/src/main/java:zcs-dashboard/src/test/java:zcs-signup/src/main/java:zcs-signup/src/test/java'
+"let g:JavaComplete_SourcesPath = 'zcs-shared/src/main/java:zcs-shared/src/test/java:zcs-dashboard/src/main/java:zcs-dashboard/src/test/java:zcs-signup/src/main/java:zcs-signup/src/test/java'
 
 " @see https://stackoverflow.com/questions/1932604/vim-problem-with-gf-command
-
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/main/java/**
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/test/java/**
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/main/resources/**
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/test/resources/**
-"
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/main/java/**
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/test/java/**
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/main/resources/**
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/test/resources/**
-"
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/main/java/**
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/test/java/**
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/main/resources/**
-"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/test/resources/**
-
 " @see https://stackoverflow.com/questions/52123349/vim-how-to-get-path-to-search-up-and-down-a-directory-tree
 set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/**
 set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/**
 set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/**
 
-
-" Below _almost_ works, but vim doesn't recognize the inside wildcards.
+" Below _almost_ works, but vim doesn't recognize the inner wildcards.
 "set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-*/src/*/java/**
+
+set path+=~/src/openjdk-16/**
 
 
 " Using tabs for Java at Synacor.
