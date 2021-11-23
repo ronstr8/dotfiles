@@ -62,7 +62,7 @@ fi
 
 ## Go config.
 export GOPATH="$HOME/go"
-export PATH="$GOPATH/bin:$PATH"
+pathmunge PATH "$GOPATH/bin" before
 
 
 ## vim: ft=sh

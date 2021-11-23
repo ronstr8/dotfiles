@@ -1,21 +1,7 @@
-# Ensure snap aliases come first.
+# Fix path.
 
-export PATH="/snap/bin:/opt/maven/bin:$PATH"
-
-# Start an ssh-agent if none is running.
-
-if false ; then
-
-    ssh-add -l &> /dev/null ; ssh_add_exit_value=$?
-
-    if [ $ssh_add_exit_value = 1 ] ; then
-        ssh-add ~/.ssh/keyfiles/*.key
-    elif [ $ssh_add_exit_value = 2 ] ; then
-        eval $( ssh-agent -s )
-        ssh-add ~/.ssh/keyfiles/*.key
-    fi
-
-fi
+pathmunge PATH /opt/maven/bin before
+pathmunge PATH /snap/bin before
 
 # Set the JAVA_HOME.
 
@@ -41,7 +27,9 @@ alias k9s='TERM=xterm-256color k9s --kubeconfig=/home/ronstra/.kube/oke-preprod.
 
 export GOPATH="$HOME/go"
 export GOPRIVATE='github.com/ZimbraOS'
-export PATH="$GOPATH/bin:$GOROOT/bin:$PATH:/usr/local/kubebuilder/bin"
+pathmunge PATH "$GOROOT/bin" before
+pathmunge PATH "$GOPATH/bin" before
+pathmunge PATH /usr/local/kubebuilder/bin after
 
 # Oracle Cloud Infrastructure CLI.
 
@@ -50,6 +38,6 @@ export PATH="$GOPATH/bin:$GOROOT/bin:$PATH:/usr/local/kubebuilder/bin"
 # Deno Javascript package manager/tool.
 
 export DENO_INSTALL="/home/ronstra/.deno"
-export PATH="$DENO_INSTALL/bin:$PATH"
+pathmunge PATH "$DENO_INSTALL/bin" before
 
 # vim: ft=sh
