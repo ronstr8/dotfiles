@@ -40,4 +40,9 @@ pathmunge PATH /usr/local/kubebuilder/bin after
 export DENO_INSTALL="/home/ronstra/.deno"
 pathmunge PATH "$DENO_INSTALL/bin" before
 
+# JEnv
+
+pathmunge PATH "$HOME/.jenv/bin" after
+eval "$( jenv init - )" 
+
 # vim: ft=sh
