@@ -36,3 +36,4 @@ elif [ -f "$BASHDIR/local" ] ; then
 fi
 
 # vim: ft=sh
+export CHANGE_MINIKUBE_NONE_USER=true

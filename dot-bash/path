@@ -2,6 +2,10 @@
 MYROOT="$HOME/.local" ;
 MYWORK="$HOME/work/adblade" ;
 
+##### Core PATH
+
+export PATH='/usr/bin:/bin:/usr/games:/usr/local/games:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin:/home/ronstra/bin:/usr/lib/jvm/default-java/bin'
+
 #####
 ##### PERL5LIB/perlbrew
 #####

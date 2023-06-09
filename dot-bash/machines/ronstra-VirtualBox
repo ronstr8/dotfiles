@@ -1,26 +1,17 @@
 # Ensure snap aliases come first.
 
-export PATH="/snap/bin:/opt/maven/bin:$PATH"
+pathmunge PATH /snap/bin before
+pathmunge PATH /opt/maven/bin before
 
-# Start an ssh-agent if none is running.
+# Setup Java and Zimbra build environments.
 
-if false ; then
+pathmunge PATH $HOME/.jenv/bin after
+eval "$( jenv init - )"
 
-    ssh-add -l &> /dev/null ; ssh_add_exit_value=$?
-
-    if [ $ssh_add_exit_value = 1 ] ; then
-        ssh-add ~/.ssh/keyfiles/*.key
-    elif [ $ssh_add_exit_value = 2 ] ; then
-        eval $( ssh-agent -s )
-        ssh-add ~/.ssh/keyfiles/*.key
-    fi
-
-fi
-
-# Set the JAVA_HOME.
+export ANT_OPTS="-Dzimbra.buildinfo.version=8.9.0"
 
 #export JAVA_HOME='/usr/lib/jvm/java-8-openjdk-amd64/' # '/usr/lib/jvm/default-java/' goes to jdk11
-export JAVA_HOME='/usr/lib/jvm/java-16-openjdk-amd64'
+#export JAVA_HOME='/usr/lib/jvm/java-16-openjdk-amd64'
 
 # Needed to get Cassandra cqlsh working.
 
@@ -41,7 +32,9 @@ alias k9s='TERM=xterm-256color k9s --kubeconfig=/home/ronstra/.kube/oke-preprod.
 
 export GOPATH="$HOME/go"
 export GOPRIVATE='github.com/ZimbraOS'
-export PATH="$GOPATH/bin:$GOROOT/bin:$PATH:/usr/local/kubebuilder/bin"
+pathmunge PATH $GOPATH/bin before
+pathmunge PATH $GOROOT/bin before
+pathmunge PATH /usr/local/kubebuilder/bin after
 
 # Oracle Cloud Infrastructure CLI.
 
@@ -50,6 +43,6 @@ export PATH="$GOPATH/bin:$GOROOT/bin:$PATH:/usr/local/kubebuilder/bin"
 # Deno Javascript package manager/tool.
 
 export DENO_INSTALL="/home/ronstra/.deno"
-export PATH="$DENO_INSTALL/bin:$PATH"
+pathmunge PATH $DENO_INSTALL/bin before
 
 # vim: ft=sh

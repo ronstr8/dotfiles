@@ -25,6 +25,8 @@ termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'   # tell screen how to 
 defbce  on  # "Background Color Erase" style.
 defutf8 on  # UTF-8 encoding by default for new windows.
 
+defdynamictitle off # Stop changing my xterm title to "screen"!
+
 ## ========================================================== ##
 ## Copy Buffer
 ## ========================================================== ##

@@ -43,7 +43,8 @@ XTerm.toolBar: false
 *.vt100.eightBitOutput:  true
 *.vt100.metaSendsEscape: true
 *.vt100.eightBitInput:   false
-*.vt100.allowTitleOps:   true
+! Disallow title ops, as it just makes the window harder to find.
+*.vt100.allowTitleOps:   false
 *.vt100.allowTcapOps:    true
 
 

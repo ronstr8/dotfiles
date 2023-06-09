@@ -36,6 +36,9 @@ set shiftwidth=4
 " For phrack submissions. Yeah, right.
 "set textwidth=75
 
+" https://stackoverflow.com/questions/526858/how-do-i-make-vim-do-normal-bash-like-tab-completion-for-file-names
+set wildmode=longest:full,full
+
 filetype plugin on
 
 execute pathogen#infect()
@@ -229,11 +232,14 @@ set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/**
 "set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-*/src/*/java/**
 
 set path+=~/src/openjdk-16/**
+"set path+=~/go/src/**
 
+set path+=~/src/Zimbra/zm-mailbox/*/src/**
+set path+=~/src/ZimbraOS/zm-mailbox/*/src/**
 
 " Using tabs for Java at Synacor.
 
-autocmd FileType java setlocal noexpandtab
+autocmd FileType java setlocal expandtab
 
 " Try autodetecting tabs or spaces.
 
