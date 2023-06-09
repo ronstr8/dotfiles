@@ -1,0 +1,2 @@
+export ANT_HOME=/usr/share/ant
+export ANT_OPTS='-Dzimbra.buildinfo.version=8.9.0'
