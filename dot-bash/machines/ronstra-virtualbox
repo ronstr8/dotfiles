@@ -51,4 +51,11 @@ pathmunge PATH "$DENO_INSTALL/bin" before
 pathmunge PATH "$HOME/.jenv/bin" after
 eval "$( jenv init - )" 
 
+# Set xterm title
+
+title-for-xterm
+
+export CHANGE_MINIKUBE_NONE_USER=true
+eval "$(gh copilot alias -- bash)"
+
 # vim: ft=sh

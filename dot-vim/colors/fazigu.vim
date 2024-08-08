@@ -316,7 +316,7 @@ call <SID>X("FoldColumn", "d2b48c", "4d4d4d", "")
 "LineNr
 call <SID>X("ModeMsg", "daa520", "", "")
 call <SID>X("MoreMsg", "2e8b57", "", "")
-call <SID>X("NonText", "addbe7", "000000", "bold")
+"call <SID>X("NonText", "addbe7", "000000", "bold")
 call <SID>X("Question", "00ff7f", "", "")
 call <SID>X("SpecialKey", "9acd32", "", "")
 call <SID>X("StatusLine", "c2bfa5", "000000", "reverse")

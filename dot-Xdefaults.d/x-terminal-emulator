@@ -77,8 +77,8 @@ XTerm.toolBar: false
 !*.vt100.faceName: DejaVuSansMono
 !*.vt100.faceName: SourceCodePro
 
-*.fontMenu*fontdefault*Label: Default - Consolas12
-*.VT100.faceName: Consolas12
+*.fontMenu*fontdefault*Label: Default - Consolas 12
+*.VT100.faceName: Consolas
 *.VT100.faceSize: 12
 *.VT100.geometry: 150x40
 *.VT100.faceAntialias: true

@@ -224,9 +224,9 @@ let g:JavaComplete_StaticImportsAtTop = 1
 
 " @see https://stackoverflow.com/questions/1932604/vim-problem-with-gf-command
 " @see https://stackoverflow.com/questions/52123349/vim-how-to-get-path-to-search-up-and-down-a-directory-tree
-set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/**
-set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/**
-set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-dashboard/src/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-shared/src/**
+"set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/**
 
 " Below _almost_ works, but vim doesn't recognize the inner wildcards.
 "set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-*/src/*/java/**
@@ -234,8 +234,15 @@ set path+=~/src/ZimbraOS/zm-cloudsuite-onboarding-api/zcs-signup/src/**
 set path+=~/src/openjdk-16/**
 "set path+=~/go/src/**
 
-set path+=~/src/Zimbra/zm-mailbox/*/src/**
-set path+=~/src/ZimbraOS/zm-mailbox/*/src/**
+" If below worked, we wouldn't need the hardcoded ones.
+"set path+=./src/*/java/**
+"set path+=./*/src/*/java/**
+
+set path+=~/src/Zimbra/*/src/**
+set path+=~/src/Zimbra/*/*/src/**
+
+"set path+=~/src/ZimbraOS/zm-mailbox/*/src/**
+"set path+=~/src/Zimbra/zm-mailbox/*/src/**
 
 " Using tabs for Java at Synacor.
 

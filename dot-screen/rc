@@ -45,7 +45,8 @@ hardstatus alwayslastline
 # hardstatus string '%{= W}[%H %{= G}%l%{= W}] %{= w}%-w%{+b r}%n*%t%{-b r}%{w}%+w %= %{= W}[%D %Y-%m-%d %0C]'
 # hardstatus string '%{= w}%-w%{+d c}%n*%t%{-d c}%{w}%+w %= %{+d c}[%H: %D %Y-%m-%d %0c]'
 # hardstatus string '%{= w}%-w%{+d c}%n*%t%{-d c}%{w}%+w %= %{+d c}[%H %m/%d]'
-hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
+# hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
+hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %c"
 
 ## ========================================================== ##
 ## Key Bindings
