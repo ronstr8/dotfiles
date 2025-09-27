@@ -62,5 +62,7 @@ alias vim='vim -X' ;
 # Avoid noise from /snap mounts.
 #alias df='df --human --total | grep -v /snap/'
 
+alias whatsopen='sudo nmap -Pn -sT localhost -p 0-65535'
+
 # vim: ft=sh
 

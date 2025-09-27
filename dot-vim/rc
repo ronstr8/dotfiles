@@ -28,6 +28,8 @@ set hlsearch
 
 set ruler
 
+"set termguicolors
+
 " Letting DetectIndent handle this.
 "set expandtab
 set tabstop=4

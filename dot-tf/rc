@@ -1,3 +1,8 @@
+/redef on
+/def WORLDFILE	= ~/.tf/worlds.tf
+/def BINDFILE	= ~/.tf/bind.tf
+/redef off
+
 ;;; Enable windowing mode.
 /visual on
 
@@ -24,13 +29,11 @@
 /load local-edit.tf
 ;; /load idler.tf
 
-/def WORLDFILE	= ~/.tf/worlds.tf
-/def BINDFILE	= ~/.tf/bind.tf
 
 /loadworld
 /loadbind
 
 ;;; Stupid tf keeps disconnecting.
 ; /repeat -n -300 i ;ctime()
-/idler
+;/idler
 

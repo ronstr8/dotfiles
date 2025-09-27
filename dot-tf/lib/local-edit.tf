@@ -26,10 +26,10 @@
 ; Ok, now if we have STY (screen), TTY and not DISPLAY, use screen bg editing
 ; 2009-12-04 :: I want screen to have priority over $DISPLAY/xterm <rons>
 ;/if (STY !~ "" & TTY !~ "" & DISPLAY =~ "") \
-/if (STY !~ "" & TTY !~ "" ) \
-	/def le_do_edit = \
-		/quote -0 -dexec -w%1 !exec 2>/dev/null ;  sleep 99999999 & PID=$$!; screen < %{TTY} -t 'tf edit' sh -c " %{le_editor} %2; kill $$PID "; wait; echo '/le_edit_done %*'%;\
-/endif
+;/if (STY !~ "" & TTY !~ "" ) \
+;	/def le_do_edit = \
+;		/quote -0 -dexec -w%1 !exec 2>/dev/null ;  sleep 99999999 & PID=$$!; screen < %{TTY} -t 'tf edit' sh -c " %{le_editor} %2; kill $$PID "; wait; echo '/le_edit_done %*'%;\
+;/endif
 
 ; delete edit files 5 minutes after we upload them.  nothing gets deleted
 ; if it's the last thing to be uploaded (for /reedit)

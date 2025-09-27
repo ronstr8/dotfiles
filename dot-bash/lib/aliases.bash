@@ -35,5 +35,10 @@ function utf8-locale-force() {
     locale | fgrep -v "$desiredLocale" ;
 } ;
 
+unset -f lsdisks ;
+function lsdisks() {
+	lsblk --exclude='7' --fs --output='NAME,UUID,FSTYPE,LABEL,SIZE,FSAVAIL,FSUSE%,MOUNTPOINTS'
+};
+
 touchLib ${BASH_SOURCE[0]} ; fi ;
 

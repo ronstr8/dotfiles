@@ -34,6 +34,9 @@ XTerm*termName: xterm-256color
 ! Goal: We need no stinking toolbar.
 XTerm.toolBar: false
 
+XTerm*NumLock: true
+
+
 ! UTF-8 mode is initially on.  Escape sequences for turning UTF-8 mode on/off are allowed.
 ! utf8 is respected only if locale is false.
 *.vt100.locale: false

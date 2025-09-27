@@ -35,15 +35,11 @@
 ## -- 
 ## Ronald E. Straight <straight@adiant.com>
 
-SCRIPT_DIR="$( dirname $0 )" ;
 SCRIPT_NAME="$( basename $0 )" ;
 
 NOOP=2
 ERR=1 ;
 OK=0 ;
-
-# source "$SCRIPT_DIR/../lib/stdlib.sh" ;
-# source "$SCRIPT_DIR/../lib/fixtures.sh" ;
 
 DO_STATUS='' ;
 EVAL='' ;
@@ -57,7 +53,7 @@ RESTORE_FROM='' ;
 CHECKPOINT_WAIT_SECONDS='' ;
 LOAD_SAVED_HARDCOPY='yes' ;
 MOVED_WINDOW_NUMBER='' ;
-MOVED_WINDOW_HISTFILE='' ;
+MOVED_WINDOW_HISTORY_FILE='' ;
 DO_HARDCOPY_DUMP='' ;
 
 MV_CMD='mv' ;
@@ -791,5 +787,5 @@ function __main() {
 
 ( __getOptions $* && __main $* ) ;
 
-## vim: ft=sh:expandtab:tabstop=4
+## vim: ft=sh:et:ts=4
 

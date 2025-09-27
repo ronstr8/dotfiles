@@ -1,13 +1,9 @@
-/def -i -b'^[B' = /dokey wleft
-/def -i -b'^[F' = /dokey wright
+/bind ^[[1;5A = /dokey searchb
+/bind ^[[1;5B = /dokey searchf
 
-/def -i -b'PgUp' = /fg -> 
-/def -i -b'PgDn' = /fg -<
+/bind ^[[1;5D = /dokey wleft
+/bind ^[[1;5C = /dokey wright
 
-/def "key_esc_pgup" = /fg -<
-/def "key_esc_pgdn" = /fg ->
-
-/def key_esc_pgup = /fg -<
-/def key_esc_pgdn = /fg ->
-/def key_nkpEnt = /dokey NEWLINE
+/bind ^[[5;5~ = /fg ->
+/bind ^[[6;5~ = /fg <-
 
