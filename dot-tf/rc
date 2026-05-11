@@ -27,13 +27,14 @@
 /load mcp-negotiate.tf
 /load simpleedit.tf
 /load local-edit.tf
-;; /load idler.tf
-
 
 /loadworld
 /loadbind
 
 ;;; Stupid tf keeps disconnecting.
-; /repeat -n -300 i ;ctime()
-;/idler
+/repeat -n -300 i ;ctime()
+
+/load idler.tf
+/idler
+
 

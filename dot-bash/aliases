@@ -64,5 +64,7 @@ alias vim='vim -X' ;
 
 alias whatsopen='sudo nmap -Pn -sT localhost -p 0-65535'
 
+alias xclipcopy='xclip -selection clipboard'
+
 # vim: ft=sh
 
