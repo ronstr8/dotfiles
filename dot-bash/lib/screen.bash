@@ -5,7 +5,7 @@ if ! pingLib ${BASH_SOURCE[0]} ; then
 
 # alias screen-mrenv=". $HOME/.screen/var/mrenv.$STY"
 
-function screen-stuff() {
+function session-stuffall() {
     ## Use \015 instead of \n for older versions of screen.
     screen -X at \# stuff "$*\015" ;
 } ;

@@ -32,7 +32,7 @@ for dn in /sbin /usr/sbin /usr/local/sbin $HOME/bin $MYROOT/sbin $MYROOT/bin $MY
 	[ -d "$dn" ] && pathmunge PATH "$dn" after ;
 done
 
-for dn in $HOME/.rakudobrew/bin ; do
+for dn in $HOME/.rakudobrew/bin $HOME/.cargo/bin $HOME/.local/bin ; do
 	[ -d "$dn" ] && pathmunge PATH "$dn" after ;
 done
 
@@ -46,8 +46,6 @@ if [ -d "/opt/maven" ] ; then
     pathmunge PATH "$MAVEN_HOME/bin" ;
 fi
 
-[ -d "/opt/genymotion" ] && pathmunge PATH "/opt/genymotion" ;
-[ -d "/opt/perl5/bin"  ] && pathmunge PATH "/opt/perl5/bin" ;
 [ -d "$JAVA_HOME"      ] && pathmunge PATH "$JAVA_HOME/bin" after ;
 
 export PATH ;

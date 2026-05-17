@@ -21,7 +21,7 @@
 ##
 ##  --session=s  The name of the current session, default $SESSION_NAME.
 ##
-##  --title=s       Set the title of the current window, default $WINDOW_TITLE.
+##  --title=s       Set the title of the current window
 ##  --renumber-to=n Change the current window number, swapping state files if it already exists.
 ##
 ##  --verbose  Include more output at verbosity level 1.
@@ -64,8 +64,6 @@ declare -a SESSION_VARS=(
     WINDOW
     WINDOW_NUMBER
     WINDOW_HOME
-    WINDOW_TITLE
-    WINDOW_TITLE_FILE
     HISTFILE
 ) ;
 
@@ -283,8 +281,6 @@ EOT
 
         setenv WINDOW_HOME "$winDir"
         setenv WINDOW_NUMBER "$winNumber"
-        setenv WINDOW_TITLE "${winTitle:-win$winNumber}"
-        setenv WINDOW_TITLE_FILE "$winTitleFile"
         setenv HISTFILE "$winHistoryFile"
 
         hardcopydir "$winDir"
@@ -423,7 +419,7 @@ function __echoBashEnv() {
 
     ## ( env ; export ; echo -e "\n\nunset BASH_ENV\n" ) | grep -v '\(DISPLAY\|SSH_\w\+\|STY\|SHLVL/HISTFILE\)=' > "$WINDOW_ENV_FILE"
 
-    export | grep '\(HISTFILE\|SESSION_NAME\|WINDOW\|WINDOW_NUMBER\|WINDOW_TITLE\|OLDPWD\)' | sed 's/$/ ;/g;' ;
+    export | grep '\(HISTFILE\|SESSION_NAME\|WINDOW\|WINDOW_NUMBER\|OLDPWD\)' | sed 's/$/ ;/g;' ;
 
     echo ;
 
@@ -538,18 +534,7 @@ function __maybeRetitleWindow() {
     
     screen -X title "$RETITLE_TO" ;
 
-    __whinge "Retitled window to RETITLE_TO='$RETITLE_TO'" ;
-
-    export WINDOW_TITLE="$RETITLE_TO" ;
-
-    __whinge "export WINDOW_TITLE='$RETITLE_TO' ; WINDOW_TITLE='$WINDOW_TITLE'"
-
-    if [ "$WINDOW_TITLE_FILE" ] ; then
-        echo "$RETITLE_TO" > "$WINDOW_TITLE_FILE" ;
-        __whinge "cat $WINDOW_TITLE_FILE => $( cat $WINDOW_TITLE_FILE )"
-    else
-        __whinge "WINDOW_TITLE_FILE is empty!" ;
-    fi
+    echo "$RETITLE_TO" > "$WINDOW_TITLE_FILE" ;
 
     return $OK ;
 } ;
@@ -588,8 +573,6 @@ function __saveWindowState() {
         touch "$histFile" ; 
     fi
 
-    [ "$WINDOW_TITLE" ] && echo "$WINDOW_TITLE" > "$WINDOW_TITLE_FILE" ;
-
     pwd > "$WINDOW_CHDIR_FILE" ;
 
     __echoBashEnv > "$WINDOW_ENV_FILE" ;
@@ -621,7 +604,6 @@ function __loadWindowState() {
     export WINDOW="$winNumber" ;
     export WINDOW_NUMBER="$winNumber" ;
     export WINDOW_HOME="$winDir" ;
-    export WINDOW_TITLE="${winTitle:-win$winNumber}" ;
     export HISTFILE="$winHistoryFile"
 
     declare -x WINDOW_HISTORY_FILE="$WINDOW_HOME/$HISTORY_BASENAME" ;
@@ -748,7 +730,7 @@ function __main() {
 
     __validateWindowState   || return $ERR ;
 
-    mkdir -p $WINDOW_HOME ;
+    mkdir -p "$WINDOW_HOME" ;
 
     declare -x WINDOW_HISTORY_FILE="$WINDOW_HOME/$HISTORY_BASENAME" ;
     declare -x WINDOW_TITLE_FILE="$WINDOW_HOME/$TITLE_BASENAME" ;
@@ -757,7 +739,6 @@ function __main() {
     declare -x WINDOW_ENV_FILE="$WINDOW_HOME/$ENV_BASENAME" ;
 
     if [ "$RETITLE_TO" ] ; then
-        WINDOW_TITLE="$RETITLE_TO" ;
         __maybeRetitleWindow  || return $ERR ;
     fi
 
@@ -776,7 +757,7 @@ function __main() {
     export HISTFILE="$WINDOW_HISTORY_FILE" ;
 
     export SESSION_HOME SESSION_NAME  ;
-    export WINDOW_HOME WINDOW_NUMBER WINDOW_TITLE WINDOW_TITLE_FILE ;
+    export WINDOW_HOME WINDOW_NUMBER ;
 
     if [ "$DO_HARDCOPY_DUMP" ] ; then
         __dumpHardcopyFiles ${WINDOW_HOME}/${HARDCOPY_BASENAME}.* $WINDOW_HARDCOPY_FILE ; # return $OK ;
