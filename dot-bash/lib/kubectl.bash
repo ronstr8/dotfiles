@@ -19,7 +19,7 @@ function kns() {
 }
 
 function k() {
-	kubectl "$*"
+	kubectl "$@"
 }
 
 # Pull pgpass from Bitnami chart and connect to the wordwonk db.
@@ -46,3 +46,6 @@ function kpsql() {
 	export PG_PASS PG_USER PG_DBNAME
 	kubectl "${IRREGULAR_NAMESPACE}" exec -it "pods/${POD_NAME}" -- env PSQL_HISTORY='/dev/null' PGPASSWORD="${PG_PASS}" psql -U "${PG_USER}" -d "${PG_DBNAME}"
 }
+
+complete -F __start_kubectl k
+
