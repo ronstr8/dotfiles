@@ -11,7 +11,7 @@ function session-stuffall() {
 } ;
 
 function session-window-title() {
-    eval $( session --eval --title="$1" ) ;
+    eval $( . ~/bin/session --eval --title="$1" ) ;
 } ;
 
 function session-checkpoint() {
@@ -23,13 +23,13 @@ function session-checkpoint() {
     declare thisWinDir="${WINDOW_HOME:-}" eachWindir='' ;
 
     for eachWinDir in $SESSION_HOME/window-[0-9][0-9] ; do
-        [[ $eachWinDir != $thisWinDir ]] && screen -X at ${eachWinDir/#*window-} stuff "eval \$( session --eval )\015" ;
+        [[ $eachWinDir != $thisWinDir ]] && screen -X at ${eachWinDir/#*window-} stuff "eval \$( . ~/bin/session --eval )\015" ;
     done
 
-    eval $( session --eval ) ; 
+    eval $( . ~/bin/session --eval ) ;
 
-    session --screenrc ;
-    session --status   ;
+    . ~/bin/session --screenrc ;
+    . ~/bin/session --status   ;
 
     [[ ! -f "$HISTFILE" ]] || [[ "$HISTFILE" -nt "$WAITFILE" ]] ;
 } ;
