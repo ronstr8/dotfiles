@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# xterm-title — set xterm window title
+#
+# Usage:
+#   xterm-title [TITLE]              set title (default: user@host:pwd)
+#   xterm-title -r TITLE CMD [...]   set title, run CMD, restore original title when done
+#   source xterm-title -r TITLE      set title in current shell, restore on EXIT
+
+_xt_set() {
+    if [ -n "$WINDOWID" ] && command -v xdotool &>/dev/null; then
+        xdotool set_window --name "$1" "$WINDOWID"
+    elif [ -n "$STY" ]; then
+        printf '\033P\033]0;%s\007\033\\' "$1" > /dev/tty 2>/dev/null
+    else
+        printf '\033]0;%s\007' "$1" > /dev/tty 2>/dev/null
+    fi
+    return 0
+}
+_xt_save()    { printf '\033[22;0t' > /dev/tty 2>/dev/null; return 0; }       # push current title onto xterm stack
+_xt_restore() { printf '\033[23;0t' > /dev/tty 2>/dev/null; return 0; }       # pop title from xterm stack
+
+case "$1" in
+    -r|--restore)
+        shift
+        title="$1"; shift
+        _xt_save
+        _xt_set "$title"
+        if [ $# -gt 0 ]; then
+            # Run the given command, then restore
+            "$@"
+            _xt_restore
+        else
+            # Sourced into current shell — restore when the shell exits
+            trap '_xt_restore' EXIT
+        fi
+        ;;
+    *)
+        _xt_set "${*:-${USER}@${HOSTNAME}:${PWD}}"
+        ;;
+esac
