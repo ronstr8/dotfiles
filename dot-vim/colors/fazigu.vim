@@ -349,9 +349,8 @@ call <SID>X("Comment", "a9a9a9", "", "")
 " http://vimdoc.sourceforge.net/htmldoc/syntax.html#italic
 " bold, underline, undercurl, reverse, inverse, italic, standout, NONE
 " but italic is underline in xterm when resource *.vt100.italicULMode:true
-"Wheat
-"call <SID>X("String", "f5deb3", "", g:no_italics ? "" : "italic")
-call <SID>X("String", "f5deb3", "", "undercurl")
+" f5deb3 == Wheat
+call <SID>X("String", "f5deb3", "", "italic")
 
 call <SID>X("PreProc", "cd5c5c", "", "")
 call <SID>X("Type", "bdb76b", "", "bold")
