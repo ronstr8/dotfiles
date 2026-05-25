@@ -36,6 +36,8 @@ XTerm.toolBar: false
 
 XTerm*NumLock: true
 
+XTerm*cursorKeys: false
+
 
 ! UTF-8 mode is initially on.  Escape sequences for turning UTF-8 mode on/off are allowed.
 ! utf8 is respected only if locale is false.
