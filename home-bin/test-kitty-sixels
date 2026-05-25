@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+IMG="$1"
+
+# Kitty
+printf '\033_Ga=T;f=100;:%s\033\\' "$(base64 -w0 "$IMG")" && exit 0
+
+# iTerm2
+printf '\033]1337;File=name=%s;inline=1:%s\a' "$IMG" "$(base64 -w0 "$IMG")" && exit 0
+
+# Sixel
+if command -v img2sixel >/dev/null; then
+    img2sixel "$IMG"
+    exit 0
+fi
+
+echo "No supported image protocol found."
