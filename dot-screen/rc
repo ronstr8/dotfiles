@@ -11,6 +11,7 @@ altscreen on
 defutf8 on
 defbce on
 shelltitle "$ |bash"
+autosavestate on
 
 # ------------------------------
 # Color & Terminal Support
