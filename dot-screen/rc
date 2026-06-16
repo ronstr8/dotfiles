@@ -48,21 +48,12 @@ hardstatus string "%{= 15}%-w%{= 9}%n*%t%{-}%+w %= %{= 10}%H %{= 11}%` %{= 14}%l
 # ------------------------------
 # Ctrl+Shift+Left  → Previous window
 # Ctrl+Shift+Right → Next window
-#
-#bindkey "^[OD" prev
-#bindkey "^[OC" next
 
-# Optional: Keep Alt+Left/Right as backup
 bindkey "^[[1;3D" prev
 bindkey "^[[1;3C" next
 
-# F1-F3 quick window select
-bindkey -k k1 select 1
-bindkey -k k2 select 2
-bindkey -k k3 select 3
-
-bindkey -m "\e[A" stuff k
-bindkey -m "\e[B" stuff j
+bindkey -m "^[[A" stuff k
+bindkey -m "^[[B" stuff j
 
 # ------------------------------
 # Misc

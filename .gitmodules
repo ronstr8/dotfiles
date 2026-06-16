@@ -1,15 +1,18 @@
-[submodule "dot-vim/bundle/tabular"]
-	path = dot-vim/bundle/tabular
-	url = git://github.com/godlygeek/tabular.git
-[submodule "dot-vim/bundle/vim-gitgutter"]
-	path = dot-vim/bundle/vim-gitgutter
-	url = git://github.com/airblade/vim-gitgutter.git
-[submodule "dot-vim/bundle/vim-fugitive"]
-	path = dot-vim/bundle/vim-fugitive
-	url = git://github.com/tpope/vim-fugitive.git
-[submodule "dot-vim/bundle/vim-json"]
-	path = dot-vim/bundle/vim-json
-	url = https://github.com/elzr/vim-json.git
-[submodule "dot-vim/bundle/vim-sensible"]
-	path = dot-vim/bundle/vim-sensible
-	url = git://github.com/tpope/vim-sensible.git
+[submodule "dot-vim/pack/bundle/start/tabular"]
+	path = dot-vim/pack/bundle/start/tabular
+	url = https://github.com/godlygeek/tabular.git
+[submodule "dot-vim/pack/bundle/start/vim-fugitive"]
+	path = dot-vim/pack/bundle/start/vim-fugitive
+	url = https://github.com/tpope/vim-fugitive.git
+[submodule "dot-vim/pack/bundle/start/vim-gitgutter"]
+	path = dot-vim/pack/bundle/start/vim-gitgutter
+	url = https://github.com/airblade/vim-gitgutter.git
+[submodule "dot-vim/pack/bundle/start/vim-airline"]
+	path = dot-vim/pack/bundle/start/vim-airline
+	url = https://github.com/vim-airline/vim-airline.git
+[submodule "dot-vim/pack/bundle/start/vim-airline-themes"]
+	path = dot-vim/pack/bundle/start/vim-airline-themes
+	url = https://github.com/vim-airline/vim-airline-themes.git
+[submodule "dot-vim/pack/bundle/start/gruvbox"]
+	path = dot-vim/pack/bundle/start/gruvbox
+	url = https://github.com/morhetz/gruvbox.git

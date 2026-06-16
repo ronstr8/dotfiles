@@ -28,8 +28,6 @@ set hlsearch
 
 set ruler
 
-"set termguicolors
-
 " Letting DetectIndent handle this.
 "set expandtab
 set tabstop=4
@@ -41,9 +39,7 @@ set shiftwidth=4
 " https://stackoverflow.com/questions/526858/how-do-i-make-vim-do-normal-bash-like-tab-completion-for-file-names
 set wildmode=longest:full,full
 
-filetype plugin on
-
-execute pathogen#infect()
+filetype plugin indent on
 
 "set autochdir
 set hidden
@@ -90,15 +86,11 @@ let g:no_italics = !empty($SSH_CLIENT) && !empty(matchstr($SSH_CLIENT, '^76\.180
 set t_Co=256
 set t_ZH="^[[3m"
 set t_ZR="^[[23m"
+set termguicolors
 
 syntax enable
 set background=dark
-colorscheme fazigu
-"colorscheme deveiate  ## horrible for perl
-"colorscheme inkpot
-"colorscheme gardener
-"let g:solarized_termcolors=256 " If no solarized Xdefaults modifications.
-"colorscheme solarized
+colorscheme gruvbox
 
 set autoindent
 set gfn="Consolas 10"
@@ -106,51 +98,13 @@ set gfn="Consolas 10"
 "set ttymouse=xterm
 "set mouse=a
 
-"set statusline=%<%f%h%m%r%=%b\ 0x%B\ \ %l,%c%V\ %P
-"highlight StatusLineNC cterm=NONE ctermbg=DarkGray  ctermfg=LightGray
-highlight StatusLine cterm=NONE ctermbg=DarkGray  ctermfg=LightGray
-highlight User1      cterm=NONE ctermbg=LightGray ctermfg=Black
-"   StatusLine is default window color.  Active window is difference between that
-"   color and (in this case as per g:buftabs_active_highlight_group below) User1.
-"set statusline="%#User1#%<%f%h%m%r%=Col\ %c\ Line\ %l/%L\ %P"
-"set statusline="%#User1#%<%*1f%h%m%r%=Col\ %c\ Line\ %l/%L\ %P"
-set statusline=%<%f%h%m%r%=Col\ %3c\ Line\ %4l/%4L\ (%-3P)
-"set statusline=┌%{buftabs#statusline()}┐\ %<%f%h%m%r%=Col\ %3c\ Line\ %4l/%4L\ (%-3P)
 set laststatus=2
-"set cmdheight=2
 
-
-" buftags plugin.
-"  By default buftabs will take up the whole of the left-aligned section of
-"  your statusline. You can alternatively specify precisely where it goes
-"  using %{buftabs#statusline()} e.g.:
-"set statusline=%=buffers:\ %{buftabs#statusline()}
-"set statusline="%{buftabs#statusline()}\ %=\ Col\ %c\ Line\ %l/%L\ %P"
-highlight BufTabActive   cterm=NONE ctermbg=Green     ctermfg=Black
-highlight BufTabInactive cterm=NONE ctermbg=LightGray ctermfg=White
-let g:buftabs_in_statusline=1
-let g:buftabs_only_basename=1
-let g:buftabs_active_highlight_group="User1"
-"let g:buftabs_inactive_highlight_group="BufTabInactive"
-"let g:buftabs_separator = ":«"
-"let g:buftabs_separator = "┤ "
-let g:buftabs_separator = ": "
-"let g:buftabs_marker_start = "["
-let g:buftabs_marker_start = "→"
-"let g:buftabs_marker_end = "┌┤"
-"let g:buftabs_marker_end = "»┐"
-"let g:buftabs_marker_end = "]"
-let g:buftabs_marker_end = "←"
-let g:buftabs_marker_modified = "≠"
-
-" →  ←  ±  ·  «  »  ≠  ‽ ₍  ₎  ╠  ╣  ├─  ─┤  ┌  ┐
-"   ╔══╦══╗  ┌──┬──┐  ╭──┬──╮  ╭──┬──╮
-"   ║┌─╨─┐║  │╔═╧═╗│  │╒═╪═╕│  │╓─╁─╖│
-"   ║│╲ ╱│║  │║   ║│  ││ │ ││  │║ ┃ ║│
-"   ╠╡ ╳ ╞╣  ├╢   ╟┤  ├┼─┼─┼┤  ├╫─╂─╫┤
-"   ║│╱ ╲│║  │║   ║│  ││ │ ││  │║ ┃ ║│
-"   ║└─╥─┘║  │╚═╤═╝│  │╘═╪═╛│  │╙─╀─╜│
-"   ╚══╩══╝  └──┴──┘  ╰──┴──╯  ╰──┴──╯
+" vim-airline: tabline shows open buffers (replaces old buftabs plugin).
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#fnamemod = ':t'
+let g:airline_powerline_fonts = 0
+let g:airline_theme = 'gruvbox'
 
 
 "" http://www.techrepublic.com/article/configure-vi-for-java-application-development/#
@@ -200,29 +154,6 @@ endif
 
 " Doesn't work on all builds; need to find appropriate has() check?
 "set clipboard=unnamedplus
-
-" https://github.com/artur-shaik/vim-javacomplete2
-
-autocmd FileType java setlocal omnifunc=javacomplete#Complete
-
-" To add all missing imports with F6:
-
-nmap <F6> <Plug>(JavaComplete-Imports-AddMissing)
-imap <F6> <Plug>(JavaComplete-Imports-AddMissing)
-
-" To remove all unused imports with F7:
-
-nmap <F7> <Plug>(JavaComplete-Imports-RemoveUnused)
-imap <F7> <Plug>(JavaComplete-Imports-RemoveUnused)
-
-" Try to properly sort imports.
-
-let g:JavaComplete_ImportOrder = ['java.', 'javax.', 'org.', 'com.']
-let g:JavaComplete_ImportSortType = 'packageName'
-" Put static at top, because that's how Eclipse does it by default.
-let g:JavaComplete_StaticImportsAtTop = 1
-
-"let g:JavaComplete_SourcesPath = 'zcs-shared/src/main/java:zcs-shared/src/test/java:zcs-dashboard/src/main/java:zcs-dashboard/src/test/java:zcs-signup/src/main/java:zcs-signup/src/test/java'
 
 " @see https://stackoverflow.com/questions/1932604/vim-problem-with-gf-command
 " @see https://stackoverflow.com/questions/52123349/vim-how-to-get-path-to-search-up-and-down-a-directory-tree
