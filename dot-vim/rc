@@ -92,6 +92,12 @@ syntax enable
 set background=dark
 colorscheme gruvbox
 
+" gruvbox's "dark" background is a dark gray (bg0), not black, which makes
+" the screen visibly shift tone when vim starts on a black terminal. Pin
+" the editor background to true black to match.
+highlight Normal     ctermbg=black guibg=black
+highlight SignColumn ctermbg=black guibg=black
+
 set autoindent
 set gfn="Consolas 10"
 

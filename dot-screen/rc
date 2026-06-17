@@ -52,8 +52,8 @@ hardstatus string "%{= 15}%-w%{= 9}%n*%t%{-}%+w %= %{= 10}%H %{= 11}%` %{= 14}%l
 bindkey "^[[1;3D" prev
 bindkey "^[[1;3C" next
 
-bindkey -m "^[[A" stuff k
-bindkey -m "^[[B" stuff j
+#bindkey -m "^[[A" stuff k
+#bindkey -m "^[[B" stuff j
 
 # ------------------------------
 # Misc
