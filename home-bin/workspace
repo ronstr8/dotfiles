@@ -222,7 +222,7 @@ function __buildWindowList() {
 		windowList[${#windowList[@]}]="$windowName" ;
 	done
 
-	for windowName in ${windowList[@]} ; do
+	for windowName in "${windowList[@]}" ; do
 		echo "source \"$( __buildWindowInitFilename $workspaceName $windowName )\"" ;
 	done
 }
@@ -384,7 +384,7 @@ function __main() {
 }
 
 
-__main $@ ;
+__main "$@" ;
 
 ## vim: ft=sh
 

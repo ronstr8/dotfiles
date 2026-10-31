@@ -77,7 +77,7 @@ else
 		default ) echo "unknown action \"$action\"" > /dev/stderr ; exit 1 ;;
 	esac
 
-	for ipaddr in $@ ; do
+	for ipaddr in "$@" ; do
 		if ! _check_ipaddr "$ipaddr" ; then
 			echo "bad ipaddr \"$ipaddr\"" > /dev/stderr
 			continue

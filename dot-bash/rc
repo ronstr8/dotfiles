@@ -67,3 +67,6 @@ esac
 
 # Added by Antigravity CLI installer
 export PATH="/home/ronstr8/.local/bin:$PATH"
+
+# opencode
+export PATH=/home/ronstr8/.opencode/bin:$PATH

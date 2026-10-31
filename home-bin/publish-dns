@@ -31,7 +31,7 @@ function __getOptions() {
 } ;
 
 function __whinge() { echo "# [$( date -Is )] $*" 1>&2 ; } ;
-function __croak()  { __whinge $@ ; return $ERR ; } ;
+function __croak()  { __whinge "$@" ; return $ERR ; } ;
 
 function __main() {
     declare weblog="${1:-$DEFAULT_WEBLOG}" ;

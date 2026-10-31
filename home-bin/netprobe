@@ -74,7 +74,7 @@ unset -f __extractHostFromAddr ; function __extractHostFromAddr() {
 } ;
 
 unset -f __getHostFromAddr ; function __getHostFromAddr() {
-    __extractHostFromAddr $@ ;
+    __extractHostFromAddr "$@" ;
 }
 
 unset -f __extractIpFromAddr ; function __extractIpFromAddr() {
@@ -254,7 +254,7 @@ unset -f __traceHost ; function __traceHost() {
     #           udplite - UDP w/constant destination port.
     #           raw     - Raw packets consisting only of IP header.
 
-    for method in ${methods[@]} ; do
+    for method in "${methods[@]}" ; do
         __traceHostWithMethod "$host" "$method" ;
 
 #       sudo traceroute -4 -d -e -A -w $probeWait -m $maxTtl -N $probes -M $method "$host" ;
@@ -326,10 +326,10 @@ unset -f __main ; function __main() {
 
     declare addr ;
 
-    for addr in ${addresses[@]} ; do
+    for addr in "${addresses[@]}" ; do
         __testHost "$addr" ;
     done
-} ; __main $@ ;
+} ; __main "$@" ;
 
 # netprobe 'ip-10-17-0-172.ec2.internal <10.17.0.172>' 'ip-10-17-0-51.ec2.internal <10.17.0.51>' 'ip-10-17-127-16.ec2.internal <10.17.127.16>'
 

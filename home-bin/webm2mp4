@@ -17,5 +17,5 @@ function __main() {
 	echo "$cmdline" ;
 }
 
-__main $@
+__main "$@"
 

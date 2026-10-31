@@ -134,7 +134,7 @@ fazigu.vim
 
 	local fn
 
-	for fn in ${skeleton[@]} ; do
+	for fn in "${skeleton[@]}" ; do
 		rsync $dry_run --archive --delete --delete-excluded --verbose --cvs-exclude --include-from <( echo "$includeFrom" ) --exclude-from <( echo "$excludeFrom" ) "$HOME/$fn" "$HOME/bin/skel" ;
 	done
 }

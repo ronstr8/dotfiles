@@ -45,7 +45,7 @@ function __isInt()   {
     fi
 } ;
 
-function __Whinge()  { declare -i rv ; rv=$( __isInt "$1" ) && shift ; echo "[$( date +%Y-%m-%dT%H:%M:%S )]${WHINGEE:- }$@" 1>&2 ; return $rv ; }
+function __Whinge()  { declare -i rv ; rv=$( __isInt "$1" ) && shift ; echo "[$( date +%Y-%m-%dT%H:%M:%S )]${WHINGEE:- }$*" 1>&2 ; return $rv ; }
 function __Croak()   { __Whinge "$@" ; exit ; } ;
 
 ## Application variables.

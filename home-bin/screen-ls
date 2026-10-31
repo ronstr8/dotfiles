@@ -223,7 +223,7 @@ function writeSessionState() {
 
 	pushScreenCommands "$screenSession" '-' 'at \# wrap off' ## "hardcopydir $sessionDir"
 
-	for windowRef in ${screenWindows[@]} ; do
+	for windowRef in "${screenWindows[@]}" ; do
 		windowTitle="${screenWindows[$windowNumber]}"
 		windowTitleFile="$sessionDir/title.$windowNumber"
 		echo "$windowTitle" > "$windowTitleFile"
@@ -239,7 +239,7 @@ function writeSessionState() {
 }
 
 
-trap croak HUP ABRT INT QUIT KILL STOP TERM
+trap croak HUP ABRT INT QUIT TERM
 
 screenSessions="$( screen -ls | awk "/$SESSIONLIST_RE/ { print \$1 }" )"
 [ "$screenSessions" ] || croak "Failed to find any active screen sessions."

@@ -48,5 +48,25 @@ function __findTermType() {
 	fi
 }
 
+## Clear the terminal modes that stray bytes leave set, without wiping the
+## screen or scrollback the way reset(1) does.  Safe to run any time.
+unfuck() {
+	printf '\017'                       # SI: lock shift back to G0  <- the SO fix
+	printf '\033(B\033)0\033*B\033+B'   # re-designate G0..G3 (G1=gfx, xterm default)
+	printf '\033[!p'                    # DECSTR soft reset: modes, margins, attrs
+	printf '\033[?1049l'                # leave alternate screen buffer
+	printf '\033[r'                     # drop any scrolling-region restriction
+	printf '\033[?7h'                   # autowrap back on
+	printf '\033[4l'                    # replace mode, not insert
+	printf '\033[?5l'                   # normal video, not reverse
+	printf '\033[?25h'                  # cursor visible
+	printf '\033[0m'                    # clear colour/bold/inverse attributes
+	printf '\033[?1000l\033[?1002l\033[?1003l\033[?1006l\033[?1015l'  # mouse off
+	printf '\033[?2004l'                # bracketed paste off
+	stty sane 2>/dev/null               # echo, ^C, cooked mode
+	command -v tput >/dev/null && tput cnorm 2>/dev/null
+}
+
+
 # vim: ft=sh
 
