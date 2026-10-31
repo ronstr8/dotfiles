@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 
-DEFAULT_SUDO='' ;
 DEFAULT_TIMEOUT=3 ;
 
-DEFAULT_INSTANCE_USER='ec2-user' ;
 DEFAULT_SSH_TIMEOUT=$(( DEFAULT_TIMEOUT * 2 )) ;
 
-DEFAULT_PING_DEADLINE=$DEFAULT_TIMEOUT ;
+DEFAULT_PING_DEADLINE=${DEFAULT_TIMEOUT} ;
 
-DEFAULT_LOOKUP_TIMEOUT=$DEFAULT_TIMEOUT ;
+DEFAULT_LOOKUP_TIMEOUT=${DEFAULT_TIMEOUT} ;
 
-TRACERT_PROBE_WAIT=$DEFAULT_TIMEOUT ; 
+TRACERT_PROBE_WAIT=${DEFAULT_TIMEOUT} ; 
 ## *MAX_TTL Too low? Some sites are more than a hop, skip and a jump away.
 ## However, for the purposes of testing local-ish connectivity as through
 ## the fiber of AWS Direct Connect, this is more than enough. Also, keep
@@ -26,21 +24,8 @@ WHOIS_URI_FORMAT='http://whois.arin.net/rest/ip/%s.txt' ;
 #       curl -sS 'http://whois.arin.net/rest/ip/69.55.75.59.txt'
 
 TRACERT_OPT_E=$( traceroute -e --help &>/dev/null && echo ' -e ' ) ;
-## First %s is the traceroute method to use.  Second %s is the host.
-TRACERT_FORMAT="traceroute -4 -q $TRACERT_PROBES_PER_HOP -d $TRACERT_OPT_E -A -w $TRACERT_PROBE_WAIT -m $TRACERT_MAX_TTL -N $TRACERT_ASYNC_PROBES -M %s %s" ;
-TRACERT_SUDO="${DEFAULT_SUDO:-sudo}" ; # Always use sudo w/traceroute.
-
-#VPC_EXTERNAL_IPV4=(     52.5.138.115                             54.88.5.75 ) ;
-#VPC_EXTERNAL_HOST=( ec2-52-5-138-115.compute-1.amazonaws.com ec2-54-88-5-75.compute-1.amazonaws.com) ;
-
-#VPC_INTERNAL_IPV4=(    10.17.0.172                 10.17.0.51                 10.17.127.16 ) ;
-#VPC_INTERNAL_HOST=( ip-10-17-0-172.ec2.internal ip-10-17-0-51.ec2.internal ip-10-17-127-16.ec2.internal ) ;
-
-DEFAULT_ADDRESS_LIST=(
-    'ip-10-17-0-172.ec2.internal <10.17.0.172>'
-    'ip-10-17-0-51.ec2.internal <10.17.0.51>'
-    'ip-10-17-127-16.ec2.internal <10.17.127.16>'
-) ;
+## Full traceroute invocation, w/ method and host appended.
+TRACERT_SUDO='sudo' ;
 
 IPV4_OCTET_REGEX='(2([0-4][0-9]|5[0-5])|1[0-9][0-9]|[0-9]{1,2})' ;
 #IPV4_REGEX="((${IPV4_OCTET_REGEX}\.){3,3}${IPV4_OCTET_REGEX})" ;
@@ -51,26 +36,27 @@ unset -f __renderIpRegexFormat ; function __renderIpRegexFormat() {
     ## A regex expr matching what would be dots in an IPv4 octet-quad.
     local dotSubst="${1:-.}" ;
 
-    printf "$IPV4_REGEX_FORMAT" "$dotSubst" ;
+    printf '%s' "${IPV4_REGEX_FORMAT//%s/${dotSubst}}" ;
 }
 
 unset -f __isValidIp ; function __isValidIp() {
     local ipv4="$1" ;
-    local ipRe=$( __renderIpRegexFormat '[.-]' ) ;
+    local ipRe ;
+    ipRe=$( __renderIpRegexFormat '[.-]' ) ;
 
-    echo "$ipv4" | egrep -q "$ipRe" ;
+    echo "${ipv4}" | grep -E -q "${ipRe}" ;
 } ;
 
 unset -f __isReservedIp ; function __isReservedIp() {
     local ipv4="$1" ;
 
-    echo "$ipv4" | egrep -q "$IPV4_RESERVED_REGEX" ;
+    echo "${ipv4}" | grep -E -q "${IPV4_RESERVED_REGEX}" ;
 } ;
 
 unset -f __extractHostFromAddr ; function __extractHostFromAddr() {
     local host="$1" ;
 
-    echo -n "${host// /}" | tr -d ' ' | sed "s/<[^>]\+>//;" ;
+    echo -n "${host// /}" | tr -d ' ' | sed "s/<[^>]\+>//;" || true ;
 } ;
 
 unset -f __getHostFromAddr ; function __getHostFromAddr() {
@@ -79,7 +65,8 @@ unset -f __getHostFromAddr ; function __getHostFromAddr() {
 
 unset -f __extractIpFromAddr ; function __extractIpFromAddr() {
     local host="$1" ;
-    local ipRe=$( __renderIpRegexFormat '[.-]' ) ;
+    local ipRe ;
+    ipRe=$( __renderIpRegexFormat '[.-]' ) ;
 
 #   local cutted=$( echo -n "$host" | egrep -o "$IPV4_REGEX" ) ;
 #   local dotted=$( echo -n "$cutted" | tr -c '0-9' '.' ) ;
@@ -87,7 +74,7 @@ unset -f __extractIpFromAddr ; function __extractIpFromAddr() {
 #   echo "$dotted" ;
 
 #   echo -n "${host// /}" | egrep -o "$ipRe" | tr -d "\n" | tr -c '0-9' '.' ;
-    echo -n "${host// /}" | egrep -m1 -o "$ipRe" | head -n 1 | sed -e 's/^\([^[:space:]]\+\).*$/\1/; s/[^0-9]/./g;' # tr -d "\n" | tr -c '0-9' '.' ;
+    echo -n "${host// /}" | grep -E -m1 -o "${ipRe}" | head -n 1 | sed -e 's/^\([^[:space:]]\+\).*$/\1/; s/[^0-9]/./g;' || true # tr -d "\n" | tr -c '0-9' '.' ;
 } ;
 
 unset -f __lookupHost ; function __lookupHost() {
@@ -104,18 +91,19 @@ unset -f __lookupHost ; function __lookupHost() {
     # -W        Seconds to wait for a reply.
 
 #   host -v -d -C -a -W $waitSeconds "$host" ;
-    host -W "$waitSeconds" "$host" 2>/dev/null | awk '/has address/ { print $4 }' ;
+    host -W "${waitSeconds}" "${host}" 2>/dev/null | awk '/has address/ { print $4 }' || true ;
 } ;
 
 unset -f __getIpFromAddr ; function __getIpFromAddr() {
     local addr="$1" ;
-    local ipv4=$( __extractIpFromAddr "$addr" ) ;
+    local ipv4 ;
+    ipv4=$( __extractIpFromAddr "${addr}" ) ;
 
-    if [ ! "$ipv4" ] ; then
-        ipv4=$( __lookupHost "$addr" ) ;
+    if [[ -z "${ipv4}" ]] ; then
+        ipv4=$( __lookupHost "${addr}" ) ;
     fi
 
-    echo "$ipv4" ;
+    echo "${ipv4}" ;
 }
 
 unset -f __setFgBg ; function __setFgBg() {
@@ -124,8 +112,8 @@ unset -f __setFgBg ; function __setFgBg() {
 
     (
                      tput op        ; # Reset
-        [ "$fg" ] && tput setaf $fg ; # Set foreground color.
-        [ "$bg" ] && tput setab $bg ; # Set background color.
+        [[ -n "${fg}" ]] && tput setaf "${fg}" ; # Set foreground color.
+        [[ -n "${bg}" ]] && tput setab "${bg}" ; # Set background color.
 
     ) 2>/dev/null ; # Ignore all errors.
 } ;
@@ -139,9 +127,9 @@ unset -f __echoColoredThenReset ; function __echoColoredThenReset() {
     local bgc="${2}" ;
     local msg="${3}" ;
 
-    __setFgBg $fgc $bgc ;
+    __setFgBg "${fgc}" "${bgc}" ;
 
-    echo -n "$msg" ;
+    echo -n "${msg}" ;
 
     __resetFgBg ;
 
@@ -150,14 +138,16 @@ unset -f __echoColoredThenReset ; function __echoColoredThenReset() {
 
 unset -f __echoHostHeader ; function __echoHostHeader() {
     local host=$1 ;
-    local line=$( printf " %-72s " "$host" ) ;
-    local rule=$( printf "%*s" ${#line} ' ' ) ;
+    local line ;
+    line=$( printf " %-72s " "${host}" ) ;
+    local rule ;
+    rule=$( printf "%*s" ${#line} ' ' ) ;
 
     echo ;
 
-    __echoColoredThenReset 4 7 "$rule" ;
-    __echoColoredThenReset 4 7 "$line" ;
-    __echoColoredThenReset 4 7 "$rule" ;
+    __echoColoredThenReset 4 7 "${rule}" ;
+    __echoColoredThenReset 4 7 "${line}" ;
+    __echoColoredThenReset 4 7 "${rule}" ;
 
     echo ;
 }
@@ -169,7 +159,7 @@ unset -f __echoComment ; function __echoComment() {
 
     __setFgBg 8 ;
 
-    echo -n "##### [$( date -Is )] $msg" ;
+    echo -n "##### [$( date -Is )] ${msg}" || true ;
 
     __resetFgBg ;
 
@@ -191,48 +181,58 @@ unset -f __croak ; function __croak() {
 
 unset -f __sshHost ; function __sshHost() {
     local host="$1" ;
-    local user="${2:-$DEFAULT_INSTANCE_USER}" ;
-    local timeout=${3:-$DEFAULT_SSH_TIMEOUT} ;
+    local user="${2:-$( id -un )}" ;
+    local timeout=${3:-${DEFAULT_SSH_TIMEOUT}} ;
 
     __echoComment "ssh ${user}@${host}" ;
 
-    ssh -o "ConnectTimeout=$timeout" "$host" 'echo "[$( date -Is )] SSH $( hostname ) OK"' ;
+    ssh -o "ConnectTimeout=${timeout}" "${user}@${host}" 'echo "[$( date -Is )] SSH $( hostname ) OK"' ;
 } ;
 
 unset -f __whoisHost ; function __whoisHost() {
     local ipv4=$1 ; # "${1//./-}" ;
-    local uri=$( printf "$WHOIS_URI_FORMAT" "$ipv4" ) ;
+    local uri ;
+    uri=$( printf '%s' "${WHOIS_URI_FORMAT//%s/${ipv4}}" ) ;
 
-    __echoComment "WHOIS <$uri>" ;
+    __echoComment "WHOIS <${uri}>" ;
 
-    curl -sS -X GET "$uri" ;
+    curl -sS -X GET "${uri}" ;
 } ;
 
 unset -f __pingHost ; function __pingHost() {
     local host="$1" ;
-    local deadline=${2:-$DEFAULT_PING_DEADLINE} ;
+    local deadline=${2:-${DEFAULT_PING_DEADLINE}} ;
 
     __echoComment "ping ${host}" ;
 
-    ping -w $deadline "$host" ;
+    ping -w "${deadline}" "${host}" ;
 } ;
 
 
 unset -f __traceHostWithMethod ; function __traceHostWithMethod() {
     local host="$1" ;
     local method="${2:-tcp}" ;
+    local sudoCmd="${TRACERT_SUDO}" ;
 
 #   local opt_e=' -e ' ; if ! traceroute -e localhost &>/dev/null ; then opt_e='' ; fi
 
-    local traceRtCmd=$( printf "$TRACERT_FORMAT" "$method" "$host" ) ;
-    __echoComment "$traceRtCmd" ;
+    local -a traceCmd=( traceroute -4 -q "${TRACERT_PROBES_PER_HOP}" -d -A -w "${TRACERT_PROBE_WAIT}" -m "${TRACERT_MAX_TTL}" -N "${TRACERT_ASYNC_PROBES}" -M "${method}" "${host}" ) ;
+    if [[ -n "${TRACERT_OPT_E}" ]] ; then
+        traceCmd=( "${traceCmd[@]}" -e ) ;
+    fi
 
-    $TRACERT_SUDO $traceRtCmd ;
-}
+    __echoComment "${traceCmd[*]}" ;
+
+    if [[ -n "${sudoCmd}" ]] ; then
+        "${sudoCmd}" "${traceCmd[@]}" ;
+    else
+        "${traceCmd[@]}" ;
+    fi
+} ;
 
 unset -f __traceHost ; function __traceHost() {
     local host="$1" ;
-    local methods=${TRACERT_METHODS[@]} ;
+    local methods=( "${TRACERT_METHODS[@]}" ) ;
 
 
     # -4    Force IPv4 transport.
@@ -255,7 +255,7 @@ unset -f __traceHost ; function __traceHost() {
     #           raw     - Raw packets consisting only of IP header.
 
     for method in "${methods[@]}" ; do
-        __traceHostWithMethod "$host" "$method" ;
+        __traceHostWithMethod "${host}" "${method}" ;
 
 #       sudo traceroute -4 -d -e -A -w $probeWait -m $maxTtl -N $probes -M $method "$host" ;
     done
@@ -275,63 +275,221 @@ unset -f __traceHost ; function __traceHost() {
     #   * Try '-N 1', esp. if final target host drops probes.
 } ;
 
+unset -f __tcpConnectHost ; function __tcpConnectHost() {
+    local host="$1" ;
+    local port="$2" ;
+    local timeout=${3:-${DEFAULT_PING_DEADLINE}} ;
+
+    __echoComment "tcp connect ${host}:${port}" ;
+
+    if timeout "${timeout}" bash -c "exec 3<>/dev/tcp/${host}/${port}" &>/dev/null ; then
+        __echoComment "TCP connect ${host}:${port} OK" ;
+    else
+        __croak "TCP connect ${host}:${port} failed." ;
+    fi
+}
+
+unset -f __httpProbeHost ; function __httpProbeHost() {
+    local url="${1}" ;
+    local timeout=${2:-${DEFAULT_PING_DEADLINE}} ;
+
+    __echoComment "HTTP GET <${url}>" ;
+
+    local code ;
+    code=$( curl -sS -o /dev/null -w '%{http_code}' --max-time "${timeout}" "${url}" 2>/dev/null ) ;
+
+    if [[ "${code}" = 000 ]] ; then
+        __croak "HTTP GET ${url} failed (no response)." ;
+    fi
+
+    echo "${code}" ;
+}
+
+unset -f __dnsProbeHost ; function __dnsProbeHost() {
+    local host="${1}" ;
+
+    __lookupHost "${host}" ;
+}
+
+unset -f __certProbeHost ; function __certProbeHost() {
+    local host="${1}" ;
+    local port="${2:-443}" ;
+
+    __echoComment "TLS cert check ${host}:${port}" ;
+
+    local notAfter ;
+    notAfter=$( echo | openssl s_client -connect "${host}:${port}" -servername "${host}" 2>/dev/null | openssl x509 -noout -enddate ) || true ;
+
+    echo "${notAfter}" ;
+}
+
+unset -f __mtrProbeHost ; function __mtrProbeHost() {
+    local host="${1}" ;
+
+    __echoComment "mtr ${host}" ;
+
+    if [[ -n "${TRACERT_SUDO}" ]] ; then
+        "${TRACERT_SUDO}" mtr -C -c 1 "${host}" ;
+    else
+        mtr -C -c 1 "${host}" ;
+    fi
+}
+
+unset -f __nmapProbeHost ; function __nmapProbeHost() {
+    local host="${1}" ;
+
+    __echoComment "nmap ${host}" ;
+
+    nmap -T4 "${host}" ;
+}
+
 unset -f __testHost ; function __testHost() {
     local addr="${1}" ;
+    local doSsh="${2:-0}" ;
+    local sshUser="${3:-$( id -un )}" ;
 
-    __echoHostHeader "$addr" ;
+    __echoHostHeader "${addr}" ;
 
-    local host=$( __getHostFromAddr "$addr" ) ;
+    local host ;
+    host=$( __getHostFromAddr "${addr}" ) ;
 
-    if [ ! "$host" ] ; then
-        __croak "Failed to deduce hostname from string «$addr»." ;
+    if [[ -z "${host}" ]] ; then
+        __croak "Failed to deduce hostname from string «${addr}»." ;
         return ;
     fi
 
 #   echo "addr=«$addr» host=«$host» ipv4=«$ipv4»" 1>&2 ;
 
-    local ipv4=$( __getIpFromAddr "$addr" ) ;
+    local ipv4 ;
+    ipv4=$( __getIpFromAddr "${addr}" ) ;
 
-    if [ ! "$ipv4" ] ; then 
-        __croak "Failed to deduce IPv4 address from string «$addr»." ;
+    if [[ -z "${ipv4}" ]] ; then
+        __croak "Failed to deduce IPv4 address from string «${addr}»." ;
         return ;
     fi
 
 #   echo "addr=«$addr» host=«$host» ipv4=«$ipv4»" 1>&2 ;
 
-    if ! __isValidIp "$ipv4" ; then 
-        __croak "String «$ipv4» does not look like an IPv4 address." ;
+    if ! __isValidIp "${ipv4}" ; then
+        __croak "String «${ipv4}» does not look like an IPv4 address." ;
         return ;
     fi
 
-    if __isReservedIp "$ipv4" ; then
-        __whinge "IPv4 «$ipv4» is in the private range reserved by RFC1918." ;
+    if __isReservedIp "${ipv4}" ; then
+        __whinge "IPv4 «${ipv4}» is in the private range reserved by RFC1918." ;
     else
-        __whoisHost  "$ipv4" ;
+        __whoisHost "${ipv4}" ;
     fi
 
-    __sshHost   "$ipv4" ;
-    __pingHost  "$ipv4" ;
-    __traceHost "$ipv4" ;
+    if [[ "${doSsh}" -eq 1 ]] ; then
+        __sshHost "${ipv4}" "${sshUser}" ;
+    fi
+
+    __pingHost "${ipv4}" ;
+    __traceHost "${ipv4}" ;
 } ; 
 
 # echo "IPV4_OCTET_REGEX:«$IPV4_OCTET_REGEX»" ;
 # echo "IPV4_REGEX=«$IPV4_REGEX»" ;
 # echo "IPV4_RESERVED_REGEX=«$IPV4_RESERVED_REGEX»" ;
 
-# if [ $# -gt 0 ] ; then for addr in "$@" ; do __testHost "$addr" ; done else for addr in ${DEFAULT_ADDRESS_LIST[@]} ; do __testHost $addr ; done fi
+unset -f __usage ; function __usage() {
+    cat <<'EOF'
+Usage: netprobe [options] <host> <ip> [<host> <ip> ...]
+
+Probe a host for whois, ping, traceroute and (optionally) ssh reachability.
+
+Options:
+  --ssh          Probe ssh reachability. Off by default.
+  --user <user> SSH user to use when probing ssh. (default: current user)
+  --port <port> TCP connect probe to <addr>:<port> for each address.
+  --http <url>   HTTP GET probe for <url>.
+  --dns <host>   DNS lookup for <host>.
+  --cert <host>  TLS cert check for <host> (default port 443).
+  --mtr <host>   mtr probe for <host>.
+  -h, --help    Show this help.
+
+Address format: «host <ip>» (e.g. 'ip-10-17-0-172.ec2.internal <10.17.0.172>')
+EOF
+}
 
 unset -f __main ; function __main() {
-    declare -a addresses=${@:-${DEFAULT_ADDRESS_LIST[@]}} ;
-    [ ${#addresses[@]} -gt 0 ] || addresses=${DEFAULT_ADDRESS_LIST[@]} ;
-
+    declare -a addresses ;
     declare addr ;
+    declare doSsh=0 ;
+    declare sshUser ;
+    sshUser=$( id -un ) ;
+    declare port= ;
+    declare httpUrl= ;
+    declare dnsHost= ;
+    declare certHost= ;
+    declare mtrHost= ;
+    declare doTcpPort=0 ;
+    declare doHttp=0 ;
+    declare doDns=0 ;
+    declare doCert=0 ;
+    declare doMtr=0 ;
+    declare doNmap=1 ;
 
-    for addr in "${addresses[@]}" ; do
-        __testHost "$addr" ;
+    while [[ $# -gt 0 ]] ; do
+        case "$1" in
+            --ssh)              doSsh=1 ; shift ;;
+            --user)            shift ; sshUser="$1" ; shift ;;
+            --user=*)          sshUser="${1#--user=}" ; shift ;;
+            -h|--help)         __usage ; return 0 ;;
+            --)                shift ; break ;;
+            --port)            shift ; port="$1" ; shift ; doTcpPort=1 ;;
+            --http)            shift ; httpUrl="$1" ; shift ; doHttp=1 ;;
+            --dns)             shift ; dnsHost="$1" ; shift ; doDns=1 ;;
+            --cert)            shift ; certHost="$1" ; shift ; doCert=1 ;;
+            --mtr)             shift ; mtrHost="$1" ; shift ; doMtr=1 ;;
+            -*)                __croak "Unknown option: «$1»." ; return 1 ;;
+            *)                 addresses+=( "$1" ) ; shift ;;
+        esac
     done
+
+    if [[ ${#addresses[@]} -eq 0 ]] ; then
+        if [[ ${doHttp} -ne 1 && ${doDns} -ne 1 && ${doCert} -ne 1 && ${doMtr} -ne 1 && ${doNmap} -ne 1 && ${doTcpPort} -ne 1 ]] ; then
+            __croak "No address given. Pass one or more «host <ip>» arguments." ;
+            return ;
+        fi
+    fi
+
+    if [[ ${#addresses[@]} -gt 0 ]] ; then
+        for addr in "${addresses[@]}" ; do
+            __testHost "${addr}" "${doSsh}" "${sshUser}" ;
+        done
+    fi
+
+    if [[ ${doTcpPort} -eq 1 && ${#addresses[@]} -gt 0 ]] ; then
+        for addr in "${addresses[@]}" ; do
+            local tcpAddrIpv4 ;
+            tcpAddrIpv4=$( __getIpFromAddr "${addr}" ) ;
+            __tcpConnectHost "${tcpAddrIpv4}" "${port}" ;
+        done
+    fi
+
+    if [[ ${doHttp} -eq 1 ]] ; then
+        __httpProbeHost "${httpUrl}" ;
+    fi
+
+    if [[ ${doDns} -eq 1 ]] ; then
+        __dnsProbeHost "${dnsHost}" ;
+    fi
+
+    if [[ ${doCert} -eq 1 ]] ; then
+        __certProbeHost "${certHost}" ;
+    fi
+
+    if [[ ${doMtr} -eq 1 ]] ; then
+        __mtrProbeHost "${mtrHost}" ;
+    fi
+
+    if [[ ${doNmap} -eq 1 ]] ; then
+        __nmapProbeHost "${addr}" ;
+    fi
 } ; __main "$@" ;
 
-# netprobe 'ip-10-17-0-172.ec2.internal <10.17.0.172>' 'ip-10-17-0-51.ec2.internal <10.17.0.51>' 'ip-10-17-127-16.ec2.internal <10.17.127.16>'
+# netprobe 'example.com <203.0.113.10>'
 
 # vim: set expandtab:set tabstop=4:
-
