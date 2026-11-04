@@ -1,1 +1,1 @@
-source <( kubectl completion bash )
+type kubectl &>/dev/null && source <( kubectl completion bash )
