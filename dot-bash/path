@@ -24,7 +24,9 @@ export PERL5LIB ;
 ##### GO
 #####
 
-pathmunge PATH "$(go env GOPATH)/bin" after
+if (type go &>/dev/null ) ; then
+	pathmunge PATH "$(go env GOPATH)/bin" after
+fi
 
 ######
 ###### PATH
@@ -55,7 +57,5 @@ fi
 [ -d "$JAVA_HOME"      ] && pathmunge PATH "$JAVA_HOME/bin" after ;
 
 export PATH ;
-
-## export MANPATH
 
 # vim: ft=sh
