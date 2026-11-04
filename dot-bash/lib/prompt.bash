@@ -117,7 +117,7 @@ unset -f bashprompt ; function bashprompt() {
 	GIT_PS1_SHOWCOLORHINTS='true'
 	declare gitState=""'$( __git_ps1 "\[\e[38;5;245m\] [%s]" )'
 
-    export PS1="${coloresc}\n\D{${datetimef}} \w${gitState}\n${coloresc} \u@\h\$\[\e[${xcFF_NONE}m\] " ;
+    export PS1="${coloresc}\n\D{${datetimef}} \w${gitState}\n${coloresc} \u@\H\$\[\e[${xcFF_NONE}m\] " ;
 }
 
 touchLib ${BASH_SOURCE[0]} ; fi ;

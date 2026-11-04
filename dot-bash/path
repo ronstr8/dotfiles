@@ -20,6 +20,12 @@ done
 
 export PERL5LIB ; 
 
+#####
+##### GO
+#####
+
+pathmunge PATH "$(go env GOPATH)/bin" after
+
 ######
 ###### PATH
 ######
@@ -49,14 +55,6 @@ fi
 [ -d "$JAVA_HOME"      ] && pathmunge PATH "$JAVA_HOME/bin" after ;
 
 export PATH ;
-
-######
-###### MANPATH
-######
-
-## for dn in $HOME/man $HOME/perl/man ; do
-##     pathmunge MANPATH $dn after ;
-## done
 
 ## export MANPATH
 
