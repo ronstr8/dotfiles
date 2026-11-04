@@ -13,7 +13,7 @@
 
 ;; Personalization
 
-(setq user-mail-address "straight@adiant.com")
+(setq user-mail-address "straightre@gmail.com")
 
 ;; Personal Functions
 

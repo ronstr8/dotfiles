@@ -90,7 +90,7 @@ set termguicolors
 
 syntax enable
 set background=dark
-colorscheme gruvbox
+colorscheme desert
 
 " gruvbox's "dark" background is a dark gray (bg0), not black, which makes
 " the screen visibly shift tone when vim starts on a black terminal. Pin
