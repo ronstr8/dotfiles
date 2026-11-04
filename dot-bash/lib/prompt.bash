@@ -93,7 +93,12 @@ unset -f bashprompt ; function bashprompt() {
     ## Integer names reference explicit color slots.  Else, check if we
     ## define the given name in termcap.bash.
 
-    [[ $fgname =~ ^[0-9]+$ ]] && fgint="38;5;$fgname" || fgint=${!fgname} ;
+    if [[ $fgname =~ ^[0-9]+$ ]] ; then
+		fgint="38;5;$fgname"
+	else
+		colorvar="xcFF_${fgname^^}"
+		fgint="${!colorvar}"
+	fi
 
     if [[ -z "$fgint" ]] ; then
         whinge "Color name «$fgname» is not recognized.  Try these..." ;
