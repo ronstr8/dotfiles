@@ -46,6 +46,6 @@ set -g window-status-current-format " #I*#W "
 set -g window-status-current-style "fg=colour9,bold"
 set -g window-status-separator ""
 
-# Right side: Hostname (10), Backtick replacement (11), Load average (14)
-set -g status-right "#[fg=colour10]#H #[fg=colour11]#(uptime | sed 's/.*load average: //') #[fg=colour14]"
+# Right side: Hostname (10), Date & Time (11), Load average (14)
+set -g status-right "#[fg=colour10]#H #[fg=colour11]%Y-%m-%d %H:%M #[fg=colour14]#(cut -d' ' -f1-3 /proc/loadavg) "
 
