@@ -1,0 +1,51 @@
+# --- 1. Screen Muscle-Memory Compatibility ---
+unbind C-b
+set -g prefix C-a
+bind C-a send-prefix
+bind a last-window          # Ctrl+A, a toggles last window (like screen)
+bind c new-window -c "#{pane_current_path}"
+
+# --- 2. Windows Terminal & OSC 11 Fixes ---
+set -g default-terminal "tmux-256color"
+set -ag terminal-overrides ",xterm-256color:RGB"
+set -g allow-passthrough off # Blocks inner OSC 11 queries from leaking
+set -g mouse on              # Native scrolling and pane clicking
+set -g history-limit 50000   # Deep scrollback buffer
+
+# --- 3. Plugins (Press Prefix + I to install once inside tmux) ---
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+
+# Restore scrollback contents and auto-restore on start
+set -g @resurrect-capture-pane-contents 'on'
+set -g @continuum-restore 'on'
+
+# Fix issues with Windows Terminal ESC sequences,
+set -sg escape-time 350       # Prevents escape sequence leaks/delays
+## but switch back to snappy response on load.
+#set-hook -g session-created 'run-shell "sleep 1 && tmux set -sg escape-time 50"'
+
+# Initialize TPM (keep this line at the very bottom)
+run '~/.tmux/plugins/tpm/tpm'
+# --- 1. Alt+Left / Alt+Right Window Switching (No Prefix Required) ---
+bind -n M-Left previous-window
+bind -n M-Right next-window
+
+# --- 2. Screen Hardstatus Translation ---
+set -g status on
+set -g status-interval 5
+set -g status-style "bg=black,fg=colour15"
+set -g status-left ""
+set -g status-right-length 100
+
+# Window list: inactive in bright white (15), active in bright red (9) with *
+set -g window-status-format " #I:#W "
+set -g window-status-style "fg=colour15"
+set -g window-status-current-format " #I*#W "
+set -g window-status-current-style "fg=colour9,bold"
+set -g window-status-separator ""
+
+# Right side: Hostname (10), Backtick replacement (11), Load average (14)
+set -g status-right "#[fg=colour10]#H #[fg=colour11]#(uptime | sed 's/.*load average: //') #[fg=colour14]"
+

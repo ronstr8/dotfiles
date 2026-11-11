@@ -90,13 +90,19 @@ set termguicolors
 
 syntax enable
 set background=dark
-colorscheme desert
+colorscheme gruvbox
 
 " gruvbox's "dark" background is a dark gray (bg0), not black, which makes
 " the screen visibly shift tone when vim starts on a black terminal. Pin
 " the editor background to true black to match.
 highlight Normal     ctermbg=black guibg=black
 highlight SignColumn ctermbg=black guibg=black
+
+" Pin the editor background and trailing buffer lines to black
+highlight Normal      ctermbg=black guibg=black
+highlight SignColumn  ctermbg=black guibg=black
+highlight NonText     ctermbg=black guibg=black
+highlight EndOfBuffer ctermbg=black guibg=black
 
 set autoindent
 set gfn="Consolas 10"
@@ -198,5 +204,55 @@ set listchars=eol:¬,tab:>·,trail:~,extends:>,precedes:<,space:␣
 
 " Proper syntax highlighting for a Jenkinsfile.
 au BufNewFile,BufRead Jenkinsfile setf groovy
+
+" Rendered Markdown preview toggle
+function! SmartMarkdownToggle()
+    " 1. If a split preview terminal window is open, find it and close it
+    if exists('b:preview_buf') && bufexists(b:preview_buf)
+        let l:win_id = bufwinnr(b:preview_buf)
+        if l:win_id != -1
+            execute l:win_id . 'wincmd w'
+            q
+        else
+            execute 'bwipeout!' b:preview_buf
+        endif
+        unlet b:preview_buf
+        return
+    endif
+
+    " 2. If we are currently sitting IN an active preview terminal window, just close it
+    if &buftype == 'terminal' && exists('w:is_preview')
+        q
+        return
+    endif
+
+    " Save the current file changes
+    w
+    let l:full_path = expand('%:p')
+
+    " Check for glow dynamically
+    let l:viewer_bin = exepath('glow')
+    if empty(l:viewer_bin)
+        let l:viewer_bin = 'glow'
+    endif
+
+    " 3. ULTRAWIDE RULE: Only split if the window is wider than 200 character columns
+    if winwidth(0) > 200
+        " Pass the arguments unquoted so Vim executes the binary directly
+        execute 'vertical terminal ' . l:viewer_bin . ' ' . l:full_path
+        let l:term_buf = bufnr('%')
+        let w:is_preview = 1
+        wincmd p
+        let b:preview_buf = l:term_buf
+    
+    " 4. LAPTOP SCREEN RULE: Run glow in an interactive full-screen overlay terminal window
+    else
+        execute 'terminal ' . l:viewer_bin . ' ' . l:full_path
+        let w:is_preview = 1
+    endif
+endfunction
+
+" Universal mapping for markdown buffers
+autocmd FileType markdown nnoremap <buffer> <silent> <Leader>p :call SmartMarkdownToggle()<CR>
 
 " vim: filetype=vim:

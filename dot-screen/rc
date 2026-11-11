@@ -19,11 +19,15 @@ autosavestate on
 truecolor on
 term screen-256color
 
-termcapinfo xterm* 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm:ks=:ke=:ti@:te@'
+#  termcapinfo xterm* 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm:ks=:ke=:ti@:te@'
+# Tell screen that xterm supports 256 color registers and Sixel graphics
+termcapinfo xterm* 'G0:S0:am:bce:km:mir:ms:nf:xenl:colors=256:NC=256'
 termcapinfo screen* 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+defescape ^Aa
 
 defdynamictitle off
 attrcolor b ".I"          # Bold → bright/italic where needed
+
 
 # ------------------------------
 # Scrollback & Copy

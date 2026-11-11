@@ -88,5 +88,10 @@ XTerm*numColorRegisters: 256
   Shift <KeyPress> Home:    scroll-back(10000, page)\n\
   Shift <KeyPress> End:     scroll-forw(10000, page)\n
 
+! Primary font
+!XTerm*faceName: Consolas:size=10:antialias=true
+
+! Fallback list containing an emoji font (Noto Color Emoji or Symbola for monochrome)
+!XTerm*faceNameDoublesize: Noto Color Emoji:size=10:antialias=true
 
 ! vim: ft=xdefaults
