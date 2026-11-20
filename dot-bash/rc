@@ -15,10 +15,10 @@ fi
 RCFILES=(
     environment
     aliases
-    completion
     path
     shopts
 	secret
+	prompt
 ) ;
 
 for rcFile in ${RCFILES[@]} ; do

@@ -17,6 +17,9 @@ set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
 
+# Ensure we keep some envvars up-to-date from invoking shell.
+set -g update-environment "DISPLAY SSH_AUTH_SOCK SSH_CONNECTION XAUTHORITY"
+
 # Restore scrollback contents and auto-restore on start
 set -g @resurrect-capture-pane-contents 'on'
 set -g @continuum-restore 'on'

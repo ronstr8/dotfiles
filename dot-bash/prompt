@@ -1,0 +1,12 @@
+
+refresh_tmux_env() {
+    [ -n "$TMUX" ] || return
+    eval "$(
+        tmux show-environment -s SSH_AUTH_SOCK DISPLAY \
+        2>/dev/null | grep -v '^-'
+    )"
+}
+
+PROMPT_COMMAND="refresh_tmux_env${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
+
+# vim: ft=sh
